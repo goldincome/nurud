@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: "Inter", sans-serif;
+}
+
+/* Stepper booking page styling */
+.step-active .step-circle {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+.step-completed .step-circle {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+.step-inactive .step-circle {
+    background-color: #e5e7eb; /* gray-200 */
+    color: #6b7280; /* gray-500 */
+}
+
+/* Home page Styling */
+.hero-banner {
+    background-image: url("https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=2070&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
+}
+/* Light/Dark Mode Transition */
+.dark-mode-toggle,
+.dark body,
+.dark .dark\:bg-slate-900 {
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+/* Autocomplete styles */
+    /* Container for the dropdown */
+    .autocomplete-items {
+        position: absolute;
+        border: 1px solid #d4d4d4;
+        border-bottom: none;
+        border-top: none;
+        z-index: 99;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* Individual items */
+    .autocomplete-items div {
+        padding: 10px;
+        cursor: pointer;
+        background-color: #fff;
+        border-bottom: 1px solid #d4d4d4;
+    }
+
+    /* Hover effect */
+    .autocomplete-items div:hover {
+        background-color: #e9e9e9;
+    }
+
+    /* Active item (when navigating with arrows) */
+    .autocomplete-active {
+        background-color: #0ea5e9 !important; /* Tailwind Sky-500 */
+        color: #ffffff;
+    }
+    
+    /* Dark mode support (Optional, if your project uses 'dark' class) */
+    .dark .autocomplete-items {
+        background-color: #1e293b; /* Slate-800 */
+        border-color: #334155;
+    }
+    .dark .autocomplete-items div {
+        background-color: #1e293b;
+        border-color: #334155;
+        color: #f8fafc;
+    }
+    .dark .autocomplete-items div:hover {
+        background-color: #334155;
+    }
+/* Accordion styles for mobile */
+.accordion-content {
+    max-height: 0;
+    transition: max-height 0.3s ease-out;
+    overflow: hidden;
+}
+.accordion-content.open {
+    overflow: visible;
+}
+/* Flatpickr custom styling */
+.flatpickr-calendar {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.dark .flatpickr-calendar {
+    background: #1e293b; /* slate-800 */
+}
+.dark .flatpickr-day {
+    color: #e2e8f0; /* slate-200 */
+}
+.dark .flatpickr-day:hover {
+    background: #334155; /* slate-700 */
+}
+.dark .flatpickr-day.selected {
+    background: #0284c7; /* sky-600 */
+    border-color: #0284c7;
+}
+.dark .flatpickr-weekday,
+.dark .flatpickr-monthDropdown-months,
+.dark .numInput,
+.dark .flatpickr-current-month,
+.dark .arrowUp,
+.dark .arrowDown {
+    color: #e2e8f0; /* slate-200 */
+}
+.dark .flatpickr-months .flatpickr-prev-month,
+.dark .flatpickr-months .flatpickr-next-month {
+    fill: #e2e8f0;
+}
+/* Hide scrollbar for deals container */
+.deals-container::-webkit-scrollbar {
+    display: none;
+}
+.deals-container {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+/* Search Result Page */
+/* Custom Range Slider Styling */
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    margin-top: -6px;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: #e2e8f0;
+    border-radius: 2px;
+}
+
+/* Hide scrollbar for matrix container */
+.matrix-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+.matrix-scroll::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
