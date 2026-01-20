@@ -33,8 +33,8 @@ class BookingController extends Controller
 
     public function create(Request $request): View
     {
-       $data = session()->get('verified_flight_offer'); //session()get('verified_flight_offer');
-        //dd($data);
+       $data = session()->get('verified_flight_offer');
+        //dd($data['travelerPricings']);
         // TODO: Load flight details from  session
         return view('booking', [
             'flightData' => $data,

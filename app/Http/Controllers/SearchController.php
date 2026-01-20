@@ -210,26 +210,27 @@ class SearchController extends Controller
     }
 
     public function verifyOffer(Request $request): RedirectResponse
-    {     // Validate the request
-        $validated = $request->validate([ 'allOffer' => 'required|string' ]);
+    {     
+        // Validate the request
+        $validated = $request->validate([ 
+            'allOffer' => 'required|string' 
+        ]);
+        
         $data = json_decode($validated['allOffer'], true);
         
         try {
-
-            $flightOutput = $this->flexiService->verifyPrice($data );
-            Log::info($flightOutput);
+            $flightOutput = $this->flexiService->verifyPrice($data);
+            
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return back()->with('error', 'Invalid flight offer data.');
             }
 
             // Store the verified flight offer in session
-            session()->put('verified_flight_offer', $flightOutput
-            );
+            session()->put('verified_flight_offer', $flightOutput);
 
             // Redirect to booking page
             return redirect()->route('bookings.create')->with([
                 'success' => 'Flight offer verified successfully. Please complete your booking.',
-                'flightData' => $flightOutput
             ]);
 
         } catch (\Exception $e) {

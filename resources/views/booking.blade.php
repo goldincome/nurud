@@ -146,7 +146,7 @@
                                 $adultCount++;
                             } elseif($pricing['travelerType'] === 'CHILD') {
                                 $childCount++;
-                            } elseif($pricing['travelerType'] === 'INFANT') {
+                            } elseif($pricing['travelerType'] === 'HELD_INFANT') {
                                 $infantCount++;
                             }
                         }
@@ -186,11 +186,11 @@
                             </div>
                         </div>
                     @endfor
-
+                      @php $j = $i; @endphp   
                     <!-- Child Passengers -->
                     @for($i = 1; $i <= $childCount; $i++)
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="font-bold text-lg mb-1">Passenger {{ $i }} (Child)</h3>
+                            <h3 class="font-bold text-lg mb-1">Passenger {{ $j++ }} (Child)</h3>
                             <p class="text-xs text-slate-500 mb-4">Traveller names must match government-issued photo ID.</p>
                             
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -219,12 +219,13 @@
                                 </div>
                             </div>
                         </div>
+                        
                     @endfor
 
                     <!-- Infant Passengers -->
                     @for($i = 1; $i <= $infantCount; $i++)
                         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="font-bold text-lg mb-1">Passenger {{ $i }} (Infant)</h3>
+                            <h3 class="font-bold text-lg mb-1">Passenger {{ $j++ }} (Infant)</h3>
                             <p class="text-xs text-slate-500 mb-4">Traveller names must match government-issued photo ID.</p>
                             
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -401,10 +402,35 @@
                         <div class="mb-2">
                             <h4 class="font-bold text-md text-brand-textDark mb-3">Flight Base Fare</h4>
                             @if(isset($flightData['travelerPricings']))
-                                @foreach($flightData['travelerPricings'] as $pricing)
+                                @php
+                                    // 1. Group the travelers by type (ADULT, CHILD, HELD_INFANT)
+                                    $groupedDetails = collect($flightData['travelerPricings'])->groupBy('travelerType');
+                                @endphp
+
+                                @foreach($groupedDetails as $type => $group)
+                                    @php
+                                        // 2. Calculate the count for this specific group
+                                        $count = $group->count();
+
+                                        // 3. Sum the price for all travelers in this group
+                                        $totalGroupPrice = $group->sum(function ($traveler) {
+                                            return $traveler['price']['total'];
+                                        });
+
+                                        // 4. Format the Label
+                                        $label = match($type) {
+                                            'HELD_INFANT' => 'Infant',
+                                            'CHILD' => 'Child',
+                                            default => 'Adult'
+                                        };
+                                    @endphp
+
                                     <div class="flex justify-between text-xs text-slate-600 mb-2">
-                                        <span>{{ ucfirst($pricing['travelerType']) }} x (1)</span>
-                                        <span class="font-medium">₦{{ number_format($pricing['price']['total']) }}</span>
+                                        {{-- Output: "Adult x (2)" --}}
+                                        <span>{{ $label }} x ({{ $count }})</span>
+                                        
+                                        {{-- Output: Total price for that group --}}
+                                        <span class="font-medium">₦{{ number_format($totalGroupPrice, 2) }}</span>
                                     </div>
                                 @endforeach
                             @endif
