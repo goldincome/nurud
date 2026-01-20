@@ -56,6 +56,7 @@ class SearchController extends Controller
 
         $rawOffers = $searchResults['flights']['offerInfos'] ?? [];
         $formattedFlights = [];
+        $airlineGroups = [];
         
         foreach ($rawOffers as $offer) {
             $offerItineraries = [];
@@ -123,7 +124,30 @@ class SearchController extends Controller
                 'rawData' => json_encode($offer),
                 'allOffer' => $offer //do not remove
             ];
+
+            // Group by airline for matrix display
+            if (!isset($airlineGroups[$mainAirlineCode])) {
+                $airlineGroups[$mainAirlineCode] = [
+                    'airline' => $mainAirlineName,
+                    'airlineCode' => $mainAirlineCode,
+                    'cheapestPrice' => $offer['price']['total'],
+                    'cheapestPriceFormatted' => number_format($offer['price']['total']),
+                    'flights' => []
+                ];
+            } else {
+                // Update cheapest price if current offer is cheaper
+                if ($offer['price']['total'] < $airlineGroups[$mainAirlineCode]['cheapestPrice']) {
+                    $airlineGroups[$mainAirlineCode]['cheapestPrice'] = $offer['price']['total'];
+                    $airlineGroups[$mainAirlineCode]['cheapestPriceFormatted'] = number_format($offer['price']['total']);
+                }
+            }
+            $airlineGroups[$mainAirlineCode]['flights'][] = end($formattedFlights);
         }
+
+        // Sort airlines by cheapest price (ascending)
+        usort($airlineGroups, function($a, $b) {
+            return $a['cheapestPrice'] - $b['cheapestPrice'];
+        });
 
         // Header Info
         $origin = 'Origin';
@@ -138,6 +162,7 @@ class SearchController extends Controller
 
         return view('search-result', [
             'flights' => $formattedFlights,
+            'airlineGroups' => $airlineGroups,
             'origin' => $origin,
             'destination' => $destination,
             'tripDate' => date('D, M d', strtotime($tripDate)),
@@ -192,20 +217,19 @@ class SearchController extends Controller
         try {
 
             $flightOutput = $this->flexiService->verifyPrice($data );
-            //dd($flightOutput);
+            Log::info($flightOutput);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return back()->with('error', 'Invalid flight offer data.');
             }
 
             // Store the verified flight offer in session
-            session()->put('verified_flight_offer', [
-                'flight_offer' => $flightOutput
-            ]);
+            session()->put('verified_flight_offer', $flightOutput
+            );
 
             // Redirect to booking page
             return redirect()->route('bookings.create')->with([
                 'success' => 'Flight offer verified successfully. Please complete your booking.',
-                'flightOffer' => $flightOutput
+                'flightData' => $flightOutput
             ]);
 
         } catch (\Exception $e) {

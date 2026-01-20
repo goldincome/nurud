@@ -3,7 +3,7 @@
             <div class="container mx-auto px-4 py-3 flex justify-between items-center relative">
                 <!-- Logo -->
                 <div class="flex items-center space-x-2">
-                    <span class="text-2xl font-bold text-brand-blue">247travels<span class="text-brand-orange">.</span></span>
+                    <span class="text-2xl font-bold text-brand-blue">Nurud<span class="text-brand-orange">.</span></span>
                 </div>
                 
                 <!-- Desktop Nav Links -->

@@ -22,50 +22,70 @@
                 <!-- Deals Section -->
                 <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <h2 class="text-2xl font-bold mb-6 text-slate-800 dark:text-white">Top Flight Deals</h2>
-                    <div class="deals-container flex overflow-x-auto space-x-6 pb-4">
-                        <!-- Deal Card 1 -->
-                        <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
-                            <img src="https://images.unsplash.com/photo-1502602898657-3e91760c0337?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Paris">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 p-6 text-white">
-                                <h3 class="text-2xl font-bold">Paris, France</h3>
-                                <p class="text-lg font-medium">From $650</p>
+                    <div class="deals-container relative overflow-hidden">
+                        <div id="deals-slider" class="flex transition-transform duration-500 ease-in-out">
+                            <!-- Deal Card 1 -->
+                            <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1439246854758-87a9ab494657?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Paris">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 p-6 text-white">
+                                    <h3 class="text-2xl font-bold">Paris, France</h3>
+                                    <p class="text-lg font-medium">From $650</p>
+                                </div>
                             </div>
-                        </div>
-                        <!-- Deal Card 2 -->
-                        <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
-                            <img src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Tokyo">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 p-6 text-white">
-                                <h3 class="text-2xl font-bold">Tokyo, Japan</h3>
-                                <p class="text-lg font-medium">From $820</p>
+                            <!-- Deal Card 2 -->
+                            <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Sydney">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 p-6 text-white">
+                                    <h3 class="text-2xl font-bold">Sydney, Australia</h3>
+                                    <p class="text-lg font-medium">From $1100</p>
+                                </div>
                             </div>
-                        </div>
-                        <!-- Deal Card 3 -->
-                        <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
-                            <img src="https://images.unsplash.com/photo-1533929736458-ca588913c835?q=80&w=1974&auto=format&fit=crop" class="w-full h-full object-cover" alt="Sydney">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 p-6 text-white">
-                                <h3 class="text-2xl font-bold">Sydney, Australia</h3>
-                                <p class="text-lg font-medium">From $1100</p>
+                            <!-- Deal Card 3 -->
+                            <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Rome">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 p-6 text-white">
+                                    <h3 class="text-2xl font-bold">Rome, Italy</h3>
+                                    <p class="text-lg font-medium">From $580</p>
+                                </div>
                             </div>
-                        </div>
-                        <!-- Deal Card 4 -->
-                        <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
-                            <img src="https://images.unsplash.com/photo-1519677100203-a0e668c97489?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Rome">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 p-6 text-white">
-                                <h3 class="text-2xl font-bold">Rome, Italy</h3>
-                                <p class="text-lg font-medium">From $580</p>
+                            <!-- Deal Card 4 -->
+                            <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="London">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 p-6 text-white">
+                                    <h3 class="text-2xl font-bold">London, UK</h3>
+                                    <p class="text-lg font-medium">From $450</p>
+                                </div>
                             </div>
-                        </div>
-                        <!-- Deal Card 5 -->
-                        <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
-                            <img src="https://images.unsplash.com/photo-1523731407960-2a22d33f829f?q=80&w=1974&auto=format&fit=crop" class="w-full h-full object-cover" alt="Bali">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 p-6 text-white">
-                                <h3 class="text-2xl font-bold">Bali, Indonesia</h3>
-                                <p class="text-lg font-medium">From $950</p>
+                            <!-- Deal Card 5 -->
+                            <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1502602898657-3e91760c0337?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Paris">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 p-6 text-white">
+                                    <h3 class="text-2xl font-bold">Paris, France</h3>
+                                    <p class="text-lg font-medium">From $650</p>
+                                </div>
+                            </div>
+                            <!-- Deal Card 6 -->
+                            <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Tokyo">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 p-6 text-white">
+                                    <h3 class="text-2xl font-bold">Tokyo, Japan</h3>
+                                    <p class="text-lg font-medium">From $820</p>
+                                </div>
+                            </div>
+                            <!-- Deal Card 7 -->
+                            <div class="flex-shrink-0 w-80 h-96 rounded-lg shadow-lg overflow-hidden relative group">
+                                <img src="https://images.unsplash.com/photo-1523731407960-2a22d33f829f?q=80&w=1974&auto=format&fit=crop" class="w-full h-full object-cover" alt="Bali">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 p-6 text-white">
+                                    <h3 class="text-2xl font-bold">Bali, Indonesia</h3>
+                                    <p class="text-lg font-medium">From $950</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -179,3 +199,39 @@
 
 @endsection
 
+@section('js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const slider = document.getElementById('deals-slider');
+        const cards = slider.children;
+        const cardWidth = cards[0].offsetWidth;
+        const totalCards = cards.length;
+        let currentIndex = 0;
+        let autoScrollInterval;
+
+        function scrollToCard(index) {
+            slider.style.transform = `translateX(-${index * cardWidth}px)`;
+        }
+
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % totalCards;
+            scrollToCard(currentIndex);
+        }
+
+        function startAutoScroll() {
+            autoScrollInterval = setInterval(nextCard, 3000); // Change slide every 3 seconds
+        }
+
+        function stopAutoScroll() {
+            clearInterval(autoScrollInterval);
+        }
+
+        // Start auto-scrolling
+        startAutoScroll();
+
+        // Pause auto-scroll on hover
+        slider.addEventListener('mouseenter', stopAutoScroll);
+        slider.addEventListener('mouseleave', startAutoScroll);
+    });
+</script>
+@endsection

@@ -176,3 +176,5 @@
         </form>
     </div>
 </section>
+
+@include('common.front.search-overlay')

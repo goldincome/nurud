@@ -141,48 +141,36 @@
             <div class="lg:col-span-9 space-y-4">
 
                 <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="flex overflow-x-auto matrix-scroll divide-x divide-slate-100">
-                        <div class="flex-none w-32 bg-slate-50 p-3 flex flex-col justify-center items-center text-center">
-                            <span class="text-xs font-bold text-slate-500">All Airlines</span>
-                            <span class="text-xs text-slate-400 mt-1">Best Price</span>
+                    <div class="flex items-center">
+                        <button id="scroll-left-btn" 
+                            class="scroll-btn flex-shrink-0 w-10 h-16 bg-slate-50 hover:bg-slate-100 border-r border-slate-200 flex items-center justify-center cursor-pointer transition-colors"
+                            onclick="scrollAirlines('left')">
+                            <i class="fas fa-chevron-left text-slate-600"></i>
+                        </button>
+                        
+                        <div id="airline-scroll-container" class="flex-1 overflow-hidden">
+                            <div id="airline-scroll-content" class="flex divide-x divide-slate-100 transition-transform duration-300">
+                                <div class="flex-none w-32 bg-slate-50 p-3 flex flex-col justify-center items-center text-center">
+                                    <span class="text-xs font-bold text-slate-500">All Airlines</span>
+                                    <span class="text-xs text-slate-400 mt-1">Best Price</span>
+                                </div>
+
+                                @foreach($airlineGroups as $airlineGroup)
+                                    <div class="flex-none w-32 p-3 flex flex-col justify-center items-center text-center hover:bg-slate-50 cursor-pointer transition"
+                                        onclick="filterBySingleAirline('{{ $airlineGroup['airline'] }}')">
+                                        <img src="https://pics.avs.io/200/60/{{ $airlineGroup['airlineCode'] }}.png"
+                                            class="h-6 object-contain mb-2" alt="{{ $airlineGroup['airlineCode'] }}">
+                                        <span class="text-xs font-bold text-slate-700">{{ $airlineGroup['cheapestPriceFormatted'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
 
-                        <div class="flex-none w-32 p-3 flex flex-col justify-center items-center text-center hover:bg-slate-50 cursor-pointer transition"
-                            onclick="filterBySingleAirline('Turkish Airlines')">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Turkish_Airlines_logo_2019.svg/1200px-Turkish_Airlines_logo_2019.svg.png"
-                                class="h-6 object-contain mb-2" alt="TK">
-                            <span class="text-xs font-bold text-slate-700">₦2,412,241</span>
-                        </div>
-                        <div class="flex-none w-32 p-3 flex flex-col justify-center items-center text-center bg-blue-50/50 border-b-2 border-brand-blue cursor-pointer"
-                            onclick="filterBySingleAirline('Ethiopian Airlines')">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/2/2c/Ethiopian_Airlines_Logo.svg/1200px-Ethiopian_Airlines_Logo.svg.png"
-                                class="h-8 object-contain mb-2" alt="ET">
-                            <span class="text-xs font-bold text-brand-blue">₦2,534,427</span>
-                        </div>
-                        <div class="flex-none w-32 p-3 flex flex-col justify-center items-center text-center hover:bg-slate-50 cursor-pointer transition"
-                            onclick="filterBySingleAirline('Lufthansa')">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lufthansa_Logo_2018.svg/2048px-Lufthansa_Logo_2018.svg.png"
-                                class="h-5 object-contain mb-2" alt="LH">
-                            <span class="text-xs font-bold text-slate-700">₦3,123,564</span>
-                        </div>
-                        <div class="flex-none w-32 p-3 flex flex-col justify-center items-center text-center hover:bg-slate-50 cursor-pointer transition"
-                            onclick="filterBySingleAirline('United Airlines')">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/United_Airlines_Logo.svg/1200px-United_Airlines_Logo.svg.png"
-                                class="h-6 object-contain mb-2" alt="UA">
-                            <span class="text-xs font-bold text-slate-700">₦3,723,410</span>
-                        </div>
-                        <div class="flex-none w-32 p-3 flex flex-col justify-center items-center text-center hover:bg-slate-50 cursor-pointer transition"
-                            onclick="filterBySingleAirline('Qatar Airways')">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9b/Qatar_Airways_Logo.svg/1200px-Qatar_Airways_Logo.svg.png"
-                                class="h-6 object-contain mb-2" alt="QR">
-                            <span class="text-xs font-bold text-slate-700">₦4,220,109</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-50 px-4 py-2 flex justify-between items-center text-xs text-brand-blue">
-                        <button class="hover:underline"><i class="fas fa-chevron-left mr-1"></i> Show less
-                            airlines</button>
-                        <button class="hover:underline">Show more airlines <i
-                                class="fas fa-chevron-right ml-1"></i></button>
+                        <button id="scroll-right-btn" 
+                            class="scroll-btn flex-shrink-0 w-10 h-16 bg-slate-50 hover:bg-slate-100 border-l border-slate-200 flex items-center justify-center cursor-pointer transition-colors"
+                            onclick="scrollAirlines('right')">
+                            <i class="fas fa-chevron-right text-slate-600"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -219,6 +207,8 @@
 
 @endsection
 
+@include('common.front.booking-overlay')
+
 @section('js')
 <script>
     const flights = @json($flights);
@@ -250,6 +240,16 @@
         } else if (currentSort === 'fastest') {
             filtered.sort((a, b) => a.totalDuration - b.totalDuration);
         }
+        
+        renderFlights(filtered);
+    }
+
+    function filterBySingleAirline(airlineName) {
+        // Filter flights to show only the selected airline
+        let filtered = flights.filter(flight => flight.airline === airlineName);
+        
+        // Sort by price (cheapest first)
+        filtered.sort((a, b) => getPrice(a) - getPrice(b));
         
         renderFlights(filtered);
     }
@@ -405,11 +405,9 @@
                 return `
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 ${index > 0 ? 'mt-4 pt-4 border-t border-slate-100' : ''}">
                     <div class="flex items-center gap-4 w-full md:w-1/4">
-                         <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-100 p-1">
-                             <span class="font-bold text-[10px] text-slate-600">${leg.airlineCode}</span>
-                        </div>
+                        <img src="https://pics.avs.io/200/60/${leg.airlineCode}.png" class="h-6 object-contain" alt="${leg.airlineName}">
                         <div>
-                             <div class="text-[10px] uppercase font-bold text-slate-400">
+                            <div class="text-[10px] uppercase font-bold text-slate-400">
                                 ${legLabel}
                             </div>
                             <h3 class="font-bold text-sm text-slate-800">${leg.airlineName}</h3>
@@ -483,5 +481,17 @@
         sliders.forEach(input => input.addEventListener('input', applyFiltersAndSort));
         applyFiltersAndSort();
     });
+
+    function scrollAirlines(direction) {
+        const container = document.getElementById('airline-scroll-container');
+        const content = document.getElementById('airline-scroll-content');
+        const scrollAmount = 300; // pixels to scroll per click
+        
+        if (direction === 'left') {
+            container.scrollLeft -= scrollAmount;
+        } else {
+            container.scrollLeft += scrollAmount;
+        }
+    }
 </script>
 @endsection

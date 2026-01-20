@@ -61,105 +61,233 @@
                 
                 <!-- Selected Flight Summary Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <!-- Outbound -->
-                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 border-b border-dashed border-slate-200 pb-6">
-                        <div class="flex items-center gap-4 mb-4 md:mb-0">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/United_Airlines_Logo.svg/1200px-United_Airlines_Logo.svg.png" class="h-8 object-contain" alt="United">
-                            <div>
-                                <div class="text-xl font-bold text-brand-textDark">23:50</div>
-                                <div class="text-xs text-slate-500">Lagos</div>
-                                <div class="text-xs text-slate-500">Fri, 21 Nov</div>
-                            </div>
-                        </div>
-
-                        <div class="flex-1 px-8 flex flex-col items-center">
-                            <span class="text-xs text-slate-400 mb-1">Duration: 20h 39m</span>
-                            <div class="w-full flex items-center">
-                                <div class="h-[1px] bg-slate-300 flex-1 relative">
-                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-brand-blue"></div>
+                    @if(isset($flightData['itineraries']) && count($flightData['itineraries']) > 0)
+                        @foreach($flightData['itineraries'] as $itineraryIndex => $itinerary)
+                            @if($itineraryIndex > 0) <div class="border-t border-dashed border-slate-200 my-6"></div> @endif
+                            
+                            <!-- Flight Segment -->
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
+                                <div class="flex items-center gap-4 mb-4 md:mb-0">
+                                    @if(isset($itinerary['segments'][0]['carrier']['iataCode']))
+                                        <img src="https://pics.avs.io/200/60/{{ $itinerary['segments'][0]['carrier']['iataCode'] }}.png" class="h-8 object-contain" alt="{{ $itinerary['segments'][0]['carrier']['name'] }}">
+                                    @endif
+                                    <div>
+                                        @if(isset($itinerary['segments'][0]['segmentDeparture']['at']))
+                                            @php
+                                                $depTime = \Carbon\Carbon::parse($itinerary['segments'][0]['segmentDeparture']['at']);
+                                                $depDate = $depTime->format('D, d M');
+                                                $depTimeFormatted = $depTime->format('H:i');
+                                            @endphp
+                                            <div class="text-xl font-bold text-brand-textDark">{{ $depTimeFormatted }}</div>
+                                            <div class="text-xs text-slate-500">{{ $itinerary['segments'][0]['segmentDeparture']['airport']['city'] }}</div>
+                                            <div class="text-xs text-slate-500">{{ $depDate }}</div>
+                                        @endif
+                                    </div>
                                 </div>
-                                <i class="fas fa-plane text-slate-300 ml-2 transform rotate-90"></i>
-                            </div>
-                            <span class="text-xs text-brand-blue mt-1">1 Stop <span class="text-sky-500 cursor-pointer hover:underline">Economy (H)</span></span>
-                        </div>
 
-                        <div class="text-right">
-                            <div class="text-xl font-bold text-brand-textDark">11:29</div>
-                            <div class="text-xs text-slate-500">San Francisco</div>
-                            <div class="text-xs text-slate-500">Sat, 22 Nov</div>
-                        </div>
-                    </div>
-
-                    <!-- Return -->
-                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
-                        <div class="flex items-center gap-4 mb-4 md:mb-0">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e0/United_Airlines_Logo.svg/1200px-United_Airlines_Logo.svg.png" class="h-8 object-contain" alt="United">
-                            <div>
-                                <div class="text-xl font-bold text-brand-textDark">08:25</div>
-                                <div class="text-xs text-slate-500">San Francisco</div>
-                                <div class="text-xs text-slate-500">Thu, 27 Nov</div>
-                            </div>
-                        </div>
-
-                        <div class="flex-1 px-8 flex flex-col items-center">
-                            <span class="text-xs text-slate-400 mb-1">Duration: 17h 15m</span>
-                            <div class="w-full flex items-center">
-                                <div class="h-[1px] bg-slate-300 flex-1 relative">
-                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-brand-blue"></div>
+                                <div class="flex-1 px-8 flex flex-col items-center">
+                                    <span class="text-xs text-slate-400 mb-1">Duration: {{ $itinerary['duration'] }}</span>
+                                    <div class="w-full flex items-center">
+                                        <div class="h-[1px] bg-slate-300 flex-1 relative">
+                                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-brand-blue"></div>
+                                        </div>
+                                        <i class="fas fa-plane text-slate-300 ml-2 transform rotate-90"></i>
+                                    </div>
+                                    @if(isset($itinerary['segments']) && count($itinerary['segments']) > 1)
+                                        <span class="text-xs text-brand-blue mt-1">{{ count($itinerary['segments']) - 1 }} Stop</span>
+                                    @else
+                                        <span class="text-xs text-brand-blue mt-1">Non-stop</span>
+                                    @endif
+                                    @if(isset($itinerary['segments'][0]['cabin']))
+                                        <span class="text-xs text-sky-500 cursor-pointer hover:underline">{{ $itinerary['segments'][0]['cabin'] }} ({{ $itinerary['segments'][0]['class'] }})</span>
+                                    @endif
                                 </div>
-                                <i class="fas fa-plane text-slate-300 ml-2 transform rotate-90"></i>
-                            </div>
-                            <span class="text-xs text-brand-blue mt-1">1 Stop <span class="text-sky-500 cursor-pointer hover:underline">Economy (H)</span></span>
-                        </div>
 
-                        <div class="text-right">
-                            <div class="text-xl font-bold text-brand-textDark">10:40</div>
-                            <div class="text-xs text-slate-500">Lagos</div>
-                            <div class="text-xs text-slate-500">Fri, 28 Nov</div>
-                        </div>
-                    </div>
+                                <div class="text-right">
+                                    @if(isset($itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['at']))
+                                        @php
+                                            $arrTime = \Carbon\Carbon::parse($itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['at']);
+                                            $arrDate = $arrTime->format('D, d M');
+                                            $arrTimeFormatted = $arrTime->format('H:i');
+                                        @endphp
+                                        <div class="text-xl font-bold text-brand-textDark">{{ $arrTimeFormatted }}</div>
+                                        <div class="text-xs text-slate-500">{{ $itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['airport']['city'] }}</div>
+                                        <div class="text-xs text-slate-500">{{ $arrDate }}</div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
 
                     <!-- Price Highlight inside card -->
                     <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center md:hidden">
                          <span class="text-sm font-semibold text-slate-500">Total Price:</span>
-                         <span class="text-xl font-bold text-brand-textDark">₦3,321,693</span>
+                         <span class="text-xl font-bold text-brand-textDark">
+                             @if(isset($flightData['verifiedPrice']['total']))
+                                 ₦{{ number_format($flightData['verifiedPrice']['total']) }}
+                             @else
+                                 ₦0
+                             @endif
+                         </span>
                     </div>
                 </div>
 
                 <h2 class="text-xl font-bold text-brand-textDark pl-1">Who's Travelling?</h2>
 
-                <!-- Passenger Form -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="font-bold text-lg mb-1">Passenger 1 (Adult)</h3>
-                    <p class="text-xs text-slate-500 mb-4">Traveller names must match government-issued photo ID.</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <!-- Title -->
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
-                            <select class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
-                                <option>Mr</option>
-                                <option>Mrs</option>
-                                <option>Ms</option>
-                            </select>
+                <!-- Passenger Forms -->
+                @if(isset($flightData['travelerPricings']))
+                    @php
+                        $adultCount = 0;
+                        $childCount = 0;
+                        $infantCount = 0;
+                        
+                        foreach($flightData['travelerPricings'] as $pricing) {
+                            if($pricing['travelerType'] === 'ADULT') {
+                                $adultCount++;
+                            } elseif($pricing['travelerType'] === 'CHILD') {
+                                $childCount++;
+                            } elseif($pricing['travelerType'] === 'INFANT') {
+                                $infantCount++;
+                            }
+                        }
+                    @endphp
+
+                    <!-- Adult Passengers -->
+                    @for($i = 1; $i <= $adultCount; $i++)
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <h3 class="font-bold text-lg mb-1">Passenger {{ $i }} (Adult)</h3>
+                            <p class="text-xs text-slate-500 mb-4">Traveller names must match government-issued photo ID.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <!-- Title -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                                    <select name="passengers[adult_{{ $i }}][title]" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                        <option value="Mr">Mr</option>
+                                        <option value="Mrs">Mrs</option>
+                                        <option value="Ms">Ms</option>
+                                    </select>
+                                </div>
+                                <!-- First Name -->
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
+                                    <input type="text" name="passengers[adult_{{ $i }}][firstName]" placeholder="Enter first name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                                <!-- Middle Name -->
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
+                                    <input type="text" name="passengers[adult_{{ $i }}][middleName]" placeholder="Enter middle name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                                <!-- Surname -->
+                                <div class="md:col-span-4">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
+                                    <input type="text" name="passengers[adult_{{ $i }}][surname]" placeholder="Enter surname" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                            </div>
                         </div>
-                        <!-- First Name -->
-                        <div class="md:col-span-3">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
-                            <input type="text" placeholder="Enter first name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                    @endfor
+
+                    <!-- Child Passengers -->
+                    @for($i = 1; $i <= $childCount; $i++)
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <h3 class="font-bold text-lg mb-1">Passenger {{ $i }} (Child)</h3>
+                            <p class="text-xs text-slate-500 mb-4">Traveller names must match government-issued photo ID.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <!-- Title -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                                    <select name="passengers[child_{{ $i }}][title]" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                        <option value="Master">Master</option>
+                                        <option value="Miss">Miss</option>
+                                    </select>
+                                </div>
+                                <!-- First Name -->
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
+                                    <input type="text" name="passengers[child_{{ $i }}][firstName]" placeholder="Enter first name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                                <!-- Middle Name -->
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
+                                    <input type="text" name="passengers[child_{{ $i }}][middleName]" placeholder="Enter middle name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                                <!-- Surname -->
+                                <div class="md:col-span-4">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
+                                    <input type="text" name="passengers[child_{{ $i }}][surname]" placeholder="Enter surname" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                            </div>
                         </div>
-                        <!-- Middle Name -->
-                        <div class="md:col-span-3">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
-                            <input type="text" placeholder="Enter middle name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                    @endfor
+
+                    <!-- Infant Passengers -->
+                    @for($i = 1; $i <= $infantCount; $i++)
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <h3 class="font-bold text-lg mb-1">Passenger {{ $i }} (Infant)</h3>
+                            <p class="text-xs text-slate-500 mb-4">Traveller names must match government-issued photo ID.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <!-- Title -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                                    <select name="passengers[infant_{{ $i }}][title]" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                        <option value="Master">Master</option>
+                                        <option value="Miss">Miss</option>
+                                    </select>
+                                </div>
+                                <!-- First Name -->
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
+                                    <input type="text" name="passengers[infant_{{ $i }}][firstName]" placeholder="Enter first name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                                <!-- Middle Name -->
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
+                                    <input type="text" name="passengers[infant_{{ $i }}][middleName]" placeholder="Enter middle name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                                <!-- Surname -->
+                                <div class="md:col-span-4">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
+                                    <input type="text" name="passengers[infant_{{ $i }}][surname]" placeholder="Enter surname" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                </div>
+                            </div>
                         </div>
-                        <!-- Surname -->
-                        <div class="md:col-span-4">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
-                            <input type="text" placeholder="Enter surname" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                    @endfor
+                @else
+                    <!-- Fallback for when travelerPricings is not available -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="font-bold text-lg mb-1">Passenger 1 (Adult)</h3>
+                        <p class="text-xs text-slate-500 mb-4">Traveller names must match government-issued photo ID.</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            <!-- Title -->
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                                <select class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                    <option>Mr</option>
+                                    <option>Mrs</option>
+                                    <option>Ms</option>
+                                </select>
+                            </div>
+                            <!-- First Name -->
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
+                                <input type="text" placeholder="Enter first name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                            </div>
+                            <!-- Middle Name -->
+                            <div class="md:col-span-3">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
+                                <input type="text" placeholder="Enter middle name" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                            </div>
+                            <!-- Surname -->
+                            <div class="md:col-span-4">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
+                                <input type="text" placeholder="Enter surname" class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
 
                 <!-- Contact Details Form -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
@@ -213,54 +341,79 @@
                         <h3 class="font-bold text-lg text-brand-textDark mb-1">Booking Summary</h3>
                         <div class="w-10 h-1 bg-brand-orange mb-4"></div>
 
-                        <div class="mb-6">
-                            <h4 class="font-bold text-md text-brand-textDark">Lagos - San Francisco</h4>
-                            <p class="text-xs text-slate-500">November 21 - November 27</p>
-                        </div>
-
-                        <!-- Outbound Segment -->
-                        <div class="mb-4">
-                            <span class="bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">Departing</span>
-                            <div class="flex justify-between mt-2">
-                                <div>
-                                    <div class="font-bold text-sm text-brand-textDark">Fri, Nov 21</div>
-                                    <div class="text-xs text-slate-500">23:50</div>
+                        @if(isset($flightData['itineraries']) && count($flightData['itineraries']) > 0)
+                            @foreach($flightData['itineraries'] as $itineraryIndex => $itinerary)
+                                @if($itineraryIndex > 0) <div class="border-t border-dashed border-slate-200 my-4"></div> @endif
+                                
+                                <div class="mb-6">
+                                    @if(isset($itinerary['segments'][0]['segmentDeparture']['airport']['city']) && 
+                                        isset($itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['airport']['city']))
+                                        <h4 class="font-bold text-md text-brand-textDark">
+                                            {{ $itinerary['segments'][0]['segmentDeparture']['airport']['city'] }} - 
+                                            {{ $itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['airport']['city'] }}
+                                        </h4>
+                                    @endif
+                                    @if(isset($itinerary['segments'][0]['segmentDeparture']['at']) && 
+                                        isset($itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['at']))
+                                        @php
+                                            $startDate = \Carbon\Carbon::parse($itinerary['segments'][0]['segmentDeparture']['at'])->format('M d');
+                                            $endDate = \Carbon\Carbon::parse($itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['at'])->format('M d');
+                                        @endphp
+                                        <p class="text-xs text-slate-500">{{ $startDate }} - {{ $endDate }}</p>
+                                    @endif
                                 </div>
-                                <div class="text-right">
-                                    <div class="font-bold text-sm text-brand-textDark">Sat, Nov 22</div>
-                                    <div class="text-xs text-slate-500">11:29</div>
+                                
+                                <div class="mb-4">
+                                    <span class="bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">
+                                        {{ $itinerary['itineraryTitle'] }}
+                                    </span>
+                                    <div class="flex justify-between mt-2">
+                                        <div>
+                                            @if(isset($itinerary['segments'][0]['segmentDeparture']['at']))
+                                                @php
+                                                    $depTime = \Carbon\Carbon::parse($itinerary['segments'][0]['segmentDeparture']['at']);
+                                                    $depDate = $depTime->format('D, M d');
+                                                    $depTimeFormatted = $depTime->format('H:i');
+                                                @endphp
+                                                <div class="font-bold text-sm text-brand-textDark">{{ $depDate }}</div>
+                                                <div class="text-xs text-slate-500">{{ $depTimeFormatted }}</div>
+                                            @endif
+                                        </div>
+                                        <div class="text-right">
+                                            @if(isset($itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['at']))
+                                                @php
+                                                    $arrTime = \Carbon\Carbon::parse($itinerary['segments'][count($itinerary['segments']) - 1]['segmentArrival']['at']);
+                                                    $arrDate = $arrTime->format('D, M d');
+                                                    $arrTimeFormatted = $arrTime->format('H:i');
+                                                @endphp
+                                                <div class="font-bold text-sm text-brand-textDark">{{ $arrDate }}</div>
+                                                <div class="text-xs text-slate-500">{{ $arrTimeFormatted }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Inbound Segment -->
-                        <div class="mb-6">
-                            <span class="bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded">Arriving</span>
-                            <div class="flex justify-between mt-2">
-                                <div>
-                                    <div class="font-bold text-sm text-brand-textDark">Thu, Nov 27</div>
-                                    <div class="text-xs text-slate-500">08:25</div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-bold text-sm text-brand-textDark">Fri, Nov 28</div>
-                                    <div class="text-xs text-slate-500">10:40</div>
-                                </div>
-                            </div>
-                        </div>
+                            @endforeach
+                        @endif
 
                         <!-- Route Line -->
                         <div class="border-t border-dashed border-slate-200 my-4"></div>
 
                         <div class="mb-2">
                             <h4 class="font-bold text-md text-brand-textDark mb-3">Flight Base Fare</h4>
-                            <div class="flex justify-between text-xs text-slate-600 mb-2">
-                                <span>Adult x (1)</span>
-                                <span class="font-medium">₦2,123,550</span>
-                            </div>
-                            <div class="flex justify-between text-xs text-slate-600 mb-2">
-                                <span>Tax & fees</span>
-                                <span class="font-medium">₦1,198,143</span>
-                            </div>
+                            @if(isset($flightData['travelerPricings']))
+                                @foreach($flightData['travelerPricings'] as $pricing)
+                                    <div class="flex justify-between text-xs text-slate-600 mb-2">
+                                        <span>{{ ucfirst($pricing['travelerType']) }} x (1)</span>
+                                        <span class="font-medium">₦{{ number_format($pricing['price']['total']) }}</span>
+                                    </div>
+                                @endforeach
+                            @endif
+                            @if(isset($flightData['verifiedPriceBreakdown']))
+                                <div class="flex justify-between text-xs text-slate-600 mb-2">
+                                    <span>Tax & fees</span>
+                                    <span class="font-medium">₦{{ number_format($flightData['verifiedPriceBreakdown']['taxesAndFees']) }}</span>
+                                </div>
+                            @endif
                             <div class="flex justify-between text-xs text-slate-600 mb-2">
                                 <span>Discount</span>
                                 <span class="font-medium">₦0</span>
@@ -269,7 +422,13 @@
 
                         <div class="flex justify-between items-end mt-6 pt-4 border-t border-slate-200">
                             <span class="text-sm font-bold text-slate-500">Total Price</span>
-                            <span class="text-2xl font-bold text-brand-textDark">₦3,321,693</span>
+                            <span class="text-2xl font-bold text-brand-textDark">
+                                @if(isset($flightData['verifiedPrice']['total']))
+                                    ₦{{ number_format($flightData['verifiedPrice']['total']) }}
+                                @else
+                                    ₦0
+                                @endif
+                            </span>
                         </div>
                         
                         <div class="mt-2 text-[10px] text-sky-600 flex items-center gap-1">

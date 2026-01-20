@@ -36,12 +36,12 @@
                     <ul class="space-y-2">
                         <li><i class="fas fa-map-marker-alt mr-2"></i> Lagos, Nigeria</li>
                         <li><i class="fas fa-phone mr-2"></i> +234 700 000 0000</li>
-                        <li><i class="fas fa-envelope mr-2"></i> info@247travels.com</li>
+                        <li><i class="fas fa-envelope mr-2"></i> info@nurud.com</li>
                     </ul>
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-white/10 text-xs text-white/50">
-                &copy; 2025 FlightFinder / 247Travels Mockup. All Rights Reserved.
+                &copy; 2026 FlightFinder / Nurud. All Rights Reserved.
             </div>
         </div>
     </footer>
