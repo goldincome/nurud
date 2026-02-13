@@ -101,8 +101,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Initial Autocompletes ---
-    autocomplete(document.getElementById("origin"));
-    autocomplete(document.getElementById("destination"));
+    const originInput = document.getElementById("origin");
+    const destinationInput = document.getElementById("destination");
+    if (originInput) autocomplete(originInput);
+    if (destinationInput) autocomplete(destinationInput);
 
     // --- Toggle Mobile Menu ---
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -147,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const accordionContent = document.getElementById('booking-bar');
     
     function recalculateAccordionHeight() {
-        if (window.innerWidth < 768 && accordionContent.classList.contains('open')) {
+        if (accordionContent && window.innerWidth < 768 && accordionContent.classList.contains('open')) {
             setTimeout(() => {
                 accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
             }, 50);
@@ -244,7 +246,9 @@ document.addEventListener('DOMContentLoaded', function() {
         recalculateAccordionHeight();
     }
     
-    addFlightBtn.addEventListener('click', addMultiCityRow);
+    if (addFlightBtn) {
+        addFlightBtn.addEventListener('click', addMultiCityRow);
+    }
 
     // --- Trip Type Logic ---
     const tripTypeSelect = document.getElementById('trip-type');
@@ -252,8 +256,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const returnDateWrapper = document.getElementById('return-date-wrapper');
     const flexibleDatesWrapper = document.getElementById('flexible-dates-wrapper');
 
-    tripTypeSelect.addEventListener('change', function() {
-        const isMultiCityValue = (this.value == 2);
+    if (tripTypeSelect) {
+        tripTypeSelect.addEventListener('change', function() {
+            const isMultiCityValue = (this.value == 2);
 
         if (isMultiCityValue) {
             singleFlightForm.style.display = 'none';
@@ -281,6 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         recalculateAccordionHeight();
     });
+    }
 
     // --- Passenger Dropdown Logic ---
     const passengerBtn = document.getElementById('passenger-btn');
@@ -290,9 +296,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const passengerCountText = document.getElementById('passenger-count-text');
     const counts = { adults: 1, children: 0, infants: 0 };
     
-    passengerBtn.addEventListener('click', (e) => { e.stopPropagation(); passengerDropdown.classList.toggle('hidden'); });
-    passengerDoneBtn.addEventListener('click', () => passengerDropdown.classList.add('hidden'));
-    document.addEventListener('click', (e) => { if (!passengerBtn.contains(e.target) && !passengerDropdown.contains(e.target)) { passengerDropdown.classList.add('hidden'); } });
+    if (passengerBtn && passengerDropdown && passengerDoneBtn) {
+        passengerBtn.addEventListener('click', (e) => { e.stopPropagation(); passengerDropdown.classList.toggle('hidden'); });
+        passengerDoneBtn.addEventListener('click', () => passengerDropdown.classList.add('hidden'));
+        document.addEventListener('click', (e) => { if (!passengerBtn.contains(e.target) && !passengerDropdown.contains(e.target)) { passengerDropdown.classList.add('hidden'); } });
+    }
     
     function updatePassengerDisplay() {
         const total = counts.adults + counts.children + counts.infants;
@@ -319,36 +327,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Mobile Accordion Logic ---
-    const accordionHeader = document.getElementById('accordion-header');
-    const accordionIcon = document.getElementById('accordion-icon');
-    
-    if (window.innerWidth < 768) { 
-        accordionContent.style.maxHeight = '0px'; 
-    } else { 
-        accordionContent.classList.add('open');
-        accordionContent.style.maxHeight = accordionContent.scrollHeight + "px"; 
-    }
-    accordionHeader.addEventListener('click', () => {
-        const isOpen = accordionContent.classList.contains('open');
-        if (!isOpen) {
-            accordionContent.classList.add('open');
-            accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
-            accordionIcon.classList.add('rotate-180');
-        } else {
-            accordionContent.classList.remove('open');
-            accordionContent.style.maxHeight = '0px';
-            accordionIcon.classList.remove('rotate-180');
-        }
-    });
-    window.addEventListener('resize', () => {
-        if (window.innerWidth >= 768) { 
+    if (accordionHeader && accordionContent && accordionIcon) {
+        if (window.innerWidth < 768) { 
+            accordionContent.style.maxHeight = '0px'; 
+        } else { 
             accordionContent.classList.add('open');
             accordionContent.style.maxHeight = accordionContent.scrollHeight + "px"; 
-        } else { 
-            if (!accordionContent.classList.contains('open')) {
-                accordionContent.style.maxHeight = '0px'; 
-            } else {
+        }
+        accordionHeader.addEventListener('click', () => {
+            const isOpen = accordionContent.classList.contains('open');
+            if (!isOpen) {
+                accordionContent.classList.add('open');
                 accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                accordionIcon.classList.add('rotate-180');
+            } else {
+                accordionContent.classList.remove('open');
+                accordionContent.style.maxHeight = '0px';
+                accordionIcon.classList.remove('rotate-180');
+            }
+        });
+    }
+    window.addEventListener('resize', () => {
+        if (accordionContent) {
+            if (window.innerWidth >= 768) { 
+                accordionContent.classList.add('open');
+                accordionContent.style.maxHeight = accordionContent.scrollHeight + "px"; 
+            } else { 
+                if (!accordionContent.classList.contains('open')) {
+                    accordionContent.style.maxHeight = '0px'; 
+                } else {
+                    accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                }
             }
         }
     });

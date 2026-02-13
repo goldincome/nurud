@@ -67,12 +67,25 @@
      <!-- Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Toggle Mobile Menu
-            const btn = document.getElementById('mobile-menu-btn');
-            const menu = document.getElementById('mobile-menu');
+            // Close menus when clicking outside
+            document.addEventListener('click', function(e) {
+                // Close mobile menu
+                const mobileMenu = document.getElementById('mobile-menu');
+                const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                    if (!mobileMenu.contains(e.target) && e.target !== mobileMenuBtn && !mobileMenuBtn.contains(e.target)) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
 
-            btn.addEventListener('click', () => {
-                menu.classList.toggle('hidden');
+                // Close user dropdown
+                const userDropdown = document.getElementById('user-dropdown');
+                const userDropdownBtn = document.getElementById('user-dropdown-btn');
+                if (userDropdown && !userDropdown.classList.contains('hidden')) {
+                    if (!userDropdown.contains(e.target) && e.target !== userDropdownBtn && !userDropdownBtn.contains(e.target)) {
+                        userDropdown.classList.add('hidden');
+                    }
+                }
             });
         });
     </script>

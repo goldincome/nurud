@@ -182,13 +182,10 @@ class FlexiApiService
         }
     }
 
-    public function reserveFlight(string $offerId, array $passengers): array
+    public function reserveFlight(array $offer): array
     {
         try {
-            $response = $this->getHttpClient()->post("{$this->baseUrl}/offer/reserve", [
-                'offer_id' => $offerId,
-                'passengers' => $passengers
-            ]);
+            $response = $this->getHttpClient()->post("{$this->baseUrl}/offer/reserve", $offer);     
 
             if ($response->successful()) {
                 return $response->json();
@@ -197,14 +194,12 @@ class FlexiApiService
             Log::error('Flexi API reserve failed', [
                 'status' => $response->status(),
                 'body' => $response->body(),
-                'offer_id' => $offerId
             ]);
 
             throw new \Exception("Flight reservation failed: {$response->status()} - {$response->body()}");
         } catch (\Exception $e) {
             Log::error('Flexi API reserve error', [
                 'error' => $e->getMessage(),
-                'offer_id' => $offerId
             ]);
             throw $e;
         }

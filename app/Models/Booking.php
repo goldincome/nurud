@@ -6,26 +6,55 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 class Booking extends Model
 {
+    use HasUuids;
+
     protected $fillable = [
         'user_id',
-        'pnr_reference',
+        'office_id',
+        'ota_id',
         'flight_offer_id',
-        'guest_email',
-        'guest_phone',
-        'total_amount',
+        'origin_location',
+        'origin_destination',
+        'carrier_code',
+        'route_model',
+        'departure_date',
+        'cabin',
+        'class',
+        'ama_client_ref',
+        'reservation_id',
+        'base_price',
+        'taxes_and_fees',
+        'total_price',
+        'contact_phone',
+        'customer_first_name',
+        'customer_last_name',
+        'customer_email',
+        'reservation_date',
+        'order_status',
+        'date_created',
+        'date_modified',
         'currency',
-        'status',
         'payment_method',
         'expires_at',
         'ticket_issued_at',
     ];
 
     protected $casts = [
+        'departure_date' => 'datetime',
+        'reservation_date' => 'datetime',
+        'date_created' => 'datetime',
+        'date_modified' => 'datetime',
         'expires_at' => 'datetime',
         'ticket_issued_at' => 'datetime',
-        'total_amount' => 'decimal:2',
+        'base_price' => 'integer',
+        'taxes_and_fees' => 'integer',
+        'total_price' => 'integer',
+        'route_model' => 'integer',
+        'order_status' => 'integer',
     ];
 
     public function user(): BelongsTo
@@ -41,5 +70,15 @@ class Booking extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function itineraries(): HasMany
+    {
+        return $this->hasMany(Itinerary::class);
+    }
+
+    public function travelerPricings(): HasMany
+    {
+        return $this->hasMany(TravelerPricing::class);
     }
 }

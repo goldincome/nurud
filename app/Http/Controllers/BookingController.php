@@ -3,20 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
-use App\Services\BookingService;
-use App\Services\FlexiApiService;
-use App\Services\PaymentService;
-use App\Jobs\SendBookingConfirmation;
-use App\Jobs\SendPaymentConfirmation;
+use App\Models\Country;
+use Illuminate\View\View;
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use App\Mail\BookingConfirmed;
 use App\Mail\PaymentConfirmed;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\Request;
+use App\Services\BookingService;
+use App\Services\PaymentService;
+use App\Services\FlexiApiService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendBookingConfirmation;
+use App\Jobs\SendPaymentConfirmation;
+use Illuminate\Support\Facades\Cache;
 
 
 
@@ -31,107 +34,157 @@ class BookingController extends Controller
         $this->flexiService = $flexiService;
     }
 
-    public function create(Request $request): View
+    public function create()
     {
-       $data = session()->get('verified_flight_offer');
-        //dd($data['travelerPricings']);
-        // TODO: Load flight details from  session
-        return view('booking', [
-            'flightData' => $data,
+        $verifyId = session()->get('current_verify_id');
+        $verifiedOffer = Cache::get('verified_offer_' . $verifyId);
+        //dd($verifiedOffer);
+        if (!$verifiedOffer) {
+            return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
+        }
+
+        // Retrieve original search params to know how many travelers to show forms for
+        $searchId = session()->get('current_search_id');
+        $searchData = Cache::get('flight_search_' . $searchId)['search_data'] ?? [];
+
+        $countries = Country::orderBy('name')->get();
+
+        return view('booking.booking', [
+            'flightData' => $verifiedOffer,
+            'travelerCount' => $searchData['adults'] ?? 1,
+            'routeModel' => $searchData['routeModel'] ?? 0,
+            'countries' => $countries
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function checkout(Request $request)
     {
         $request->validate([
-            'flight_offer_id' => 'required|string',
-            'total_amount' => 'required|numeric|min:0',
-            'guest_email' => 'required|email',
-            'guest_phone' => 'nullable|string',
-            'travelers' => 'required|array|min:1|max:9',
-            'travelers.*.first_name' => 'required|string|max:255',
-            'travelers.*.last_name' => 'required|string|max:255',
-            'travelers.*.dob' => 'required|date',
-            'travelers.*.gender' => 'required|in:M,F',
-            'travelers.*.passport_number' => 'required|string|max:255',
-            'travelers.*.passport_expiry' => 'required|date|after:today',
-            'travelers.*.type' => 'required|in:ADULT,CHILD,INFANT',
+            'email' => 'required|email',
+            'phone' => 'nullable|string',
+            'passengers' => 'required|array|min:1|max:9',
+            'passengers.*.firstName' => 'required|string|max:255',
+            'passengers.*.surname' => 'required|string|max:255',
+            'passengers.*.dob' => 'required|date',
+            'passengers.*.gender' => 'required|in:1,2,3',
         ]);
 
-        try {
-            $bookingData = [
-                'user_id' => Auth::id(),
-                'guest_email' => $request->guest_email,
-                'guest_phone' => $request->guest_phone,
-                'flight_offer_id' => $request->flight_offer_id,
-                'total_amount' => $request->total_amount,
-            ];
+        $verifyId = session()->get('current_verify_id');
+        $verifiedOffer = Cache::get('verified_offer_' . $verifyId);
+        //dd($verifiedOffer, $request->all());
+        if (!$verifiedOffer) {
+            return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
+        }
+        $i = 1;
+        foreach ($request['passengers'] as $index => $passenger) {
+            $travelerPayload['travelers'][] = [
+                "travelerId" => (string) ($i),
+                "firstName" => $passenger['firstName'],
+                "lastName" => $passenger['surname'],
+                "dateOfBirth" => "1990-01-01",
+                "gender" => (int) $passenger['gender']
 
-            $booking = $this->bookingService->createPendingBooking($bookingData, $request->travelers);
+            ];
+            $i++;
+        }
+        //dd(  $travelerPayload['travelers'], $request['passengers']);
+
+        $payLoad = [
+            "officeId" => $verifiedOffer['officeId'],
+            "flightOfferId" => $verifiedOffer['offerId'],
+            "amaClientRef" => $verifiedOffer['amaClientRef'],
+            "travelers" => $travelerPayload['travelers'],
+            "travelerContact" => [
+                "email" => $request['email'],
+                "phone" => $request['phone'],
+                "countryCallingCode" => str_replace(')', '', Str::afterLast($request->countryCallingCode, '+')),
+                "firstName" => $request['passengers']['adult_1']['firstName'],
+                "lastName" => $request['passengers']['adult_1']['surname']
+            ],
+            "offerInfo" => $verifiedOffer
+        ];
+
+        //$result = $this->flexiService->reserveFlight($payLoad);
+        // if (!$result) {
+        //    return redirect()->back()->with('error', 'Failed to reserve flight');
+        //}
+        //dd($result);
+        // Generate a unique ID to avoid stuffing the SQL Session
+        $bookingId = Str::uuid()->toString();
+
+        // Store the heavydata in Cache (expires in 60 mins)
+        Cache::put('booking_offer_' . $bookingId, $payLoad, now()->addMinutes(60));
+
+        // Store only the reference ID in the session
+        session()->put('offer_data_id', $bookingId);
+
+        return view('booking.checkout', [
+            'flightData' => $verifiedOffer
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $bookingId = session()->get('offer_data_id');
+        $bookingOffer = Cache::get('booking_offer_' . $bookingId);
+
+        if (!$bookingOffer) {
+            return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
+        }
+
+        try {
+            $result = $this->flexiService->reserveFlight($bookingOffer);
+            if (!$result) {
+                return redirect()->back()->with('error', 'Failed to reserve flight');
+            }
+            // Create booking and all related data in the database
+            $booking = $this->bookingService->createPendingBooking($result);
 
             // Send booking confirmation email
             try {
-                Mail::to($booking->guest_email)->send(new BookingConfirmed($booking));
+                //Mail::to($booking->customer_email)->send(new BookingConfirmed($booking));
             } catch (\Exception $e) {
-                Log::error('Failed to send booking confirmation email', ['pnr' => $booking->pnr_reference, 'error' => $e->getMessage()]);
-                // Don't fail the booking if email fails
+                Log::error('Failed to send booking confirmation email', [
+                    'booking_id' => $booking->id,
+                    'reservation_id' => $booking->reservation_id,
+                    'error' => $e->getMessage()
+                ]);
             }
+            session()->put('booking_id', $booking->id);
+            return redirect()->route('bookings.confirmation')->with(
+                'success',
+                'Booking created successfully. Please complete payment within 24 hours.'
+            );
 
-            return response()->json([
-                'success' => true,
-                'booking' => $booking->load('travelers'),
-                'message' => 'Booking created successfully. Please complete payment within 24 hours.',
-            ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
+            Log::error('Flight reservation failed', [
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Failed to reserve flight: ' . $e->getMessage());
         }
     }
 
-    public function verify(Request $request): JsonResponse
+    public function confirmation()
     {
-        $request->validate([
-            'offer_id' => 'required|string',
-        ]);
-
-        try {
-            $result = $this->flexiService->verifyPrice($request->offer_id);
-
-            return response()->json([
-                'success' => true,
-                'verified' => true,
-                'price' => $result['price'] ?? null,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'verified' => false,
-                'message' => 'Unable to verify flight availability',
-            ]);
-        }
-    }
-
-    public function manage(Request $request): View
-    {
-        $pnr = $request->query('pnr');
-        $email = $request->query('email');
-
-        if (!$pnr || !$email) {
-            return redirect()->route('home')->with('error', 'PNR and email are required');
-        }
-
-        $booking = $this->bookingService->getBookingByPnr($pnr, $email);
-
+        $verifyId = session()->get('current_verify_id');
+        $verifiedOffer = Cache::get('verified_offer_' . $verifyId);
+        $bookingId = session()->get('booking_id');
+        $booking = Booking::find($bookingId);
+        //dd($verifiedOffer);
         if (!$booking) {
-            return redirect()->route('home')->with('error', 'Booking not found');
+            return redirect()->back()->with('error', 'Booking not found');
         }
 
-        return view('booking.manage', [
+        if (!$verifiedOffer) {
+            return redirect()->route('search.results')->with('error', 'Session expired. Please start over.');
+        }
+        //dd($booking->travelers);
+        return view('booking.confirmation', [
+            'flightData' => $verifiedOffer,
             'booking' => $booking->load(['travelers', 'payments']),
         ]);
     }
+
 
     public function show(string $id): View
     {
@@ -188,7 +241,7 @@ class BookingController extends Controller
                     'amount' => $booking->total_amount,
                     'currency' => $booking->currency,
                     'booking_id' => $booking->id,
-                    'pnr' => $booking->pnr_reference,
+                    'reservation_id' => $booking->reservation_id,
                 ]);
 
                 if ($result['status'] === 'success') {
@@ -206,7 +259,7 @@ class BookingController extends Controller
                     try {
                         Mail::to($booking->guest_email)->send(new PaymentConfirmed($booking));
                     } catch (\Exception $e) {
-                        Log::error('Failed to send payment confirmation email', ['pnr' => $booking->pnr_reference, 'error' => $e->getMessage()]);
+                        Log::error('Failed to send payment confirmation email', ['reservation_id' => $booking->reservation_id, 'error' => $e->getMessage()]);
                     }
 
                     return redirect()->route('bookings.show', $booking->id)->with('success', 'Payment processed successfully!');
@@ -248,7 +301,7 @@ class BookingController extends Controller
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
 
-        $filename = 'ticket_' . $booking->pnr_reference . '.pdf';
+        $filename = 'ticket_' . $booking->reservation_id . '.pdf';
 
         return $pdf->download($filename);
     }

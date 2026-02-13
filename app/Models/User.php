@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Enums\CustomerType;
+    
 
 class User extends Authenticatable
 {
@@ -21,6 +23,18 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'title',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'type',
+        'gender',
+        'phone_code',
+        'phone_no',
+        'country',
+        'postal_code',
+        'city',
+        'address',
     ];
 
     /**
@@ -43,6 +57,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'type' => CustomerType::class,
         ];
     }
 }
