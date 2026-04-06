@@ -203,8 +203,9 @@
                 <div id="flight-list" class="space-y-4">
                 </div>
 
-                <div class="text-center pt-4">
-                    <button
+                <div id="load-more-wrapper" class="text-center pt-4 hidden">
+                    <p id="flight-count-info" class="text-sm text-slate-500 mb-3"></p>
+                    <button id="load-more-btn" onclick="loadMoreFlights()"
                         class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center justify-center mx-auto">
                         Load more flights <i class="fas fa-chevron-down ml-2"></i>
                     </button>
@@ -265,7 +266,10 @@
             const flights = @json($flights);
             const routeModel = parseInt("{{ $routeModel }}"); // 0=OneWay, 1=RoundTrip, 2=MultiCity
 
+            const PAGE_SIZE = 10;
             let currentSort = 'cheapest';
+            let visibleCount = PAGE_SIZE;
+            let currentFilteredFlights = [];
             let container = document.getElementById('flight-list');
             const getPrice = (flight) => parseFloat(flight.rawPrice);
 
@@ -292,6 +296,8 @@
                     filtered.sort((a, b) => a.totalDuration - b.totalDuration);
                 }
 
+                visibleCount = PAGE_SIZE;
+                currentFilteredFlights = filtered;
                 renderFlights(filtered);
             }
 
@@ -302,6 +308,8 @@
                 // Sort by price (cheapest first)
                 filtered.sort((a, b) => getPrice(a) - getPrice(b));
 
+                visibleCount = PAGE_SIZE;
+                currentFilteredFlights = filtered;
                 renderFlights(filtered);
             }
 
@@ -343,13 +351,18 @@
 
             function renderFlights(data) {
                 container.innerHTML = '';
+                const loadMoreWrapper = document.getElementById('load-more-wrapper');
+                const flightCountInfo = document.getElementById('flight-count-info');
 
                 if (data.length === 0) {
                     container.innerHTML = '<div class="p-6 text-center text-slate-500 bg-white rounded-lg shadow">No flights found matching your filters.</div>';
+                    if (loadMoreWrapper) loadMoreWrapper.classList.add('hidden');
                     return;
                 }
 
-                data.forEach(flight => {
+                const toShow = data.slice(0, visibleCount);
+
+                toShow.forEach(flight => {
                     let displayBag = '1 bag x 23kg';
                     if (flight.bags) {
                         if (flight.bags.toLowerCase().includes('bag')) {
@@ -469,6 +482,37 @@
                                     `;
                     container.innerHTML += card;
                 });
+
+                // Update load-more button visibility and flight count
+                if (loadMoreWrapper) {
+                    const remaining = data.length - visibleCount;
+                    if (remaining > 0) {
+                        loadMoreWrapper.classList.remove('hidden');
+                        const loadMoreBtn = document.getElementById('load-more-btn');
+                        loadMoreBtn.classList.remove('hidden');
+                        const nextBatch = Math.min(remaining, PAGE_SIZE);
+                        flightCountInfo.textContent = `Showing ${toShow.length} of ${data.length} flights`;
+                        loadMoreBtn.innerHTML = `Load ${nextBatch} more flight${nextBatch > 1 ? 's' : ''} <i class="fas fa-chevron-down ml-2"></i>`;
+                    } else {
+                        loadMoreWrapper.classList.remove('hidden');
+                        flightCountInfo.textContent = `Showing all ${data.length} flight${data.length > 1 ? 's' : ''}`;
+                        document.getElementById('load-more-btn').classList.add('hidden');
+                    }
+                }
+            }
+
+            function loadMoreFlights() {
+                visibleCount += PAGE_SIZE;
+                renderFlights(currentFilteredFlights);
+
+                // Smooth scroll to the newly loaded flights
+                setTimeout(() => {
+                    const allCards = container.querySelectorAll(':scope > div');
+                    const scrollTarget = allCards[visibleCount - PAGE_SIZE] || allCards[allCards.length - 1];
+                    if (scrollTarget) {
+                        scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
             }
 
             document.addEventListener('DOMContentLoaded', () => {
