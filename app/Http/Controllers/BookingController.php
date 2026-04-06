@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\BookingService;
 use App\Services\PaymentService;
 use App\Services\FlexiApiService;
+use App\Services\SimlessPayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +21,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Jobs\SendBookingConfirmation;
 use App\Jobs\SendPaymentConfirmation;
 use Illuminate\Support\Facades\Cache;
+use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentMethod;
 
 
 
@@ -27,18 +31,23 @@ class BookingController extends Controller
 {
     protected BookingService $bookingService;
     protected FlexiApiService $flexiService;
+    protected SimlessPayService $simlessPayService;
 
-    public function __construct(BookingService $bookingService, FlexiApiService $flexiService)
-    {
+    public function __construct(
+        BookingService $bookingService,
+        FlexiApiService $flexiService,
+        SimlessPayService $simlessPayService
+    ) {
         $this->bookingService = $bookingService;
         $this->flexiService = $flexiService;
+        $this->simlessPayService = $simlessPayService;
     }
 
     public function create()
     {
         $verifyId = session()->get('current_verify_id');
         $verifiedOffer = Cache::get('verified_offer_' . $verifyId);
-        //dd($verifiedOffer);
+        //dd($verifiedOffer, $verifiedOffer['verifiedPriceBreakdown']['taxesAndFees']);
         if (!$verifiedOffer) {
             return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
         }
@@ -53,7 +62,10 @@ class BookingController extends Controller
             'flightData' => $verifiedOffer,
             'travelerCount' => $searchData['adults'] ?? 1,
             'routeModel' => $searchData['routeModel'] ?? 0,
-            'countries' => $countries
+            'countries' => $countries,
+            'total' => ($verifiedOffer['verifiedPriceBreakdown']['total'] + session()->get('markup_fee')),
+            'taxes' => $verifiedOffer['verifiedPriceBreakdown']['taxesAndFees'] + session()->get('markup_fee'),
+            'simlessPayService' => $this->simlessPayService,
         ]);
     }
 
@@ -118,8 +130,14 @@ class BookingController extends Controller
         // Store only the reference ID in the session
         session()->put('offer_data_id', $bookingId);
 
+        $banks = \App\Models\Bank::all();
+
         return view('booking.checkout', [
-            'flightData' => $verifiedOffer
+            'flightData' => $verifiedOffer,
+            'total' => ($verifiedOffer['verifiedPriceBreakdown']['total'] + session()->get('markup_fee')),
+            'taxes' => $verifiedOffer['verifiedPriceBreakdown']['taxesAndFees'] + session()->get('markup_fee'),
+            'simlessPayService' => $this->simlessPayService,
+            'banks' => $banks,
         ]);
     }
 
@@ -131,12 +149,14 @@ class BookingController extends Controller
         if (!$bookingOffer) {
             return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
         }
+        //dd($bookingOffer);
 
         try {
             $result = $this->flexiService->reserveFlight($bookingOffer);
             if (!$result) {
                 return redirect()->back()->with('error', 'Failed to reserve flight');
             }
+            //dd($result);
             // Create booking and all related data in the database
             $booking = $this->bookingService->createPendingBooking($result);
 
@@ -151,6 +171,9 @@ class BookingController extends Controller
                 ]);
             }
             session()->put('booking_id', $booking->id);
+            session()->forget('markup_fee');
+            session()->forget('offer_data_id');
+            session()->forget('current_verify_id');
             return redirect()->route('bookings.confirmation')->with(
                 'success',
                 'Booking created successfully. Please complete payment within 24 hours.'
@@ -166,8 +189,6 @@ class BookingController extends Controller
 
     public function confirmation()
     {
-        $verifyId = session()->get('current_verify_id');
-        $verifiedOffer = Cache::get('verified_offer_' . $verifyId);
         $bookingId = session()->get('booking_id');
         $booking = Booking::find($bookingId);
         //dd($verifiedOffer);
@@ -175,13 +196,13 @@ class BookingController extends Controller
             return redirect()->back()->with('error', 'Booking not found');
         }
 
-        if (!$verifiedOffer) {
-            return redirect()->route('search.results')->with('error', 'Session expired. Please start over.');
-        }
+
         //dd($booking->travelers);
         return view('booking.confirmation', [
-            'flightData' => $verifiedOffer,
-            'booking' => $booking->load(['travelers', 'payments']),
+            //'flightData' => $verifiedOffer,
+            'booking' => $booking->load(['travelers', 'itineraries', 'travelerPricings']),
+            'simlessPayService' => $this->simlessPayService,
+            'banks' => \App\Models\Bank::all(),
         ]);
     }
 
@@ -200,7 +221,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function payment(string $id): View
+    public function payment(string $id): \Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
         $booking = Booking::findOrFail($id);
 
@@ -210,7 +231,7 @@ class BookingController extends Controller
         }
 
         // Only allow payment for pending bookings
-        if ($booking->status !== 'pending_payment') {
+        if ($booking->status !== BookingStatus::PENDING_PAYMENT) {
             return redirect()->route('bookings.show', $booking->id)->with('error', 'Payment not available for this booking status');
         }
 
@@ -231,10 +252,10 @@ class BookingController extends Controller
 
         // Validate payment method
         $request->validate([
-            'payment_method' => 'required|in:stripe,bank_transfer',
+            'payment_method' => 'required|in:' . implode(',', array_column(PaymentMethod::cases(), 'value')),
         ]);
 
-        if ($request->payment_method === 'stripe') {
+        if ($request->payment_method === PaymentMethod::STRIPE->value) {
             // Process Stripe payment
             try {
                 $result = app(PaymentService::class)->processStripePayment([
@@ -249,7 +270,7 @@ class BookingController extends Controller
                     $booking->payments()->create([
                         'transaction_ref' => $result['transaction_id'],
                         'amount' => $result['amount'],
-                        'status' => 'completed',
+                        'status' => PaymentStatus::COMPLETED,
                     ]);
 
                     // Confirm the booking
@@ -267,12 +288,12 @@ class BookingController extends Controller
             } catch (\Exception $e) {
                 return back()->with('error', 'Payment processing failed: ' . $e->getMessage());
             }
-        } elseif ($request->payment_method === 'bank_transfer') {
+        } elseif ($request->payment_method === PaymentMethod::BANK_TRANSFER->value) {
             // Create pending payment record for bank transfer
             $booking->payments()->create([
                 'transaction_ref' => 'BANK_' . uniqid(),
                 'amount' => $booking->total_amount,
-                'status' => 'pending',
+                'status' => PaymentStatus::PENDING,
             ]);
 
             return redirect()->route('bookings.show', $booking->id)->with('success', 'Bank transfer payment initiated. Please complete the transfer to confirm your booking.');
@@ -287,11 +308,14 @@ class BookingController extends Controller
 
         // Check permissions
         if ($booking->user_id && $booking->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized');
+            if (!in_array(Auth::user()->type, [\App\Enums\CustomerType::ADMIN, \App\Enums\CustomerType::SUPERADMIN])) {
+                abort(403, 'Unauthorized');
+            }
         }
 
-        // Only allow download for confirmed bookings
-        if ($booking->status !== 'confirmed') {
+        // Only allow download for confirmed bookings (admins can download any status)
+        $isAdmin = in_array(Auth::user()->type, [\App\Enums\CustomerType::ADMIN, \App\Enums\CustomerType::SUPERADMIN]);
+        if (!$isAdmin && $booking->status !== BookingStatus::CONFIRMED) {
             abort(403, 'Ticket not available for this booking status');
         }
 

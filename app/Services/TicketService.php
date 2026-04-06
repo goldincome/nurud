@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
+use App\Enums\PaymentStatus;
 
 class TicketService
 {
@@ -18,7 +19,7 @@ class TicketService
     {
         try {
             // Validate booking has confirmed payment
-            if ($booking->payment_status !== 'paid') {
+            if ($booking->payment_status !== PaymentStatus::PAID) {
                 throw new \Exception('Booking must be paid before generating ticket');
             }
 
@@ -70,7 +71,7 @@ class TicketService
         $booking->load([
             'travelers',
             'payments' => function ($query) {
-                $query->where('status', 'completed')->latest();
+                $query->where('status', PaymentStatus::COMPLETED)->latest();
             }
         ]);
 

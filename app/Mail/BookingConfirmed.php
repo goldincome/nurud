@@ -23,7 +23,7 @@ class BookingConfirmed extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Flight Booking Reservation - ID: ' . $this->booking->reservation_id,
+            subject: 'Flight Booking Reference Number: ' . $this->booking->reference_number,
         );
     }
 

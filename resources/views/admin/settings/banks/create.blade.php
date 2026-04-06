@@ -44,6 +44,40 @@
                         @enderror
                     </div>
 
+                    <!-- SWIFT / BIC Code -->
+                    <div class="space-y-1">
+                        <label for="swift_code" class="text-sm font-medium text-slate-700">SWIFT / BIC Code</label>
+                        <input type="text" name="swift_code" id="swift_code" value="{{ old('swift_code') }}"
+                            class="w-full rounded-lg border-slate-300 focus:border-brand-blue focus:ring-brand-blue/20 transition-colors placeholder-slate-400 text-sm"
+                            placeholder="e.g. BOFAUS3N">
+                        @error('swift_code')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- IBAN -->
+                    <div class="space-y-1">
+                        <label for="iban" class="text-sm font-medium text-slate-700">IBAN</label>
+                        <input type="text" name="iban" id="iban" value="{{ old('iban') }}"
+                            class="w-full rounded-lg border-slate-300 focus:border-brand-blue focus:ring-brand-blue/20 transition-colors placeholder-slate-400 text-sm"
+                            placeholder="e.g. GB29NWBK60161331926819">
+                        @error('iban')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Routing Number -->
+                    <div class="space-y-1">
+                        <label for="routing_number" class="text-sm font-medium text-slate-700">Routing Number / Sort
+                            Code</label>
+                        <input type="text" name="routing_number" id="routing_number" value="{{ old('routing_number') }}"
+                            class="w-full rounded-lg border-slate-300 focus:border-brand-blue focus:ring-brand-blue/20 transition-colors placeholder-slate-400 text-sm"
+                            placeholder="e.g. 122000661">
+                        @error('routing_number')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Account Name -->
                     <div class="space-y-1 md:col-span-2">
                         <label for="account_name" class="text-sm font-medium text-slate-700">Account Name <span

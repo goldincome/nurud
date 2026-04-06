@@ -12,6 +12,8 @@ use App\Http\Requests\SearchFlightRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Services\MarkupService;
+use App\Services\SimlessPayService;
 
 class SearchController extends Controller
 {
@@ -23,19 +25,19 @@ class SearchController extends Controller
     }
 
     public function search(SearchFlightRequest $request): RedirectResponse
-    { 
+    {
         $validated = $request->validated();
-        
-        if($validated['routeModel'] == 0 || $validated['routeModel'] == 2){
+
+        if ($validated['routeModel'] == 0 || $validated['routeModel'] == 2) {
             $validated['dateWindow'] = false;
         }
 
         try {
             // Fix for the 30s timeout error
-            set_time_limit(120); 
+            set_time_limit(120);
 
             $flights = $this->flexiService->searchFlights($validated);
-            
+
             // Generate a unique ID to avoid stuffing the SQL Session
             $searchId = Str::uuid()->toString();
 
@@ -55,25 +57,28 @@ class SearchController extends Controller
         }
     }
 
-    public function results(Request $request)
+    public function results(Request $request, MarkupService $markupService, SimlessPayService $simlessPayService)
     {
         $searchId = session()->get('current_search_id');
         $searchResults = Cache::get('flight_search_' . $searchId);
 
+        //dd($searchResults);
+
         if (!$searchResults) {
-            return redirect()->route('/')->with('error', 'Search results expired. Please search again.');
+            return redirect()->route('search')->with('error', 'Search results expired. Please search again.');
         }
 
         $routeModel = $searchResults['search_data']['routeModel'] ?? 0;
         $rawOffers = $searchResults['flights']['offerInfos'] ?? [];
         $formattedFlights = [];
         $airlineGroups = [];
-        
+
         foreach ($rawOffers as $offer) {
             $offerItineraries = [];
-            
+
             $firstItinerarySegments = $offer['itineraries'][0]['segments'] ?? [];
-            if (empty($firstItinerarySegments)) continue; 
+            if (empty($firstItinerarySegments))
+                continue;
 
             $mainAirlineCode = $firstItinerarySegments[0]['carrier']['iataCode'] ?? $offer['validatingAirlineCodes'][0];
             $mainAirlineName = $firstItinerarySegments[0]['carrier']['name'] ?? $offer['validatingAirlineCodes'][0];
@@ -82,10 +87,10 @@ class SearchController extends Controller
                 $segments = $itinerary['segments'];
                 $firstSegment = $segments[0];
                 $lastSegment = end($segments);
-                
+
                 $stopCount = count($segments) - 1;
                 $stopsText = $stopCount === 0 ? 'Direct' : ($stopCount . ' Stop' . ($stopCount > 1 ? 's' : ''));
-                
+
                 $stopCity = $stopCount > 0 ? ($firstSegment['segmentArrival']['airport']['city'] ?? $firstSegment['segmentArrival']['airport']['iataCode']) : '';
 
                 $offerItineraries[] = [
@@ -116,14 +121,14 @@ class SearchController extends Controller
                 'id' => $offer['id'],
                 'airline' => $mainAirlineName,
                 'airlineCode' => $mainAirlineCode,
-                'price' => number_format($offer['price']['total']),
-                'rawPrice' => $offer['price']['total'],
+                'price' => number_format($simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total']))),
+                'rawPrice' => $simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total'])),
                 'currency' => $offer['price']['currency'] ?? 'NGN',
                 'bags' => $bags,
-                'itineraries' => $offerItineraries, 
+                'itineraries' => $offerItineraries,
                 'totalDuration' => $offer['durationInMinutes'] ?? 0,
                 'rawData' => json_encode($offer),
-                'allOffer' => $offer 
+                'allOffer' => $offer
             ];
 
             $formattedFlights[] = $flightData;
@@ -132,23 +137,23 @@ class SearchController extends Controller
                 $airlineGroups[$mainAirlineCode] = [
                     'airline' => $mainAirlineName,
                     'airlineCode' => $mainAirlineCode,
-                    'cheapestPrice' => $offer['price']['total'],
-                    'cheapestPriceFormatted' => number_format($offer['price']['total']),
+                    'cheapestPrice' => $simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total'])),
+                    'cheapestPriceFormatted' => number_format($simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total']))),
                     'flights' => []
                 ];
             } elseif ($offer['price']['total'] < $airlineGroups[$mainAirlineCode]['cheapestPrice']) {
-                $airlineGroups[$mainAirlineCode]['cheapestPrice'] = $offer['price']['total'];
-                $airlineGroups[$mainAirlineCode]['cheapestPriceFormatted'] = number_format($offer['price']['total']);
+                $airlineGroups[$mainAirlineCode]['cheapestPrice'] = $simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total']));
+                $airlineGroups[$mainAirlineCode]['cheapestPriceFormatted'] = number_format($simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total'])));
             }
             $airlineGroups[$mainAirlineCode]['flights'][] = $flightData;
         }
 
         usort($airlineGroups, fn($a, $b) => $a['cheapestPrice'] <=> $b['cheapestPrice']);
 
-        $origin =  !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin') : 'Origin'; //$formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin';
+        $origin = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin') : 'Origin'; //$formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin';
         $destination = !empty($formattedFlights) ? end($formattedFlights[0]['itineraries'])['arrCity'] : 'Destination';
         $tripDate = $searchResults['search_data']['departure_date'] ?? now()->format('Y-m-d');
-
+        //dd($formattedFlights);
         return view('search-result', [
             'flights' => $formattedFlights,
             'airlineGroups' => $airlineGroups,
@@ -157,26 +162,28 @@ class SearchController extends Controller
             'tripDate' => date('D, M d', strtotime($tripDate)),
             'tripType' => $searchResults['search_data']['routeModel'] ?? 'Flight',
             'airlines' => $searchResults['flights']['airlines'] ?? [],
-            'routeModel' => $routeModel 
+            'routeModel' => $routeModel
         ]);
     }
 
-    public function verifyOffer(Request $request): RedirectResponse
+    public function verifyOffer(Request $request, MarkupService $markupService): RedirectResponse
     {
         $validated = $request->validate(['allOffer' => 'required|string']);
-        
+
         $decodedJson = urldecode($validated['allOffer']);
         // Convert JSON string to PHP Array
         $data = json_decode($decodedJson, true);
-        
+
         try {
             $flightOutput = $this->flexiService->verifyPrice($data);
-            
+            //Get Markeup Fee and put it in session
+            session()->put('markup_fee', $markupService->getMarkupFee($flightOutput['verifiedPrice']['total']));
+
             // Move large verified offer to Cache instead of Session
             $verifyId = Str::uuid()->toString();
             Cache::put('verified_offer_' . $verifyId, $flightOutput, now()->addMinutes(20));
             session()->put('current_verify_id', $verifyId);
-
+            //dd($flightOutput['verifiedPrice']['total']);
             return redirect()->route('bookings.create')->with([
                 'success' => 'Flight offer verified successfully.',
             ]);
@@ -187,7 +194,8 @@ class SearchController extends Controller
         }
     }
 
-    private function formatDuration($minutes) {
+    private function formatDuration($minutes)
+    {
         $hours = floor($minutes / 60);
         $min = $minutes % 60;
         return "{$hours}h {$min}m";

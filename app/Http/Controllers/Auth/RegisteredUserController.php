@@ -20,6 +20,18 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
+        // If the user came from a booking/search/checkout page, store that URL
+        // so we can redirect them back after registration
+        $previousUrl = url()->previous();
+        $bookingPaths = ['booking', 'checkout', 'search', 'bookings'];
+
+        foreach ($bookingPaths as $path) {
+            if (str_contains($previousUrl, $path)) {
+                session()->put('url.intended', $previousUrl);
+                break;
+            }
+        }
+
         $countries = Country::orderBy('name')->get();
         return view('auth.register', compact('countries'));
     }
@@ -36,7 +48,7 @@ class RegisteredUserController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'gender' => ['required', 'in:male,female'],
             'phone_code' => ['required', 'string'],
             'phone_no' => ['required', 'string', 'min:10', 'max:15'],
@@ -61,6 +73,13 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Check if user was in a booking flow and redirect back there
+        $intendedUrl = session()->pull('url.intended');
+
+        if ($intendedUrl) {
+            return redirect()->to($intendedUrl);
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

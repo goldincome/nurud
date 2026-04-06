@@ -23,7 +23,7 @@ class PaymentConfirmed extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment Confirmed - Ticket Issued - PNR: ' . $this->booking->pnr_reference,
+            subject: 'Payment Confirmed - Ticket Processing : ' . $this->booking->reference_number,
         );
     }
 

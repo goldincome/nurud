@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <title>Admin Dashboard - Nurud</title>
+    <title>Admin Dashboard - Nurud Travels</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -46,7 +46,8 @@
                 <div class="w-8 h-8 bg-brand-orange rounded-lg flex items-center justify-center">
                     <i class="fas fa-plane text-white"></i>
                 </div>
-                <span class="text-xl font-bold tracking-tight">Nurud <span class="text-brand-orange">Admin</span></span>
+                <span class="text-xl font-bold tracking-tight">Nurud Travels<span
+                        class="text-brand-orange">Admin</span></span>
             </div>
 
             <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
@@ -54,16 +55,23 @@
                     class="{{ request()->routeIs('admin.dashboard') ? 'sidebar-link-active text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }} flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
                     <i class="fas fa-tachometer-alt w-5"></i> Dashboard
                 </a>
-                <a href="#"
-                    class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
+                <a href="{{ route('admin.bookings.index') }}"
+                    class="{{ request()->routeIs('admin.bookings.*') ? 'sidebar-link-active text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }} flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
                     <i class="fas fa-ticket-alt w-5"></i> Bookings
                 </a>
-                <a href="#"
-                    class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
+                <a href="{{ route('admin.customers.index') }}"
+                    class="{{ request()->routeIs('admin.customers.*') ? 'sidebar-link-active text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }} flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
                     <i class="fas fa-users w-5"></i> Customers
                 </a>
-                <a href="#"
-                    class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
+
+                @if(auth()->user()->type === \App\Enums\CustomerType::SUPERADMIN)
+                    <a href="{{ route('admin.admins.index') }}"
+                        class="{{ request()->routeIs('admin.admins.*') ? 'sidebar-link-active text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }} flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
+                        <i class="fas fa-user-shield w-5"></i> Manage Admins
+                    </a>
+                @endif
+                <a href="{{ route('admin.transactions.index') }}"
+                    class="{{ request()->routeIs('admin.transactions.*') ? 'sidebar-link-active text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }} flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
                     <i class="fas fa-exchange-alt w-5"></i> Transactions
                 </a>
                 <div class="pt-4 pb-2 text-xs font-bold text-slate-500 uppercase px-4">System</div>
@@ -101,13 +109,38 @@
                         <span
                             class="absolute -top-1 -right-1 bg-brand-orange text-white text-[8px] rounded-full w-4 h-4 flex items-center justify-center">3</span>
                     </div>
-                    <div class="flex items-center gap-3 border-l pl-6 border-slate-200">
-                        <div class="text-right hidden sm:block">
-                            <p class="text-xs font-bold text-slate-800">Admin User</p>
-                            <p class="text-[10px] text-slate-500">Super Administrator</p>
+                    <div class="relative" id="profileDropdown">
+                        <button onclick="document.getElementById('profileMenu').classList.toggle('hidden')"
+                            class="flex items-center gap-3 border-l pl-6 border-slate-200 cursor-pointer focus:outline-none">
+                            <div class="text-right hidden sm:block">
+                                <p class="text-xs font-bold text-slate-800">{{ auth()->user()->name }}</p>
+                                <p class="text-[10px] text-slate-500">{{ auth()->user()->type->label() }}</p>
+                            </div>
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=002D72&color=fff"
+                                class="w-10 h-10 rounded-full border border-slate-200" alt="Profile">
+                            <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+                        </button>
+
+                        <div id="profileMenu"
+                            class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+                            <div class="px-4 py-3 border-b border-slate-100">
+                                <p class="text-sm font-bold text-slate-800">{{ auth()->user()->name }}</p>
+                                <p class="text-xs text-slate-500">{{ auth()->user()->email }}</p>
+                            </div>
+                            <a href="{{ route('admin.account.edit') }}"
+                                class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                                <i class="fas fa-user-circle w-4 text-slate-400"></i> My Account
+                            </a>
+                            <div class="border-t border-slate-100 mt-1 pt-1">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <i class="fas fa-sign-out-alt w-4"></i> Logout
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=002D72&color=fff"
-                            class="w-10 h-10 rounded-full border border-slate-200" alt="Profile">
                     </div>
                 </div>
             </header>
@@ -119,6 +152,16 @@
     </div>
 
     @yield('js')
+    <script>
+        // Close profile dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('profileDropdown');
+            const menu = document.getElementById('profileMenu');
+            if (dropdown && menu && !dropdown.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 
 </html>

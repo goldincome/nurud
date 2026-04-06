@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TravelerType;
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -25,6 +26,7 @@ class Itinerary extends Model
         'segments' => 'array',
         'itinerary_index' => 'integer',
         'duration_in_minutes' => 'integer',
+        'traveler_type' => TravelerType::class,
     ];
 
     public function booking(): BelongsTo

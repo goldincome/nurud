@@ -1,9 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
 
-    <title>@yield('title') - Nurud</title>
+    <title>@yield('title') - Nurud Travels</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,17 +12,17 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
 
-    <meta name="author" content="Nurud">
+    <meta name="author" content="Nurud Travels">
     <meta name="description" content="@yield('description')">
     <meta name="keywords" content="@yield('keywords')">
-    <meta name="publisher" content="Nurud">
-    <meta name="copyright" content="Nurud">
+    <meta name="publisher" content="Nurud Travels">
+    <meta name="copyright" content="Nurud Travels">
     <meta property="og:image" content="@yield('image', asset('favicon.png'))" />
-    <meta property="og:title" content="@yield('title')"/>
-    <meta property="og:description" content="@yield('description')"/>
-    <meta name="robots" content= "index, follow">
-    <meta property="og:type" content="website"/>
-    <meta property="og:url" content="{{ request()->url() }}"/>
+    <meta property="og:title" content="@yield('title')" />
+    <meta property="og:description" content="@yield('description')" />
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ request()->url() }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @yield('og')
 
@@ -41,8 +41,10 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon.png') }}">
     <link rel="canonical" href="{{ request()->url() }}" />
 
-    <script src="https://cdn.tailwindcss.com"></script> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -58,17 +60,17 @@
 
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
 
-     @include('common.front.header') 
-        
+    @include('common.front.header')
+
     @yield('content')
 
     @include('common.front.footer')
 
-     <!-- Scripts -->
+    <!-- Scripts -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Close menus when clicking outside
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 // Close mobile menu
                 const mobileMenu = document.getElementById('mobile-menu');
                 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -89,8 +91,9 @@
             });
         });
     </script>
-    
+
     @yield('js')
 
 </body>
+
 </html>

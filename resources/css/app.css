@@ -8,13 +8,13 @@ body {
 
 /* Stepper booking page styling */
 .step-active .step-circle {
-    background-color: #f59e0b;
-    border-color: #f59e0b;
+    background-color: #2E3B82;
+    border-color: #2E3B82;
     color: white;
 }
 .step-completed .step-circle {
-    background-color: #f59e0b;
-    border-color: #f59e0b;
+    background-color: #2E3B82;
+    border-color: #2E3B82;
     color: white;
 }
 .step-inactive .step-circle {
@@ -22,12 +22,6 @@ body {
     color: #6b7280; /* gray-500 */
 }
 
-/* Home page Styling */
-.hero-banner {
-    background-image: url("https://images.unsplash.com/photo-1530521954074-e64f6810b32d?q=80&w=2070&auto=format&fit=crop");
-    background-size: cover;
-    background-position: center;
-}
 /* Light/Dark Mode Transition */
 .dark-mode-toggle,
 .dark body,
@@ -67,11 +61,11 @@ body {
 
     /* Active item (when navigating with arrows) */
     .autocomplete-active {
-        background-color: #0ea5e9 !important; /* Tailwind Sky-500 */
+        background-color: #2E3B82 !important;
         color: #ffffff;
     }
     
-    /* Dark mode support (Optional, if your project uses 'dark' class) */
+    /* Dark mode support */
     .dark .autocomplete-items {
         background-color: #1e293b; /* Slate-800 */
         border-color: #334155;
@@ -110,8 +104,8 @@ body {
     background: #334155; /* slate-700 */
 }
 .dark .flatpickr-day.selected {
-    background: #0284c7; /* sky-600 */
-    border-color: #0284c7;
+    background: #2E3B82;
+    border-color: #2E3B82;
 }
 .dark .flatpickr-weekday,
 .dark .flatpickr-monthDropdown-months,
@@ -146,7 +140,7 @@ input[type="range"]::-webkit-slider-thumb {
     height: 16px;
     width: 16px;
     border-radius: 50%;
-    background: #3b82f6;
+    background: #2E3B82;
     margin-top: -6px;
     cursor: pointer;
     border: 2px solid white;

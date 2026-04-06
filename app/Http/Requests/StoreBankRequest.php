@@ -24,6 +24,9 @@ class StoreBankRequest extends FormRequest
         return [
             'account_name' => 'required|string|max:255',
             'account_number' => 'required|string|max:255',
+            'swift_code' => 'nullable|string|max:50',
+            'iban' => 'nullable|string|max:50',
+            'routing_number' => 'nullable|string|max:50',
             'bank_name' => 'required|string|max:255',
             'instructions' => 'nullable|string',
             'deadline' => 'required|string|max:255', // e.g., '24 hours'

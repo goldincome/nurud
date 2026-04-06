@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Models\Payment;
 use App\Models\Booking;
 use App\Jobs\SendPaymentConfirmation;
+use App\Enums\BookingStatus;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentMethod;
 use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
 
@@ -14,8 +17,8 @@ class PaymentService
 
     public function __construct()
     {
-        //$this->stripe = new StripeClient(config('services.stripe.secret'));
-        //$this->stripe = new StripeClient(config('t56456w4tw'));
+        $this->stripe = new StripeClient(config('services.stripe.secret'));
+        // Ensure Stripe client is available for checkout sessions
     }
 
     public function processStripePayment(array $paymentData): array
@@ -27,7 +30,7 @@ class PaymentService
                 'line_items' => [
                     [
                         'price_data' => [
-                            'currency' => strtolower($paymentData['currency'] ?? 'ngn'),
+                            'currency' => strtolower($paymentData['currency'] ?? 'gbp'),
                             'product_data' => [
                                 'name' => 'Flight Booking - ' . $paymentData['pnr'],
                             ],
@@ -37,8 +40,8 @@ class PaymentService
                     ]
                 ],
                 'mode' => 'payment',
-                'success_url' => route('bookings.show', $paymentData['booking_id']) . '?session_id={CHECKOUT_SESSION_ID}',
-                'cancel_url' => route('bookings.show', $paymentData['booking_id']),
+                'success_url' => route('bookings.confirmation') . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('bookings.confirmation'),
                 'metadata' => [
                     'booking_id' => $paymentData['booking_id'],
                     'pnr' => $paymentData['pnr'],
@@ -123,12 +126,12 @@ class PaymentService
 
             // Update payment record
             $payment = Payment::where('booking_id', $bookingId)
-                ->where('type', 'stripe')
+                ->where('payment_method', PaymentMethod::STRIPE)
                 ->first();
 
             if ($payment) {
                 $payment->update([
-                    'status' => 'completed',
+                    'status' => PaymentStatus::COMPLETED,
                     'transaction_id' => $session['payment_intent'] ?? $session['id'],
                     'gateway_response' => json_encode($session),
                     'completed_at' => now(),
@@ -137,8 +140,8 @@ class PaymentService
 
             // Update booking status
             $booking->update([
-                'status' => 'confirmed',
-                'payment_status' => 'paid',
+                'status' => BookingStatus::CONFIRMED,
+                'payment_status' => PaymentStatus::PAID,
             ]);
 
             // Send payment confirmation email
@@ -172,12 +175,12 @@ class PaymentService
             if ($bookingId) {
                 // Update payment record
                 $payment = Payment::where('booking_id', $bookingId)
-                    ->where('type', 'stripe')
+                    ->where('payment_method', PaymentMethod::STRIPE)
                     ->first();
 
                 if ($payment) {
                     $payment->update([
-                        'status' => 'failed',
+                        'status' => PaymentStatus::FAILED,
                         'gateway_response' => json_encode($paymentIntent),
                     ]);
                 }
@@ -217,20 +220,20 @@ class PaymentService
 
             // Update payment record
             $payment = Payment::where('booking_id', $bookingId)
-                ->where('type', 'bank_transfer')
+                ->where('payment_method', PaymentMethod::BANK_TRANSFER)
                 ->first();
 
             if ($payment) {
                 $payment->update([
-                    'status' => 'completed',
+                    'status' => PaymentStatus::COMPLETED,
                     'verified_by' => $userId,
                     'completed_at' => now(),
                 ]);
 
                 // Update booking status
                 $booking->update([
-                    'status' => 'confirmed',
-                    'payment_status' => 'paid',
+                    'status' => BookingStatus::CONFIRMED,
+                    'payment_status' => PaymentStatus::PAID,
                 ]);
 
                 // Send payment confirmation email
@@ -255,12 +258,14 @@ class PaymentService
 
     public function getBankTransferInstructions(): array
     {
-        return [
-            'account_name' => config('payments.bank.account_name', 'AIR Ticket Systems Ltd'),
-            'account_number' => config('payments.bank.account_number', '1234567890'),
-            'bank_name' => config('payments.bank.bank_name', 'Central Bank PLC'),
-            'instructions' => config('payments.bank.instructions', 'Please mention your PNR in transfer description'),
-            'deadline' => '24 hours',
+        return \App\Models\Bank::all()->toArray() ?: [
+            [
+                'account_name' => config('payments.bank.account_name', 'AIR Ticket Systems Ltd'),
+                'account_number' => config('payments.bank.account_number', '1234567890'),
+                'bank_name' => config('payments.bank.bank_name', 'Central Bank PLC'),
+                'instructions' => config('payments.bank.instructions', 'Please mention your PNR in transfer description'),
+                'deadline' => '12 hours',
+            ]
         ];
     }
 }

@@ -16,6 +16,18 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
+        // If the user came from a booking/search/checkout page, store that URL
+        // so we can redirect them back after login
+        $previousUrl = url()->previous();
+        $bookingPaths = ['booking', 'checkout', 'search', 'bookings'];
+
+        foreach ($bookingPaths as $path) {
+            if (str_contains($previousUrl, $path)) {
+                session()->put('url.intended', $previousUrl);
+                break;
+            }
+        }
+
         return view('auth.login');
     }
 
@@ -27,6 +39,13 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Check if user was in a booking flow and redirect back there
+        $intendedUrl = session()->pull('url.intended');
+
+        if ($intendedUrl) {
+            return redirect()->to($intendedUrl);
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

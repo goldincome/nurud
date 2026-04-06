@@ -1,0 +1,1627 @@
+{
+  "info": {
+    "_postman_id": "2fe2956f-d414-4b3f-99f3-df063bdef07f",
+    "name": "TetradPay Services",
+    "description": "**SandBox API BASE URL** [<code>https://services.sandbox.tetraddev.com</code>](https://services.sandbox.tetraddev.com/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "11546231"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Generate Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.environment.set('token', pm.response.json().result.token);",
+                  "pm.environment.set('refresh_token', pm.response.json().result.refresh_token);",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "apikey",
+              "apikey": [
+                {
+                  "key": "key",
+                  "value": "x-api-key",
+                  "type": "string"
+                },
+                {
+                  "key": "value",
+                  "value": "{{business_api_key}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/api/v1/auth/login/api-key",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login",
+                "api-key"
+              ]
+            },
+            "description": "### API Endpoint: Retrieve API Key Token\n\nThis endpoint is used to obtain an API key token which can be utilized for authentication in subsequent API requests.\n\n#### Request\n\n- **Method:** GET\n- **URL:** `{{server}}/api/v1/auth/login/api-key`\n    \n- **Request Body:** No request body is required for this GET request.\n    \n\n#### Response\n\nThe response will return a JSON object containing the following structure:\n\n- **result**: An object containing:\n    - **token**: A string representing the API key token.\n    - **expires_in**: An integer indicating the duration (in seconds) until the token expires.\n\n#### Example Response\n\n``` json\n{\n  \"result\": {\n    \"token\": \"\",\n    \"expires_in\": 0\n  }\n}\n\n ```\n\nThis response structure allows the client to understand the validity of the token and how long it can be used before it needs to be refreshed."
+          },
+          "response": [
+            {
+              "name": "200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{server}}/api/v1/auth/login/api-key",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "login",
+                    "api-key"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "X-RateLimit-Limit-rateLimiting",
+                  "value": "10"
+                },
+                {
+                  "key": "X-RateLimit-Remaining-rateLimiting",
+                  "value": "9"
+                },
+                {
+                  "key": "X-RateLimit-Reset-rateLimiting",
+                  "value": "10"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "221"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"dd-XX0TYLifZXwBXKAyc7iWb9mGkGg\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Date",
+                  "value": "Fri, 30 Jan 2026 10:45:54 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": {\n        \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJidXNpbmVzc19pZCI6NCwiYXV0aF90eXBlIjoxLCJ0eXBlIjozLCJpYXQiOjE3Njk3Njk5NTQsImV4cCI6MTc2OTc3MzU1NH0.ES6S0MMMulkPYGq2OXDSD01d7WV70WzMx6FbyHuQMmI\",\n        \"expires_in\": 3600\n    }\n}"
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payout Channel",
+      "item": [
+        {
+          "name": "List Pay Out Channels v1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{server}}/api/v1/pay-out-channel/list",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pay-out-channel",
+                "list"
+              ]
+            },
+            "description": "\n### Get Pay Out Channel List\n\nThis endpoint retrieves a list of pay out channels available in the system. It is useful for users who need to understand the options for transferring funds, including details about currency exchange rates and limits.\n\n#### Request\n- **Method:** GET\n- **Endpoint:** `{{server}}/api/v1/pay-out-channel/list`\n\n#### Response\nThe response will contain a JSON object with the following structure:\n\n- **result**: An object that includes:\n  - **count**: The total number of pay out channels available.\n  - **pay_out_channels**: An array of pay out channel objects, each containing:\n    - **id**: A unique identifier for the pay out channel.\n    - **min_source_amount**: The minimum amount that can be sent from the source currency.\n    - **max_source_amount**: The maximum amount that can be sent from the source currency.\n    - **exchange_rate**: The exchange rate applicable for the transaction.\n    - **source_currency**: An object representing the source currency, which includes:\n      - **code**: The currency code (e.g., USD).\n      - **name**: The name of the currency.\n      - **symbol**: The symbol of the currency (e.g., $).\n      - **countries**: An array of countries that use this currency, each containing:\n        - **code**: The country code.\n        - **name**: The name of the country.\n    - **target_currency**: An object representing the target currency, structured similarly to the source currency.\n\n#### Notes\n- Ensure that you handle the case where no pay out channels are available, as indicated by a count of 0.\n- The response may include multiple pay out channels, each with varying exchange rates and limits, which should be considered when making a decision on fund transfers.\n"
+          },
+          "response": [
+            {
+              "name": "200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{server}}/api/v1/pay-out-channel/list",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "pay-out-channel",
+                    "list"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "347"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"15b-0lTDyTVhKANNgTHyIZfOESi0VKw\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 28 Jan 2026 06:11:12 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": {\n        \"count\": 1,\n        \"pay_out_channels\": [\n            {\n                \"id\": 2,\n                \"min_source_amount\": 10,\n                \"max_source_amount\": 10000,\n                \"exchange_rate\": 1922.26,\n                \"source_currency\": {\n                    \"code\": \"GBP\",\n                    \"name\": \"Pound\",\n                    \"symbol\": \"£\",\n                    \"countries\": [\n                        {\n                            \"code\": \"GB\",\n                            \"name\": \"United Kingdom\"\n                        }\n                    ]\n                },\n                \"target_currency\": {\n                    \"code\": \"NGN\",\n                    \"name\": \"Naira\",\n                    \"symbol\": \"₦\",\n                    \"countries\": [\n                        {\n                            \"code\": \"NG\",\n                            \"name\": \"Nigeria\"\n                        }\n                    ]\n                }\n            }\n        ]\n    }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Recipient",
+      "item": [
+        {
+          "name": "Create Recipient v1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"bank_id\": \"000016\",\n    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n    \"account_id\": \"1033901982\",\n    \"account_title\": \"TEST ACCOUNT 90\",\n    \"currency_code\": \"NGN\",\n    \"country_code\": \"NG\"\n    // \"extra_details\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/api/v1/recipient",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipient"
+              ]
+            },
+            "description": "\n## Add Recipient\n\nThis endpoint allows users to add a new recipient's banking details.\n\n### Request\n\n- **Method**: POST\n- **Endpoint**: `{{server}}/api/v1/recipient`\n\n### Request Body\n\nThe request body must be sent in JSON format and should include the following parameters:\n\n- **bank_id** (string): The unique identifier for the bank.\n- **bank_name** (string): The name of the bank.\n- **account_id** (string): The unique identifier for the recipient's account.\n- **account_title** (string): The title or name associated with the account.\n- **currency_code** (string): The currency code (e.g., NGN for Nigerian Naira).\n- **country_code** (string): The country code (e.g., NG for Nigeria).\n\n**Example Request Body:**\n```json\n{\n  \"bank_id\": \"000016\",\n  \"bank_name\": \"FIRST BANK OF NIGERIA\",\n  \"account_id\": \"1033901162\",\n  \"account_title\": \"TEST ACCOUNT\",\n  \"currency_code\": \"NGN\",\n  \"country_code\": \"NG\"\n}\n```\n\n### Response\n\nUpon a successful request, the API will respond with a JSON object containing the result of the operation. The response format includes:\n\n- **result** (object): Contains the details of the recipient added.\n  - **id** (integer): The unique identifier assigned to the recipient.\n  - **bank_id** (string): The bank identifier.\n  - **bank_name** (string): The name of the bank.\n  - **account_id** (string): The account identifier.\n  - **account_title** (string): The title of the account.\n  - **currency** (object): Contains currency details.\n    - **code** (string): The currency code.\n    - **name** (string): The name of the currency.\n    - **symbol** (string): The symbol of the currency.\n  - **country** (object): Contains country details.\n    - **code** (string): The country code.\n    - **name** (string): The name of the country.\n  - **extra_details** (null or object): Any additional details, if available.\n  - **created_at** (string): Timestamp of when the recipient was created.\n\n**Example Response:**\n```json\n{\n  \"result\": {\n    \"id\": 0,\n    \"bank_id\": \"\",\n    \"bank_name\": \"\",\n    \"account_id\": \"\",\n    \"account_title\": \"\",\n    \"currency\": {\n      \"code\": \"\",\n      \"name\": \"\",\n      \"symbol\": \"\"\n    },\n    \"country\": {\n      \"code\": \"\",\n      \"name\": \"\"\n    },\n    \"extra_details\": null,\n    \"created_at\": \"\"\n  }\n}\n```\n"
+          },
+          "response": [
+            {
+              "name": "201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"bank_id\": \"000016\",\n    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n    \"account_id\": \"1033901162\",\n    \"account_title\": \"TEST ACCOUNT\",\n    \"currency_code\": \"NGN\",\n    \"country_code\": \"NG\"\n    // \"extra_details\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{server}}/api/v1/recipient",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "recipient"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "290"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"122-vczi9VmrFDWeCqPsVsA4C9v7M8w\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 28 Jan 2026 06:11:54 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": {\n        \"id\": 15,\n        \"bank_id\": \"000016\",\n        \"bank_name\": \"FIRST BANK OF NIGERIA\",\n        \"account_id\": \"1033901162\",\n        \"account_title\": \"TEST ACCOUNT\",\n        \"currency\": {\n            \"code\": \"NGN\",\n            \"name\": \"Naira\",\n            \"symbol\": \"₦\"\n        },\n        \"country\": {\n            \"code\": \"NG\",\n            \"name\": \"Nigeria\"\n        },\n        \"extra_details\": null,\n        \"created_at\": \"2026-01-28T06:11:53.699Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Recipients v1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"take\": 10,\n    \"skip\": 0,\n    \"params\": { //Optional\n        \"currency_code\": [\n            \"NGN\"\n        ],\n        \"country_code\": [\n            \"NG\"\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/api/v1/recipient/list",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipient",
+                "list"
+              ]
+            },
+            "description": "## API Endpoint: List Recipients\n\nThis endpoint allows you to retrieve a list of recipients based on specified parameters. The request can be customized to filter recipients by currency and country codes, as well as control the pagination of the results.\n\n### Request\n\n**Method:** POST  \n**URL:** `{{server}}/api/v1/recipient/list`\n\n**Request Body:**  \nThe request body should be in JSON format and includes the following parameters:\n\n- **take** (integer): The number of recipient records to return in the response. This parameter is used for pagination.\n- **skip** (integer): The number of records to skip before starting to collect the result set. This is also used for pagination.\n- **params** (object): An object containing filtering criteria.\n    - **currency_code** (array of strings): An array of currency codes to filter recipients. For example, `[\"NGN\"]` for Nigerian Naira.\n    - **country_code** (array of strings): An array of country codes to filter recipients. For example, `[\"NG\"]` for Nigeria.\n\n**Example Request Body:**\n\n``` json\n{\n  \"take\": 10,\n  \"skip\": 0,\n  \"params\": {\n    \"currency_code\": [\"NGN\"],\n    \"country_code\": [\"NG\"]\n  }\n}\n\n ```\n\n### Response\n\nThe response will return a JSON object containing the result of the request.\n\n**Response Structure:**\n\n- **result** (object): Contains the details of the request.\n    - **count** (integer): The total number of recipients found that match the criteria.\n    - **recipients** (array of objects): An array of recipient objects, each containing the following fields:\n        - **id** (integer): The unique identifier for the recipient.\n        - **bank_id** (string): The identifier for the bank associated with the recipient.\n        - **bank_name** (string): The name of the bank.\n        - **account_id** (string): The account identifier for the recipient.\n        - **account_title** (string): The title of the account.\n        - **extra_details** (object or null): Additional details about the recipient, if available.\n        - **created_at** (string): Timestamp of when the recipient was created.\n        - **updated_at** (string): Timestamp of when the recipient was last updated.\n        - **currency** (object): Contains currency details.\n            - **code** (string): The currency code.\n            - **name** (string): The name of the currency.\n            - **symbol** (string): The symbol of the currency.\n        - **country** (object): Contains country details.\n            - **code** (string): The country code.\n            - **name** (string): The name of the country.\n\n**Example Response:**\n\n``` json\n{\n  \"result\": {\n    \"count\": 0,\n    \"recipients\": [\n      {\n        \"id\": 0,\n        \"bank_id\": \"\",\n        \"bank_name\": \"\",\n        \"account_id\": \"\",\n        \"account_title\": \"\",\n        \"extra_details\": null,\n        \"created_at\": \"\",\n        \"updated_at\": \"\",\n        \"currency\": {\n          \"code\": \"\",\n          \"name\": \"\",\n          \"symbol\": \"\"\n        },\n        \"country\": {\n          \"code\": \"\",\n          \"name\": \"\"\n        }\n      }\n    ]\n  }\n}\n\n ```\n\n### Notes\n\n- Ensure that the `take` and `skip` parameters are used correctly to manage pagination effectively.\n- The `params` object allows for flexible filtering based on currency and country, which can help in narrowing down the search results."
+          },
+          "response": [
+            {
+              "name": "200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"take\": 10,\n    \"skip\": 0,\n    \"params\": { //Optional\n        \"currency_code\": [\n            \"NGN\"\n        ],\n        \"country_code\": [\n            \"NG\"\n        ]\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{server}}/api/v1/recipient/list",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "recipient",
+                    "list"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "357"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"165-38wKc+4LWCg7rSFnEGO7NwpS6Rk\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 28 Jan 2026 06:12:15 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": {\n        \"count\": 1,\n        \"recipients\": [\n            {\n                \"id\": 15,\n                \"bank_id\": \"000016\",\n                \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                \"account_id\": \"1033901162\",\n                \"account_title\": \"TEST ACCOUNT\",\n                \"extra_details\": null,\n                \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                \"currency\": {\n                    \"code\": \"NGN\",\n                    \"name\": \"Naira\",\n                    \"symbol\": \"₦\"\n                },\n                \"country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                }\n            }\n        ]\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Recipient v1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{server}}/api/v1/recipient?recipient_id=15",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "recipient"
+              ],
+              "query": [
+                {
+                  "key": "recipient_id",
+                  "value": "15"
+                }
+              ]
+            },
+            "description": "\n### Retrieve Recipient Details\n\nThis endpoint retrieves detailed information about a specific recipient based on the provided recipient ID.\n\n#### Request Parameters\n\n- **recipient_id** (required): The unique identifier for the recipient you wish to retrieve. This should be passed as a query parameter in the URL.\n\n#### Example Request\n```\nGET {{server}}/api/v1/recipient?recipient_id=15\n```\n\n#### Expected Response\n\nThe response will return a JSON object containing the details of the recipient. The structure of the response is as follows:\n\n- **result**: An object containing the recipient's details:\n  - **id**: The unique identifier of the recipient.\n  - **bank_id**: The identifier for the bank associated with the recipient.\n  - **bank_name**: The name of the bank.\n  - **account_id**: The account identifier for the recipient.\n  - **account_title**: The title associated with the recipient's account.\n  - **extra_details**: Additional information related to the recipient (may be null).\n  - **created_at**: Timestamp of when the recipient was created.\n  - **updated_at**: Timestamp of the last update to the recipient's information.\n  - **currency**: An object containing currency details:\n    - **code**: The currency code.\n    - **name**: The name of the currency.\n    - **symbol**: The symbol of the currency.\n  - **country**: An object containing country details:\n    - **code**: The country code.\n    - **name**: The name of the country.\n\n#### Notes\n- Ensure that the `recipient_id` provided in the request is valid to receive the correct recipient details.\n- The response will include null values for fields that do not have data associated with them.\n"
+          },
+          "response": [
+            {
+              "name": "200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{server}}/api/v1/recipient?recipient_id=15",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "recipient"
+                  ],
+                  "query": [
+                    {
+                      "key": "recipient_id",
+                      "value": "15"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "330"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"14a-k1xO8l3XDvBzwkZ9UvQLP/O6gOY\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Date",
+                  "value": "Wed, 28 Jan 2026 07:09:16 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": {\n        \"id\": 15,\n        \"bank_id\": \"000016\",\n        \"bank_name\": \"FIRST BANK OF NIGERIA\",\n        \"account_id\": \"1033901162\",\n        \"account_title\": \"TEST ACCOUNT\",\n        \"extra_details\": null,\n        \"created_at\": \"2026-01-28T06:11:53.699Z\",\n        \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n        \"currency\": {\n            \"code\": \"NGN\",\n            \"name\": \"Naira\",\n            \"symbol\": \"₦\"\n        },\n        \"country\": {\n            \"code\": \"NG\",\n            \"name\": \"Nigeria\"\n        }\n    }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transaction",
+      "item": [
+        {
+          "name": "Create Quotation v1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pay_out_channel_id\": 4,\n    \"source_amount\": 10,\n    \"source_country_code\": \"NL\",\n    \"destination_country_code\": \"NG\",\n    \"fee_payer\": \"sender\" // sender | receiver\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/api/v1/transaction/quotation",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "quotation"
+              ]
+            },
+            "description": "## API Endpoint: Create Quotation for Transaction\n\nThis endpoint allows users to create a quotation for a transaction based on the specified parameters. The request includes details about the payout channel, source and destination countries, and the amount to be exchanged.\n\n### Request Format\n\n**HTTP Method:** POST  \n**Endpoint:** `{{server}}/api/v1/transaction/quotation`\n\n#### Request Body\n\nThe request body must be in JSON format and include the following parameters:\n\n- **pay_out_channel_id** (integer): The ID of the payout channel to be used for the transaction.\n- **source_amount** (number): The amount of money being sent from the source country.\n- **source_country_code** (string): The ISO code of the source country (e.g., \"NL\" for Netherlands).\n- **destination_country_code** (string): The ISO code of the destination country (e.g., \"NG\" for Nigeria).\n- **fee_payer** (string): Specifies who will pay the transaction fees (e.g., \"sender\" or \"receiver\").\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"pay_out_channel_id\": 4,\n  \"source_amount\": 10,\n  \"source_country_code\": \"NL\",\n  \"destination_country_code\": \"NG\",\n  \"fee_payer\": \"sender\"\n}\n\n ```\n\n### Response Structure\n\nUpon successful execution, the API will return a JSON object containing the following fields:\n\n- **source_country_code** (string): The ISO code of the source country.\n- **destination_country_code** (string): The ISO code of the destination country.\n- **source_currency_code** (string): The currency code of the source amount.\n- **destination_currency_code** (string): The currency code of the destination amount.\n- **exchange_rate** (number): The exchange rate applied to the transaction.\n- **source_amount** (number): The original amount sent from the source country.\n- **destination_amount** (number): The equivalent amount in the destination country.\n- **system_fee** (number): The fee charged by the system for processing the transaction.\n- **business_fee** (number): Any additional fees charged by the business.\n- **total_payable** (number): The total amount payable after fees.\n- **fee_payer** (string): Indicates who is responsible for paying the fees.\n    \n\n**Example Response:**\n\n``` json\n{\n  \"source_country_code\": \"\",\n  \"destination_country_code\": \"\",\n  \"source_currency_code\": \"\",\n  \"destination_currency_code\": \"\",\n  \"exchange_rate\": 0,\n  \"source_amount\": 0,\n  \"destination_amount\": 0,\n  \"system_fee\": 0,\n  \"business_fee\": 0,\n  \"total_payable\": 0,\n  \"fee_payer\": \"\"\n}\n\n ```\n\n### Status Codes\n\n- **200 OK**: The request was successful, and the quotation has been created.\n- **400 Bad Request**: The request was invalid, possibly due to missing or incorrect parameters.\n- **500 Internal Server Error**: An unexpected error occurred on the server while processing the request.\n    \n\nEnsure that all required parameters are included in the request body to avoid errors and receive the correct quotation details."
+          },
+          "response": [
+            {
+              "name": "200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"pay_out_channel_id\": 4,\n    \"source_amount\": 10,\n    \"source_country_code\": \"NL\",\n    \"destination_country_code\": \"NG\",\n    \"fee_payer\": \"sender\" // sender | receiver\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{server}}/api/v1/transaction/quotation",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "transaction",
+                    "quotation"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "264"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"108-rQkQP4Q1QqTUbV4UPwHnRHCa8S0\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 10 Feb 2026 09:34:48 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"source_country_code\": \"NL\",\n    \"destination_country_code\": \"NG\",\n    \"source_currency_code\": \"EUR\",\n    \"destination_currency_code\": \"NGN\",\n    \"exchange_rate\": 1676.7,\n    \"source_amount\": 10,\n    \"destination_amount\": 16767,\n    \"system_fee\": 1,\n    \"business_fee\": 1,\n    \"total_payable\": 12,\n    \"fee_payer\": \"sender\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Initiate Transaction v1",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "function generateRandomUppercaseString() {",
+                  "    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';",
+                  "    const minLength = 10;",
+                  "    const maxLength = 18;",
+                  "",
+                  "    const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;",
+                  "    let result = '';",
+                  "",
+                  "    for (let i = 0; i < length; i++) {",
+                  "        result += chars.charAt(Math.floor(Math.random() * chars.length));",
+                  "    }",
+                  "",
+                  "    return result;",
+                  "}",
+                  "",
+                  "// Generate string",
+                  "const randomString = generateRandomUppercaseString();",
+                  "",
+                  "pm.variables.set('randomString', randomString);",
+                  "",
+                  "console.log('Generated RANDOM_STRING:', randomString);",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pay_out_channel_id\": 2,\n    \"source_amount\": 10,\n    \"recipient_id\": 15,\n    \"source_country_code\": \"GB\",\n    \"destination_country_code\": \"NG\",\n    \"narration\": \"Test\",\n    \"external_reference\": \"{{randomString}}\",\n    \"payment_channel_type\": 2, //PaymentChannelTypeEnum\n    \"options\": {\n        \"client_email\": \"tayyab@codek.tech\" // required for PaymentChannelTypeEnum.CARD_PAYMENT\n    },\n    \"fee_payer\": \"sender\" // sender | receiver\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/api/v1/transaction",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction"
+              ]
+            },
+            "description": "\n### Create Transaction\n\nThis endpoint allows you to create a transaction by specifying various parameters related to the payout channel, source and destination details, and additional information for the transaction.\n\n**HTTP Method:** POST  \n**Endpoint:** `{{server}}/api/v1/transaction`\n\n#### Request Parameters\n\n- **pay_out_channel_id** (integer): The ID of the payout channel through which the transaction will be processed.\n- **source_amount** (number): The amount of money being sent from the source.\n- **recipient_id** (integer): The ID of the recipient who will receive the funds.\n- **source_country_code** (string): The ISO code of the country from which the funds are being sent.\n- **destination_country_code** (string): The ISO code of the country where the funds are being sent.\n- **narration** (string): A brief description or note about the transaction.\n- **external_reference** (string): An external reference ID for tracking the transaction.\n- **payment_channel_type** (PaymentChannelTypeEnum): Channel type through which payer will pay.\n- **options** (object): Additional options for the transaction.\n    - **client_email** (string): The email address of the client.\n\n#### Expected Response\n\nUpon successfully creating a transaction, the response will include the following fields:\n\n- **id** (integer): The unique identifier for the created transaction.\n- **reference** (string): A reference number associated with the transaction.\n- **external_reference** (string): The external reference provided in the request.\n- **source_country_code** (string): The country code from which the funds were sent.\n- **destination_country_code** (string): The country code where the funds are sent.\n- **source_currency_code** (string): The currency code of the source amount.\n- **destination_currency_code** (string): The currency code of the destination amount.\n- **source_amount** (number): The amount sent from the source.\n- **destination_amount** (number): The amount received at the destination.\n- **exchange_rate** (number): The exchange rate applied for the transaction.\n- **payment_url** (string): A URL for the payment process.\n\n#### Notes\n\n- Ensure that the `pay_out_channel_id` corresponds to a valid payout channel in your system.\n- The `source_country_code` and `destination_country_code` must be valid ISO country codes.\n- The `external_reference` can be used to track the transaction externally, so it should be unique for better tracking.\n\nThis endpoint is crucial for initiating transactions and requires accurate input for successful processing.\n"
+          },
+          "response": [
+            {
+              "name": "201 - OPEN_BANKING",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"pay_out_channel_id\": 4,\n    \"source_amount\": 10,\n    \"recipient_id\": 15,\n    \"source_country_code\": \"NL\",\n    \"destination_country_code\": \"NG\",\n    \"narration\": \"Test\",\n    \"external_reference\": \"{{randomString}}\",\n    \"payment_channel_type\": 1, //PaymentChannelTypeEnum\n    \"fee_payer\": \"sender\" // sender | receiver\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{server}}/api/v1/transaction",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "transaction"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"763-/8ryDAxYDMc3zKZgE0z9xhNSOio\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Content-Encoding",
+                  "value": "br"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 10 Feb 2026 09:40:03 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 57,\n    \"reference\": \"TRDSNLNG06694058\",\n    \"external_reference\": \"NZ3D6JWXVNKJDTKC\",\n    \"source_country_code\": \"NL\",\n    \"destination_country_code\": \"NG\",\n    \"source_currency_code\": \"EUR\",\n    \"destination_currency_code\": \"NGN\",\n    \"source_amount\": 10,\n    \"destination_amount\": 16767,\n    \"payment_channel_type\": 1,\n    \"system_fee\": 1,\n    \"business_fee\": 0,\n    \"exchange_rate\": 1676.7,\n    \"total_payable\": 11,\n    \"fee_payer\": \"sender\",\n    \"payment_url\": \"https://tetradpay-service-payments-dev.netlify.app/?session=eyJlbmNyeXB0ZWRLZXkiOiJxQ2lzOUw0cmYyVVJJZlcvVTBPdnB2eFdyUG9NUCt6RzgzZjZ1K3pFSEZ4U0xvSUxmdnZ4RkJiZFE4a1ErR2lHQkhjSkhhRlcwakMrcDU5OUtOUlR2anNkMmN5TTFUZGJIbnFZUi9xMW1FajNlMkJRVVRCMjJDL3ozYVJWQ3hvakk0WUNDbFRZRVY5MVJ5Q1I3VGtqaytBTW5oWUVHV0l0dmNjNFc1aUtucjEwckdrSlZJRUY3OXY4bk9iOCtEaGFhTWtLT2U1YVhuQ0Y2UVBia0Q4cG5qUTk0NTYxdWlxZEoySk05aHY1dnJDbGRVUno4anN1REUyRG1pcFZ1NUpqM0hiSHhCeWRXUEpnS1Y0Sk9ORUZZZy9uVnZSZGFTZWpZdlJSWDB5TjM4K0ZNRlo5TFZWYTF1enFCSENMcUFtWWZ2UllwS28wSnM0TFQxSW4wQjVCQ0E9PSIsImVuY3J5cHRlZFBheWxvYWQiOiJZWnJrdmE1Z1RsWFc2YnJnUkQzbkpvZmwwczAvMTByQVIySHhwODVqUlYyQk1Rb2hscjZnT1NQU3JzL2o2Z0h4aWJBeTc1K3p0a2VzUm00eVgwTjVlaEZxUi9LQVZRU2MyNUtQRFh5djFrSE9zNElGbHMxZjdBdlMrMG4wNDY0TFlwS1lneVc5OTBoS3k5UHNMbW9QUUZrVlVnRm9OdDRMeDBwOVI5akN6YVlnYXBmMjd4cUpFQ0ZPbFo2ZWRFUnY3SDVxVjRuR2JRNVBqWk51T2NGbS9iS0dwSW00MXo5aWhNb3R5YTNFbUx3SnhQR0ptbWxvYTZ6eHplb2tqRXpTL1RCaDV3OUdoc05aUFV0MDdtQ2twRHE0Y0RiQUJMOTFER1RkZVVCY1RCMGtnR2pVOFo3UHA1bVNhZFdTVFpuRVFyUnV0UDRKSEg3Y0dsZEhmbGFMN2NVcWNUSlJZREpvSE11NkcweWxXZTV3OWkyanFPKzdmcXFSVXF3Z1N5WjJIeng4VDNaYjIxTExOTUdrUWVyS3Y4UE4wdXJXanBPUnJNeGtGSk9BQVA3M1hPeEpYT21BOEcrZytXTzdyaUcvM1l2VWhTQ25STUdBRlJxUitzVmVVcWllZGRET1BySGdmYXowUWVncWhxd3U1ZE5IRkJBMVNMR0dBKzNuUTN6bkVxd2RXb2h2eHdKYWhSWVFvazlIdHhuUzFJMmtjMDBMZ3k1Uy9DREU3VXJRT21zU3Y0ZFFhaisyZERwbHE0akx6NnYwQUoxTHVCcTZaZERUcVUycWNNSjNJZTEwWE1RaGhJbGdkVk9zbnkzeUhqZGJKUGVlSFo2VzJRZXMiLCJpdiI6Ilp4ZjhCZHZBRnlDam56aVkiLCJhdXRoVGFnIjoiSkNEYWpFMW9DbnhneTJESFdTZGhlQT09In0%3D\"\n}"
+            },
+            {
+              "name": "201 - CARD_PAYMENTS",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"pay_out_channel_id\": 2,\n    \"source_amount\": 10,\n    \"recipient_id\": 15,\n    \"source_country_code\": \"GB\",\n    \"destination_country_code\": \"NG\",\n    \"narration\": \"Test\",\n    \"external_reference\": \"{{randomString}}\",\n    \"payment_channel_type\": 2, //PaymentChannelTypeEnum\n    \"options\": {\n        \"client_email\": \"tayyab@codek.tech\" // required for PaymentChannelTypeEnum.CARD_PAYMENT\n    },\n    \"fee_payer\": \"sender\" // sender | receiver\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{server}}/api/v1/transaction",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "transaction"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"851-73l8c+WB58nXl/EWI3/eInVxhUs\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Content-Encoding",
+                  "value": "br"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 10 Feb 2026 09:37:51 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 56,\n    \"reference\": \"TRDSGBNG06371476\",\n    \"external_reference\": \"PQMMSKTZB8ED2\",\n    \"source_country_code\": \"GB\",\n    \"destination_country_code\": \"NG\",\n    \"source_currency_code\": \"GBP\",\n    \"destination_currency_code\": \"NGN\",\n    \"source_amount\": 10,\n    \"destination_amount\": 19302.6,\n    \"payment_channel_type\": 2,\n    \"system_fee\": 1,\n    \"business_fee\": 0,\n    \"exchange_rate\": 1930.26,\n    \"total_payable\": 11,\n    \"fee_payer\": \"sender\",\n    \"payment_url\": \"https://tetradpay-service-payments-dev.netlify.app/?session=eyJlbmNyeXB0ZWRLZXkiOiJLY1BEWDJNUkJUYmYvUFFuVUxnZ1NrMUJVb3BudjBoOUgvRGdVeTFENVNDZXBHNk9neVpUaS9vN1RIdUNyK0xlTlh2L1FacXNUdEcyeG5wdVUyNWF2dHRia3ErTDlkdy9LUVAyeVJ4ak5PN3pORHRFN2ZyRGs0WEVpTm5FZFJIS1ZxZklrc3Rmd1E4ZnpxTzRhNnNnam50am5IeXJGSElScXBST0JRTDJWTVV2eEpweFdxZ2NWTXB4OWVKY3BhYy96c2JLTXZqTUh6SEJIcnVGWHdNOVUrOUdCMFFMOHdhZnZJN25Nbjg0RkZ1R0pPbDZHc2VGS094SUhFS0NLM1NIMVJsTUNjZU01TFBCZU1UMFdWTW82RDVNaldjSTMwU25rMkQ1eTNCeDl6YklqZjEzejBmZFFjYVBZUnoyZStvTmMybi96bGRZRVJHUVN3WG1aV2FqcUE9PSIsImVuY3J5cHRlZFBheWxvYWQiOiJHaWZtNXZ0VU00Q1plelI1bDJhQ2tTeldFUkVTeDhjWWc3UUUvREg5Q2ZMRGU0eTlpMmR1YWdyb3dUWko4eDllSUVmV2swRzlwVGo4NlRHSnd4czR1K1JRZWVCUWJrWng5cW1nVGd6QWNRLzluSXdpRzlTL0lKbkU3bkowTURkZkYvaHJBRVNJSWxGRXl4ZzlvZTg4L1N1dTFHK1FldnVmZDhiWVNQSklPYUYyQm5VMzlmclRtSHJidFJsejRobitXQnI0bHVnR1dNMit1NVZtKzV4bERjMW1MREQ0am9oWktWVWY3UWxWVDF5Tk5JT0ZFVEQvWkkwdk9wL3FBMW9vNzl1VWNuN1dmdGk3a2lPbGkvdXJiWEJ1WjJpS09jNmhWbWprTzVoOUd1cWlJbm9tNndrb1hHQmk4ZERkaUlBUWdxbHM1QUQwQng0YlhqYUVNdS9NZkI2ME9iMzZ6cTZwYlc2ckZMSUxsaDhNeVRhMVVkOXZlaDBBbEFVdHJLU1U5bHdJTnVOR1R2VWJrSmpzWmZYS0JxVWtnWFdyNzFLeFdERFVkR1pTNFk3RGJ4SitkOGY5Kzg1M2VuZEdhaEVQNGljZkYwdStQL1hOZ0xYSFpoei9mQlhJQ0M5dWVrQjFvcFgydGR0cHIxbFJzb1pIWnQyUnVGY3BranY5VGw5WC83Qnh1bW94WGRGd2tRUnpPQTZIT3h5THZGaWFQVGVqcUdMbXo3cU56SlgzVHY5SFJUODhzcDBZRHR2S0JJMDJsTmRscTErS1BqZ1NKQlV3endjcFVUSWIrMmx2Z3UyM0daaE84a09aVU84NFN5MWpKYmhKck9GZkhmWktiYVlYZHZtM1hIQjRyYU5JOFcreGpVR3dJZ3I4c3RrMFJ5c0pRRjlVOEVjUy9ic2sxOWdaN3d0TmQzU3doaFJvMXNhbW0yZERZR0Q0S1BQSFJjOHI5anR6S1JaWGI2ZFRFTlpkYzVUL21saFZ5Q0NzcUsyT2NUL1BPYmo3N2FFOWRKdU9oTi8yMDlJMHdOTUxFYVQ2RWtOdEtXcmViNXpBaTNtb0tabm9Wc1hObzBCbiIsIml2IjoiUWVTak9HVHArbmUvSXJaOSIsImF1dGhUYWciOiJieEZaWFFmbmJHYnB3ZlFWdjJwRmR3PT0ifQ%3D%3D\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Transaction v1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{server}}/api/v1/transaction?transaction_id=22",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction"
+              ],
+              "query": [
+                {
+                  "key": "transaction_id",
+                  "value": "22"
+                }
+              ]
+            },
+            "description": "### Endpoint Description\n\nThis endpoint retrieves the details of a specific transaction based on the provided `transaction_id`.\n\n### Request Parameters\n\n- **transaction_id** (query parameter): The unique identifier for the transaction you wish to retrieve. It is required for the request.\n    \n\n### Expected Response\n\nThe response will return a JSON object containing the transaction details, structured as follows:\n\n- **result**: An object that includes:\n    - **id**: The unique identifier of the transaction.\n    - **exchange_rate**: The exchange rate applied to the transaction.\n    - **status**: The current status of the transaction.\n    - **source_amount**: The amount of currency sent from the source.\n    - **destination_amount**: The amount of currency received at the destination.\n    - **business_fee**: The fee charged by the business for the transaction.\n    - **system_fee**: The fee charged by the system for processing the transaction.\n    - **total_payable**: The total amount payable including fees.\n    - **fee_payer**: Indicates who is responsible for paying the fees.\n    - **narration**: A brief description of the transaction.\n    - **reference**: A reference number for the transaction.\n    - **external_reference**: An external reference number if applicable.\n    - **payment_channel_type**: The type of payment channel used for the transaction.\n    - **created_at**: The timestamp when the transaction was created.\n    - **updated_at**: The timestamp when the transaction was last updated.\n    - **source_country**: An object containing:\n        - **code**: The country code of the source.\n        - **name**: The name of the source country.\n    - **destination_country**: An object containing:\n        - **code**: The country code of the destination.\n        - **name**: The name of the destination country.\n    - **recipient**: An object containing details about the recipient:\n        - **id**: The unique identifier of the recipient.\n        - **bank_id**: The identifier of the recipient's bank.\n        - **bank_name**: The name of the recipient's bank.\n        - **account_id**: The account identifier of the recipient.\n        - **account_title**: The title of the recipient's account.\n        - **extra_details**: Any additional details about the recipient.\n        - **created_at**: The timestamp when the recipient information was created.\n        - **updated_at**: The timestamp when the recipient information was last updated.\n        - **currency**: An object containing:\n            - **code**: The currency code.\n            - **name**: The name of the currency.\n            - **symbol**: The symbol of the currency.\n        - **country**: An object containing:\n            - **code**: The country code of the recipient's country.\n            - **name**: The name of the recipient's country.\n    - **pay_out_channel**: An object containing details about the payout channel:\n        - **id**: The unique identifier of the payout channel.\n        - **source_currency**: An object representing the source currency:\n            - **code**: The currency code.\n            - **name**: The name of the currency.\n            - **symbol**: The symbol of the currency.\n        - **target_currency**: An object representing the target currency:\n            - **code**: The currency code.\n            - **name**: The name of the currency.\n            - **symbol**: The symbol of the currency.\n\n### Notes\n\nMake sure to provide a valid `transaction_id` to successfully retrieve the transaction details. The response will contain comprehensive information about the transaction, including fees, recipient details, and currency information."
+          },
+          "response": [
+            {
+              "name": "200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{server}}/api/v1/transaction?transaction_id=22",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "transaction"
+                  ],
+                  "query": [
+                    {
+                      "key": "transaction_id",
+                      "value": "22"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "966"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"3c6-EUCG7BJcEooU3s5KlvIisnApneE\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 10 Feb 2026 09:27:35 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": {\n        \"id\": 22,\n        \"exchange_rate\": 1922.26,\n        \"status\": \"01\",\n        \"source_amount\": 10,\n        \"destination_amount\": 19222.6,\n        \"business_fee\": 0,\n        \"system_fee\": 0,\n        \"total_payable\": 0,\n        \"fee_payer\": \"sender\",\n        \"narration\": \"Test\",\n        \"reference\": \"TRDSGBNG03800961\",\n        \"external_reference\": \"AAASHRIQ2011114101\",\n        \"payment_channel_type\": 1,\n        \"created_at\": \"2026-01-28T07:07:07.203Z\",\n        \"updated_at\": \"2026-01-28T07:07:07.203Z\",\n        \"source_country\": {\n            \"code\": \"GB\",\n            \"name\": \"United Kingdom\"\n        },\n        \"destination_country\": {\n            \"code\": \"NG\",\n            \"name\": \"Nigeria\"\n        },\n        \"recipient\": {\n            \"id\": 15,\n            \"bank_id\": \"000016\",\n            \"bank_name\": \"FIRST BANK OF NIGERIA\",\n            \"account_id\": \"1033901162\",\n            \"account_title\": \"TEST ACCOUNT\",\n            \"extra_details\": null,\n            \"created_at\": \"2026-01-28T06:11:53.699Z\",\n            \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n            \"currency\": {\n                \"code\": \"NGN\",\n                \"name\": \"Naira\",\n                \"symbol\": \"₦\"\n            },\n            \"country\": {\n                \"code\": \"NG\",\n                \"name\": \"Nigeria\"\n            }\n        },\n        \"pay_out_channel\": {\n            \"id\": 2,\n            \"source_currency\": {\n                \"code\": \"GBP\",\n                \"name\": \"Pound\",\n                \"symbol\": \"£\"\n            },\n            \"target_currency\": {\n                \"code\": \"NGN\",\n                \"name\": \"Naira\",\n                \"symbol\": \"₦\"\n            }\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Transaction v1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"take\": 10,\n    \"skip\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{server}}/api/v1/transaction/list",
+              "host": [
+                "{{server}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "list"
+              ]
+            },
+            "description": "## API Endpoint: List Transactions\n\nThis endpoint retrieves a list of transactions based on the specified pagination parameters. It is designed to help users fetch transaction records efficiently by allowing them to specify how many records to return and how many to skip for pagination purposes.\n\n### Request\n\n**Method:** POST  \n**URL:** `{{server}}/api/v1/transaction/list`\n\n#### Request Body\n\nThe request body must be in JSON format and includes the following parameters:\n\n- **take** (integer): The number of transactions to return. This parameter controls how many records are fetched in a single request, allowing users to limit the response size.\n- **skip** (integer): The number of records to skip before starting to collect the result set. This is useful for pagination, enabling users to navigate through large sets of transaction data.\n    \n\n**Example Request Body:**\n\n``` json\n{\n  \"take\": 10,\n  \"skip\": 0\n}\n\n ```\n\n### Response\n\nUpon a successful request, the API will return a JSON object containing the following structure:\n\n- **result** (object): An object containing the result of the transaction query.\n    - **count** (integer): The total number of transactions available based on the provided parameters.\n    - **transactions** (array): An array of transaction objects, each containing:\n        - **id** (integer): Unique identifier for the transaction.\n        - **exchange_rate** (number): The exchange rate applied to the transaction.\n        - **status** (string): The current status of the transaction.\n        - **source_amount** (number): The amount sent from the source.\n        - **destination_amount** (number): The amount received at the destination.\n        - **narration** (string): A description or note regarding the transaction.\n        - **reference** (string): A reference identifier for tracking.\n        - **external_reference** (string): An external reference for the transaction.\n        - **created_at** (string): Timestamp of when the transaction was created.\n        - **updated_at** (string): Timestamp of the last update to the transaction.\n        - **source_country** (object): Details of the source country.\n            - **code** (string): Country code.\n            - **name** (string): Country name.\n        - **destination_country** (object): Details of the destination country.\n            - **code** (string): Country code.\n            - **name** (string): Country name.\n        - **recipient** (object): Information about the recipient of the transaction.\n            - **id** (integer): Unique identifier for the recipient.\n            - **bank_id** (string): Identifier for the recipient's bank.\n            - **bank_name** (string): Name of the recipient's bank.\n            - **account_id** (string): Account identifier for the recipient.\n            - **account_title** (string): Title of the recipient's account.\n            - **extra_details** (object|null): Any additional details about the recipient.\n            - **created_at** (string): Timestamp of when the recipient was created.\n            - **updated_at** (string): Timestamp of the last update to the recipient.\n            - **currency** (object): Currency details for the recipient.\n                - **code** (string): Currency code.\n                - **name** (string): Currency name.\n                - **symbol** (string): Currency symbol.\n            - **country** (object): Country details for the recipient.\n                - **code** (string): Country code.\n                - **name** (string): Country name.\n        - **pay_out_channel** (object): Details of the payout channel.\n            - **id** (integer): Unique identifier for the payout channel.\n            - **source_currency** (object): Currency details for the source.\n                - **code** (string): Currency code.\n                - **name** (string): Currency name.\n                - **symbol** (string): Currency symbol.\n            - **target_currency** (object): Currency details for the target.\n                - **code** (string): Currency code.\n                - **name** (string): Currency name.\n                - **symbol** (string): Currency symbol.\n\n### Notes\n\n- Ensure that the `take` and `skip` parameters are set appropriately to manage the pagination of transaction records.\n- The response may contain an empty list of transactions if there are no records matching the specified parameters.\n- This endpoint is useful for applications that need to display transaction history or manage transaction data efficiently."
+          },
+          "response": [
+            {
+              "name": "200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"take\": 10,\n    \"skip\": 0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{server}}/api/v1/transaction/list",
+                  "host": [
+                    "{{server}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "transaction",
+                    "list"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Security-Policy",
+                  "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                },
+                {
+                  "key": "Cross-Origin-Opener-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Cross-Origin-Resource-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "Origin-Agent-Cluster",
+                  "value": "?1"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "no-referrer"
+                },
+                {
+                  "key": "Strict-Transport-Security",
+                  "value": "max-age=31536000; includeSubDomains"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-DNS-Prefetch-Control",
+                  "value": "off"
+                },
+                {
+                  "key": "X-Download-Options",
+                  "value": "noopen"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "none"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"256f-5NnRyoXEAfiiv5b3Xcj9v10F+xE\""
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Content-Encoding",
+                  "value": "br"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 10 Feb 2026 09:29:06 GMT"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=5"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"result\": {\n        \"count\": 24,\n        \"transactions\": [\n            {\n                \"id\": 51,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG07761274\",\n                \"external_reference\": \"CQU1NOR5EQJUA1KZQ6\",\n                \"payment_channel_type\": 2,\n                \"created_at\": \"2026-02-03T08:26:28.368Z\",\n                \"updated_at\": \"2026-02-03T08:26:28.368Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 50,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG01007143\",\n                \"external_reference\": \"42M4ON1AA88W1\",\n                \"payment_channel_type\": 2,\n                \"created_at\": \"2026-02-03T08:19:41.880Z\",\n                \"updated_at\": \"2026-02-03T08:19:41.880Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 49,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG05131771\",\n                \"external_reference\": \"WSKZ19JC5BG79YOLH\",\n                \"payment_channel_type\": 1,\n                \"created_at\": \"2026-02-02T11:28:50.871Z\",\n                \"updated_at\": \"2026-02-02T11:28:50.871Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 48,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG08756346\",\n                \"external_reference\": \"Z1Q76WHSQG\",\n                \"payment_channel_type\": 1,\n                \"created_at\": \"2026-02-02T11:23:28.687Z\",\n                \"updated_at\": \"2026-02-02T11:23:28.687Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 47,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG0859677\",\n                \"external_reference\": \"WIPF2HD9K30S1QK\",\n                \"payment_channel_type\": 2,\n                \"created_at\": \"2026-02-02T10:28:10.887Z\",\n                \"updated_at\": \"2026-02-02T10:28:10.887Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 46,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG04647254\",\n                \"external_reference\": \"2T9AOIV0BJ\",\n                \"payment_channel_type\": 2,\n                \"created_at\": \"2026-02-02T10:23:39.631Z\",\n                \"updated_at\": \"2026-02-02T10:23:39.631Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 45,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 100,\n                \"destination_amount\": 193026,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG02686570\",\n                \"external_reference\": \"MASHRIQ20111141\",\n                \"payment_channel_type\": 1,\n                \"created_at\": \"2026-02-02T07:17:56.867Z\",\n                \"updated_at\": \"2026-02-02T07:17:56.867Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 23,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"6734052853\",\n                    \"account_title\": \"TEST 247 ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-02-01T15:33:26.012Z\",\n                    \"updated_at\": \"2026-02-01T15:33:26.012Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 44,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 1554.19,\n                \"destination_amount\": 2999990.79,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"247 test Test\",\n                \"reference\": \"TRDSGBNG03617395\",\n                \"external_reference\": \"T84B220JOBZ3\",\n                \"payment_channel_type\": 1,\n                \"created_at\": \"2026-02-01T15:22:40.290Z\",\n                \"updated_at\": \"2026-02-01T15:22:40.290Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 22,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"6734052853\",\n                    \"account_title\": \"TEST 247 ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-02-01T15:17:52.500Z\",\n                    \"updated_at\": \"2026-02-01T15:17:52.500Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 43,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG03939933\",\n                \"external_reference\": \"4DZK46YNAZ3ANB\",\n                \"payment_channel_type\": 1,\n                \"created_at\": \"2026-02-01T14:48:58.168Z\",\n                \"updated_at\": \"2026-02-01T14:48:58.168Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            },\n            {\n                \"id\": 42,\n                \"exchange_rate\": 1930.26,\n                \"status\": \"01\",\n                \"source_amount\": 10,\n                \"destination_amount\": 19302.6,\n                \"business_fee\": 0,\n                \"system_fee\": 0,\n                \"total_payable\": 0,\n                \"fee_payer\": \"sender\",\n                \"narration\": \"Test\",\n                \"reference\": \"TRDSGBNG05284412\",\n                \"external_reference\": \"Q8P12WRBXIMYX7K\",\n                \"payment_channel_type\": 1,\n                \"created_at\": \"2026-02-01T09:32:15.160Z\",\n                \"updated_at\": \"2026-02-01T09:32:15.160Z\",\n                \"source_country\": {\n                    \"code\": \"GB\",\n                    \"name\": \"United Kingdom\"\n                },\n                \"destination_country\": {\n                    \"code\": \"NG\",\n                    \"name\": \"Nigeria\"\n                },\n                \"recipient\": {\n                    \"id\": 15,\n                    \"bank_id\": \"000016\",\n                    \"bank_name\": \"FIRST BANK OF NIGERIA\",\n                    \"account_id\": \"1033901162\",\n                    \"account_title\": \"TEST ACCOUNT\",\n                    \"extra_details\": null,\n                    \"created_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"updated_at\": \"2026-01-28T06:11:53.699Z\",\n                    \"currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    },\n                    \"country\": {\n                        \"code\": \"NG\",\n                        \"name\": \"Nigeria\"\n                    }\n                },\n                \"pay_out_channel\": {\n                    \"id\": 2,\n                    \"source_currency\": {\n                        \"code\": \"GBP\",\n                        \"name\": \"Pound\",\n                        \"symbol\": \"£\"\n                    },\n                    \"target_currency\": {\n                        \"code\": \"NGN\",\n                        \"name\": \"Naira\",\n                        \"symbol\": \"₦\"\n                    }\n                }\n            }\n        ]\n    }\n}"
+            }
+          ]
+        }
+      ],
+      "description": "## Transaction Status Codes\n\nEach status represents a specific stage in the lifecycle of a transaction.\n\n---\n\n### Status Code Reference\n\n| Code | Status Name | Description |\n| --- | --- | --- |\n| `00` | **COMPLETED** | Transaction has been successfully completed. No further action is required. |\n| `01` | **CREATED** | Transaction has been created in the system but processing has not yet started. |\n| `02` | **PAYIN_INITIATION_PROCESS_COMPLETED** | Pay-in initiation request has been successfully processed. |\n| `03` | **PAYIN_INITIATION_FAILED_OR_CANCELLED** | Pay-in initiation failed or was cancelled by the user or upstream provider. |\n| `04` | **PAYIN_INITIATION_EXECUTED** | Pay-in initiation has been executed and funds processing has started. |\n| `05` | **PAYIN_AMOUNT_CREDITING_UNDER_COMPLIANCE_CHECK** | Funds are under compliance / AML review before crediting to the account. |\n| `06` | **PAYIN_COMPLIANCE_SUCCESS_CREDITED** | Compliance checks passed and the pay-in amount has been successfully credited. |\n| `07` | **PAYIN_COMPLIANCE_FAILED_REFUNDED** | Compliance checks failed and the pay-in amount has been refunded to the payer. |\n| `08` | **PAYIN_CREDITED_BUT_ON_HOLD** | Funds have been credited but are temporarily on hold due to risk or compliance reasons. |\n| `09` | **PAYOUT_IN_PROGRESS** | Pay-out request has been initiated and is currently being processed. |\n| `10` | **PAYOUT_MIGHT_FAILED** | Pay-out may fail due to bank, network, or validation issues. Final status is pending. |\n| `11` | **REFUNDING_IN_PROGRESS** | Refund has been initiated and is currently being processed. |\n| `12` | **REFUNDED** | Refund has been successfully completed and funds have been returned to the source. |\n\n## Transaction Payment Channel Types\n\n---\n\nOPEN_BANKING = 1  \nCARD_PAYMENT = 2"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "server",
+      "value": ""
+    },
+    {
+      "key": "business_api_key",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}

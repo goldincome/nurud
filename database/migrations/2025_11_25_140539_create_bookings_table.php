@@ -28,6 +28,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('base_price')->default(0);
             $table->unsignedBigInteger('taxes_and_fees')->default(0);
             $table->unsignedBigInteger('total_price')->default(0);
+            $table->unsignedBigInteger('markup_fee')->default(0);
             $table->string('contact_phone')->nullable();
             $table->string('customer_first_name')->nullable();
             $table->string('customer_last_name')->nullable();

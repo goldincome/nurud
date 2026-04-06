@@ -6,6 +6,9 @@ use App\Models\Booking;
 use App\Models\Traveler;
 use App\Models\Payment;
 use App\Mail\BookingConfirmed;
+use App\Services\SimlessPayService;
+use App\Models\PriceInPounds;
+use App\Enums\BookingStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -14,10 +17,12 @@ use Illuminate\Support\Str;
 class BookingService
 {
     protected FlexiApiService $flexiService;
+    protected SimlessPayService $simlessPayService;
 
-    public function __construct(FlexiApiService $flexiService)
+    public function __construct(FlexiApiService $flexiService, SimlessPayService $simlessPayService)
     {
         $this->flexiService = $flexiService;
+        $this->simlessPayService = $simlessPayService;
     }
 
     public function createPendingBooking(array $bookingData): Booking
@@ -44,6 +49,7 @@ class BookingService
                 'base_price' => $order['basePrice'] ?? 0,
                 'taxes_and_fees' => $order['taxesAndFees'] ?? 0,
                 'total_price' => $order['totalPrice'] ?? 0,
+                'markup_fee' => session()->get('markup_fee') ?? 0,
                 'contact_phone' => $order['contactPhone'] ?? null,
                 'customer_first_name' => $order['customerFirstName'] ?? null,
                 'customer_last_name' => $order['customerLastName'] ?? null,
@@ -53,8 +59,17 @@ class BookingService
                 'date_created' => $order['dateCreated'] ?? null,
                 'date_modified' => $order['dateModified'] ?? null,
                 'currency' => $order['currency'] ?? 'NGN',
-                'status' => 'pending_payment',
+                'status' => BookingStatus::PENDING_PAYMENT,
                 'expires_at' => now()->addHours(24),
+            ]);
+
+            // Save prices in pounds
+            $booking->priceInPounds()->create([
+                'currency' => 'GBP',
+                'price' => $this->simlessPayService->convertNairaToPounds($booking->base_price),
+                'tax' => $this->simlessPayService->convertNairaToPounds($booking->taxes_and_fees),
+                'markup' => $this->simlessPayService->convertNairaToPounds($booking->markup_fee),
+                'total_price' => $this->simlessPayService->convertNairaToPounds($booking->total_price),
             ]);
 
             // 2. Create Travelers
@@ -107,11 +122,11 @@ class BookingService
                 }
             }
 
-            Log::info('New booking recorded in database', [
-                'booking_id' => $booking->id,
-                'reservation_id' => $booking->reservation_id,
-                'customer' => $booking->customer_email
-            ]);
+            // Log::info('New booking recorded in database', [
+            //     'booking_id' => $booking->id,
+            //     'reservation_id' => $booking->reservation_id,
+            //     'customer' => $booking->customer_email
+            // ]);
 
             return $booking;
         });
@@ -120,7 +135,7 @@ class BookingService
     public function confirmPayment(Booking $booking): bool
     {
         return DB::transaction(function () use ($booking) {
-            if ($booking->status !== 'pending_payment') {
+            if ($booking->status !== BookingStatus::PENDING_PAYMENT) {
                 throw new \Exception('Booking cannot be confirmed in current status');
             }
 
@@ -130,7 +145,7 @@ class BookingService
 
                 // Update booking
                 $booking->update([
-                    'status' => 'confirmed',
+                    'status' => BookingStatus::CONFIRMED,
                     'ticket_issued_at' => now(),
                 ]);
 
@@ -148,7 +163,7 @@ class BookingService
     {
         DB::transaction(function () use ($booking, $reason) {
             $booking->update([
-                'status' => 'cancelled',
+                'status' => BookingStatus::CANCELLED,
             ]);
 
             Log::info('Booking cancelled', [
@@ -162,7 +177,7 @@ class BookingService
     {
         DB::transaction(function () use ($booking) {
             $booking->update([
-                'status' => 'expired',
+                'status' => BookingStatus::EXPIRED,
             ]);
 
             // TODO: Send expiration email

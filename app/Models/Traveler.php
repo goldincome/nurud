@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Traveler extends Model
@@ -35,7 +35,7 @@ class Traveler extends Model
         'base_price' => 'integer',
         'taxes_and_fees' => 'integer',
         'total_price' => 'integer',
-        'gender' => 'integer',
+        'gender' => Gender::class,
     ];
 
     public function booking(): BelongsTo
