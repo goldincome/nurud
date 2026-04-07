@@ -20,6 +20,7 @@ use App\Http\Controllers\Customer\BookingController as CustomerBookingController
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
 use App\Http\Controllers\StripePaymentController;
+use App\Http\Controllers\SubscriberController;
 
 /*Route::get('/', function () {
     return view('welcome');
@@ -36,6 +37,8 @@ Route::get('/booking', function () {
 Route::get('/result', function () {
     return view('search-result');
 });
+
+Route::post('/subscribe', [SubscriberController::class, 'store'])->name('subscribe');
 
 // API routes (no auth required)
 Route::prefix('api')->group(function () {
@@ -96,6 +99,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         'update',
         'destroy'
     ]);
+
+    Route::get('/subscribers', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'index'])->name('subscribers.index');
+    Route::post('/subscribers/send-email', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'sendEmail'])->name('subscribers.send-email');
+    Route::delete('/subscribers/{id}', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'destroy'])->name('subscribers.destroy');
 
     // Super Admin Routes
     Route::middleware(['superadmin'])->group(function () {

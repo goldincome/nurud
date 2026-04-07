@@ -89,26 +89,26 @@
                                 <table class="w-full text-sm text-left">
                                     <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-xs">
                                         <tr>
-                                            <th class="px-6 py-4">Bank Details</th>
-                                            <th class="px-6 py-4">Account Number</th>
-                                            <th class="px-6 py-4">Account Name</th>
+                                            <th class="px-4 py-4">Name</th>
+                                            <th class="px-4 py-4">IBAN / Acct No.</th>
+                                            <th class="px-4 py-4">Swift</th>
+                                            <th class="px-4 py-4">Bank Name</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
                                         @forelse($banks as $bank)
                                             <tr class="hover:bg-slate-50">
-                                                <td class="px-6 py-4">
-                                                    <div class="font-medium text-slate-700">{{ $bank->bank_name }}</div>
-                                                    @if($bank->swift_code)<div class="text-xs text-slate-500">SWIFT: {{ $bank->swift_code }}</div>@endif
-                                                    @if($bank->iban)<div class="text-xs text-slate-500">IBAN: {{ $bank->iban }}</div>@endif
-                                                    @if($bank->routing_number)<div class="text-xs text-slate-500">Routing: {{ $bank->routing_number }}</div>@endif
+                                                <td class="px-4 py-4 text-slate-600">{{ $bank->account_name }}</td>
+                                                <td class="px-4 py-4 text-slate-600 font-medium">
+                                                    {{ $bank->iban ?: $bank->account_number }}
+                                                    @if($bank->routing_number)<div class="text-[10px] text-slate-400">Routing: {{ $bank->routing_number }}</div>@endif
                                                 </td>
-                                                <td class="px-6 py-4 text-slate-600">{{ $bank->account_number }}</td>
-                                                <td class="px-6 py-4 text-slate-600">{{ $bank->account_name }}</td>
+                                                <td class="px-4 py-4 text-slate-600">{{ $bank->swift_code ?: '-' }}</td>
+                                                <td class="px-4 py-4 font-medium text-slate-700">{{ $bank->bank_name }}</td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="3" class="px-6 py-4 text-center text-slate-500">No bank accounts available.</td>
+                                                <td colspan="4" class="px-6 py-4 text-center text-slate-500">No bank accounts available.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -220,47 +220,28 @@
                                 <table class="w-full text-sm text-left">
                                     <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-xs">
                                         <tr>
-                                            <th class="px-6 py-4">Bank Name</th>
-                                            <th class="px-6 py-4">Account Number</th>
-                                            <th class="px-6 py-4">Account Name</th>
+                                            <th class="px-4 py-4">Name</th>
+                                            <th class="px-4 py-4">IBAN / Acct No.</th>
+                                            <th class="px-4 py-4">Swift</th>
+                                            <th class="px-4 py-4">Bank Name</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
-                                        <tr class="hover:bg-slate-50">
-                                            <td class="px-6 py-4 font-medium text-slate-700">GTBANK</td>
-                                            <td class="px-6 py-4 text-slate-600">3000369044</td>
-                                            <td class="px-6 py-4 text-slate-600">NURUD LTD</td>
-                                        </tr>
-                                        <tr class="bg-slate-50 hover:bg-slate-100">
-                                            <td class="px-6 py-4 font-medium text-slate-700">FIDELITY</td>
-                                            <td class="px-6 py-4 text-slate-600">5600032999</td>
-                                            <td class="px-6 py-4 text-slate-600">NURUD LTD</td>
-                                        </tr>
-                                        <tr class="hover:bg-slate-50">
-                                            <td class="px-6 py-4 font-medium text-slate-700">ECOBANK</td>
-                                            <td class="px-6 py-4 text-slate-600">0810030935</td>
-                                            <td class="px-6 py-4 text-slate-600">NURUD LTD</td>
-                                        </tr>
-                                        <tr class="bg-slate-50 hover:bg-slate-100">
-                                            <td class="px-6 py-4 font-medium text-slate-700">FCMB</td>
-                                            <td class="px-6 py-4 text-slate-600">2244296019</td>
-                                            <td class="px-6 py-4 text-slate-600">NURUD LTD</td>
-                                        </tr>
-                                        <tr class="hover:bg-slate-50">
-                                            <td class="px-6 py-4 font-medium text-slate-700">PROVIDUS</td>
-                                            <td class="px-6 py-4 text-slate-600">1300244198</td>
-                                            <td class="px-6 py-4 text-slate-600">NURUD LTD</td>
-                                        </tr>
-                                        <tr class="bg-slate-50 hover:bg-slate-100">
-                                            <td class="px-6 py-4 font-medium text-slate-700">FIRST BANK</td>
-                                            <td class="px-6 py-4 text-slate-600">2032735381</td>
-                                            <td class="px-6 py-4 text-slate-600">NURUD LTD</td>
-                                        </tr>
-                                        <tr class="hover:bg-slate-50">
-                                            <td class="px-6 py-4 font-medium text-slate-700">STERLING</td>
-                                            <td class="px-6 py-4 text-slate-600">0027784775</td>
-                                            <td class="px-6 py-4 text-slate-600">NURUD LTD</td>
-                                        </tr>
+                                        @forelse($banks as $bank)
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="px-4 py-4 text-slate-600 border-b border-gray-100">{{ $bank->account_name }}</td>
+                                                <td class="px-4 py-4 text-slate-600 border-b border-gray-100 font-medium">
+                                                    {{ $bank->iban ?: $bank->account_number }}
+                                                    @if($bank->routing_number)<div class="text-[10px] text-slate-400">Routing: {{ $bank->routing_number }}</div>@endif
+                                                </td>
+                                                <td class="px-4 py-4 text-slate-600 border-b border-gray-100">{{ $bank->swift_code ?: '-' }}</td>
+                                                <td class="px-4 py-4 font-medium text-slate-700 border-b border-gray-100">{{ $bank->bank_name }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="px-6 py-4 text-center text-slate-500 border-b border-gray-100">No bank accounts available.</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div> </br>

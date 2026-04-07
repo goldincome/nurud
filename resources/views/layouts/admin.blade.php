@@ -63,6 +63,10 @@
                     class="{{ request()->routeIs('admin.customers.*') ? 'sidebar-link-active text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }} flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
                     <i class="fas fa-users w-5"></i> Customers
                 </a>
+                <a href="{{ route('admin.subscribers.index') }}"
+                    class="{{ request()->routeIs('admin.subscribers.*') ? 'sidebar-link-active text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }} flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
+                    <i class="fas fa-envelope-open-text w-5"></i> Subscribers
+                </a>
 
                 @if(auth()->user()->type === \App\Enums\CustomerType::SUPERADMIN)
                     <a href="{{ route('admin.admins.index') }}"
