@@ -364,7 +364,9 @@
             <div class="logo">Nurud <span>Travel</span></div>
             <div class="ref">
                 Ref: <strong>{{ $booking->reference_number }}</strong><br>
+                @if($booking->status->value === 'confirmed')
                 PNR: {{ $booking->reservation_id }}<br>
+                @endif
                 Date: {{ $booking->created_at->format('M d, Y') }}
             </div>
         </div>
@@ -544,7 +546,7 @@
             </div>
 
             <div class="price-box">
-                <div class="price-label">Total Amount Paid</div>
+                <div class="price-label">Total Amount</div>
                 <div class="price-value">{{ $booking->currency }} {{ number_format($booking->total_price) }}</div>
             </div>
         </div>

@@ -162,7 +162,7 @@
                     </div> </br>
 
                     <div class="flex items-center justify-center gap-4 mt-12">
-                        <a href="{{ route('customer.bookings.ticket', $booking->id) }}" target="_blank"
+                        <a href="{{ route('bookings.ticket.download', $booking->id) }}" target="_blank"
                             class="bg-white border-2 border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all flex items-center">
                             <i class="fas fa-file-download mr-2"></i> Download Reservation
                         </a>

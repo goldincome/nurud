@@ -160,7 +160,100 @@ class BookingController extends Controller
             // Create booking and all related data in the database
             $booking = $this->bookingService->createPendingBooking($result);
 
-            // Send booking confirmation email
+            // Check for Buy Now, Pay Later (BNPL)
+            if ($request->booking_type === 'pay_later') {
+                // Record the payment method as pay_later
+                $booking->payments()->create([
+                    'transaction_ref' => 'BNPL_' . strtoupper(uniqid()),
+                    'amount' => $booking->total_price,
+                    'currency' => $booking->currency,
+                    'status' => \App\Enums\PaymentStatus::PENDING,
+                    'payment_method' => \App\Enums\PaymentMethod::PAY_LATER,
+                ]);
+
+                // Send the BNPL Email
+                try {
+                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                        ->send(new \App\Mail\BuyNowPayLaterEmail($booking, \App\Models\Bank::all()));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send BNPL email', [
+                        'booking_id' => $booking->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+
+                session()->put('booking_id', $booking->id);
+                session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
+                
+                return redirect()->route('bookings.confirmation')->with(
+                    'success',
+                    'Booking reserved successfully via BNPL Facility! Please check your email and contact us within 12 hours.'
+                );
+            }
+
+            // Check for Bank Transfer
+            if ($request->booking_type === 'bank_transfer') {
+                // Record the payment method as bank_transfer
+                $booking->payments()->create([
+                    'transaction_ref' => 'TRF_' . strtoupper(uniqid()),
+                    'amount' => $booking->total_price,
+                    'currency' => $booking->currency,
+                    'status' => \App\Enums\PaymentStatus::PENDING,
+                    'payment_method' => \App\Enums\PaymentMethod::BANK_TRANSFER,
+                ]);
+
+                // Send the Bank Transfer Email
+                try {
+                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                        ->send(new \App\Mail\BankTransferBookingEmail($booking, \App\Models\Bank::all()));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send Bank Transfer email', [
+                        'booking_id' => $booking->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+
+                session()->put('booking_id', $booking->id);
+                session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
+                
+                return redirect()->route('bookings.confirmation')->with(
+                    'success',
+                    'Booking reserved successfully! Please check your email and complete the bank transfer within 12 hours.'
+                );
+            }
+
+            // Check for Book On Hold
+            if ($request->booking_type === 'on_hold') {
+                // Record the payment method as book_on_hold
+                $booking->payments()->create([
+                    'transaction_ref' => 'HOLD_' . strtoupper(uniqid()),
+                    'amount' => $booking->total_price,
+                    'currency' => $booking->currency,
+                    'status' => \App\Enums\PaymentStatus::PENDING,
+                    'payment_method' => \App\Enums\PaymentMethod::BOOK_ON_HOLD,
+                ]);
+
+                // Send the Book On Hold Email
+                try {
+                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                        ->send(new \App\Mail\BookOnHoldEmail($booking, \App\Models\Bank::all()));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send Book On Hold email', [
+                        'booking_id' => $booking->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+
+                session()->put('booking_id', $booking->id);
+                session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
+                
+                return redirect()->route('bookings.confirmation')->with(
+                    'success',
+                    'Booking successfully placed on hold! Please check your email and complete the transfer within 12 hours.'
+                );
+            }
+
+            // Normal Flow Confirmation Email (if not BNPL)
             try {
                 //Mail::to($booking->customer_email)->send(new BookingConfirmed($booking));
             } catch (\Exception $e) {
@@ -170,6 +263,7 @@ class BookingController extends Controller
                     'error' => $e->getMessage()
                 ]);
             }
+
             session()->put('booking_id', $booking->id);
             session()->forget('markup_fee');
             session()->forget('offer_data_id');
@@ -306,16 +400,18 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
 
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $isAdmin = $user && in_array($user->type, [\App\Enums\CustomerType::ADMIN, \App\Enums\CustomerType::SUPERADMIN]);
+
         // Check permissions
-        if ($booking->user_id && $booking->user_id !== Auth::id()) {
-            if (!in_array(Auth::user()->type, [\App\Enums\CustomerType::ADMIN, \App\Enums\CustomerType::SUPERADMIN])) {
+        if ($booking->user_id) {
+            if (!$user || ($booking->user_id !== $user->id && !$isAdmin)) {
                 abort(403, 'Unauthorized');
             }
         }
 
-        // Only allow download for confirmed bookings (admins can download any status)
-        $isAdmin = in_array(Auth::user()->type, [\App\Enums\CustomerType::ADMIN, \App\Enums\CustomerType::SUPERADMIN]);
-        if (!$isAdmin && $booking->status !== BookingStatus::CONFIRMED) {
+        // Only allow download for active bookings (admins can download any status)
+        if (!$isAdmin && in_array($booking->status, [BookingStatus::CANCELLED, BookingStatus::EXPIRED])) {
             abort(403, 'Ticket not available for this booking status');
         }
 

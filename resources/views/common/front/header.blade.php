@@ -4,7 +4,8 @@
         <!-- Logo -->
         <div class="flex items-center space-x-2">
             <a href="/" class="flex items-center space-x-2">
-                <img src="{{ asset('images/nurud-logo.png') }}" alt="Nurud Travels" class="h-10 sm:h-12 w-auto" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <img src="{{ asset('images/nurud-logo.png') }}" alt="Nurud Travels" class="h-10 sm:h-12 w-auto"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                 <span class="text-2xl font-bold text-white hidden" style="display:none;">
                     <span class="text-white">Nurud</span>
                     <span class="text-brand-red ml-1">Travels</span>
@@ -15,8 +16,8 @@
         <!-- Desktop Nav Links -->
         <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-white/70">
             <a href="/" class="hover:text-white transition-colors">Home</a>
+            <a href="#" class="hover:text-white transition-colors">Services</a>
             <a href="#" class="hover:text-white transition-colors">About Us</a>
-            <a href="#" class="hover:text-white transition-colors">Travel Financing</a>
             <a href="#" class="hover:text-white transition-colors">Contact Us</a>
             <a href="#" class="hover:text-white transition-colors">Blog</a>
         </div>

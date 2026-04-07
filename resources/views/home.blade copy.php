@@ -52,20 +52,24 @@
                 </div>
             </div>
 
-            <div class="relative z-10 container mx-auto px-4 pt-10 pb-6 md:pt-14 md:pb-10 text-center">
-                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-3 drop-shadow-lg">
+            <div class="relative z-10 container mx-auto px-4 pt-12 pb-16 md:pt-16 md:pb-20 text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 drop-shadow-lg">
                     Get the best flight deals ever.</h1>
-                <p class="text-base sm:text-lg text-white/80 mb-0 max-w-2xl mx-auto">
+                <p class="text-base sm:text-lg text-white/80 mb-2 max-w-2xl mx-auto">
                     Discover and book flights to your dream destinations with ease.
                 </p>
-            </div>
 
-            {{-- Booking form directly inside hero, no gap --}}
-            <div class="relative z-20 pb-6 md:pb-10">
-                @include('common.front.error-and-message')
-                @include('common.front.booking-form')
+
             </div>
         </section>
+
+        {{-- ============================================================ --}}
+        {{-- BOOKING FORM - Overlapping the hero --}}
+        {{-- ============================================================ --}}
+        <div class="relative -mt-28 md:-mt-36 z-20">
+            @include('common.front.error-and-message')
+            @include('common.front.booking-form')
+        </div>
 
         {{-- ============================================================ --}}
         {{-- TRAVEL DEALS UNDER $1,006 - Horizontal scrollable cards --}}
@@ -362,7 +366,7 @@
     <style>
         /* ====================== HERO SECTION ====================== */
         .hero-section {
-            min-height: auto;
+            min-height: 420px;
         }
 
         .hero-gradient {
@@ -652,7 +656,7 @@
             }
 
             .hero-section {
-                min-height: auto;
+                min-height: 340px;
             }
         }
 

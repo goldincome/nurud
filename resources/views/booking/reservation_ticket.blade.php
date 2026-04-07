@@ -598,7 +598,7 @@
     {{-- ───────────── FOOTER ───────────── --}}
     <div class="footer">
         <div class="footer-contact">
-            Phone: +234 809 696 4423 &bull;
+            Phone: +44 (0) 2032474747 &bull;
             Email: support@nurud.com &bull;
             Web: www.nurud.com
         </div>

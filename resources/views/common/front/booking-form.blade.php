@@ -1,14 +1,9 @@
 <section id="booking-section" class="px-4">
     <div class="container mx-auto max-w-6xl">
-        <div class="md:hidden bg-brand-blue rounded-t-lg shadow-lg p-4 flex justify-between items-center cursor-pointer"
-            id="accordion-header">
-            <h3 class="font-bold text-lg text-white">Book a Flight</h3>
-            <i id="accordion-icon" class="fas fa-chevron-down transform transition-transform text-white"></i>
-        </div>
         <form action="{{ route('search') }}" method="POST">
             @csrf
             <div id="booking-bar"
-                class="bg-white dark:bg-slate-800 p-6 rounded-b-lg md:rounded-2xl shadow-xl accordion-content md:!max-h-none md:overflow-visible border border-slate-200/80 dark:border-slate-700">
+                class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-700">
                 <div class="flex flex-col md:flex-row items-center gap-3 mb-4">
                     <div class="relative w-full md:w-auto">
                         <select id="trip-type" name="routeModel"
