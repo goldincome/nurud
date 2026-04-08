@@ -7,13 +7,13 @@
                 <div class="flex flex-col md:flex-row items-center gap-3 mb-4">
                     <div class="relative w-full md:w-auto">
                         <select id="trip-type" name="routeModel"
-                            class="w-full appearance-none bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-4 pr-10 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 [&>option]:text-slate-800">
+                            class="w-full appearance-none bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-4 pr-10 text-brand-blueDark font-semibold dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 [&>option]:text-brand-blueDark font-semibold">
                             <option value="1">Round Trip</option>
                             <option value="0">One Way</option>
                             <option value="2">Multi-City</option>
                         </select>
                         <i
-                            class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                            class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-brand-blue/70 pointer-events-none text-xs"></i>
                     </div>
 
                     <div class="relative w-full md:w-auto">
@@ -22,10 +22,10 @@
                         <input type="hidden" name="travelers[numberOfInfants]" id="input-infants" value="0">
 
                         <button type="button" id="passenger-btn"
-                            class="w-full text-left bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 px-4 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 flex items-center justify-between">
-                            <span><i class="fas fa-user mr-2 text-slate-400"></i><span id="passenger-count-text">1
+                            class="w-full text-left bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 px-4 text-brand-blueDark font-semibold dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 flex items-center justify-between">
+                            <span><i class="fas fa-user mr-2 text-brand-blue/70"></i><span id="passenger-count-text">1
                                     Passenger</span></span>
-                            <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                            <i class="fas fa-chevron-down text-brand-blue/70 text-xs"></i>
                         </button>
 
                         <div id="passenger-dropdown"
@@ -33,8 +33,8 @@
                             <div class="space-y-4">
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="font-medium text-sm">Adults</p>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400">Ages 12+</p>
+                                        <p class="font-bold text-brand-blueDark text-sm">Adults</p>
+                                        <p class="text-xs text-brand-blueDark font-medium dark:text-brand-blue/70">Ages 12+</p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button type="button" data-type="adults" data-action="decrease"
@@ -46,8 +46,8 @@
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="font-medium text-sm">Children</p>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400">Ages 2-11</p>
+                                        <p class="font-bold text-brand-blueDark text-sm">Children</p>
+                                        <p class="text-xs text-brand-blueDark font-medium dark:text-brand-blue/70">Ages 2-11</p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button type="button" data-type="children" data-action="decrease"
@@ -59,8 +59,8 @@
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="font-medium text-sm">Infants</p>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400">Under 2</p>
+                                        <p class="font-bold text-brand-blueDark text-sm">Infants</p>
+                                        <p class="text-xs text-brand-blueDark font-medium dark:text-brand-blue/70">Under 2</p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button type="button" data-type="infants" data-action="decrease"
@@ -79,14 +79,14 @@
 
                     <div class="relative w-full md:w-auto">
                         <select id="cabin-class" name="flightClass"
-                            class="w-full appearance-none bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-4 pr-10 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 [&>option]:text-slate-800">
+                            class="w-full appearance-none bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-4 pr-10 text-brand-blueDark font-semibold dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 [&>option]:text-brand-blueDark font-semibold">
                             <option value="ECONOMY">Economy</option>
                             <option value="PREMIUM_ECONOMY">Premium Economy</option>
                             <option value="BUSINESS">Business</option>
                             <option value="FIRST">First</option>
                         </select>
                         <i
-                            class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                            class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-brand-blue/70 pointer-events-none text-xs"></i>
                     </div>
                 </div>
 
@@ -94,46 +94,46 @@
                     <div id="single-flight-form" class="grid grid-cols-1 md:grid-cols-10 gap-3 items-end">
                         <div class="col-span-12 md:col-span-3 relative autocomplete">
                             <label for="origin"
-                                class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Where
+                                class="block text-xs font-bold text-brand-blueDark dark:text-brand-blue/70 mb-1">Where
                                 From?</label>
                             <div class="relative">
                                 <i
                                     class="fas fa-plane-departure absolute left-3 top-1/2 -translate-y-1/2 text-brand-blue/50"></i>
                                 <input type="text" id="origin" name="originLocationCode"
                                     placeholder="Where From? (e.g. JFK)" value="DFW"
-                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
+                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-brand-blueDark font-semibold dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
                             </div>
                         </div>
                         <div class="col-span-12 md:col-span-3 relative autocomplete">
                             <label for="destination"
-                                class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Going
+                                class="block text-xs font-bold text-brand-blueDark dark:text-brand-blue/70 mb-1">Going
                                 To?</label>
                             <div class="relative">
                                 <i
                                     class="fas fa-plane-arrival absolute left-3 top-1/2 -translate-y-1/2 text-brand-blue/50"></i>
                                 <input type="text" id="destination" name="originDestinationCode" placeholder="Going To?"
                                     value="SEZ"
-                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
+                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-brand-blueDark font-semibold dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
                             </div>
                         </div>
                         <div class="col-span-12 md:col-span-2">
                             <label for="departure-date"
-                                class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Departure</label>
+                                class="block text-xs font-bold text-brand-blueDark dark:text-brand-blue/70 mb-1">Departure</label>
                             <div class="relative">
                                 <i
                                     class="fas fa-calendar-alt absolute left-3 top-1/2 -translate-y-1/2 text-brand-blue/50 pointer-events-none"></i>
                                 <input type="text" id="departure-date" name="departureDate" placeholder="Select date"
-                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
+                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-brand-blueDark font-semibold dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
                             </div>
                         </div>
                         <div id="return-date-wrapper" class="col-span-12 md:col-span-2">
                             <label for="return-date"
-                                class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Returning</label>
+                                class="block text-xs font-bold text-brand-blueDark dark:text-brand-blue/70 mb-1">Returning</label>
                             <div class="relative">
                                 <i
                                     class="fas fa-calendar-alt absolute left-3 top-1/2 -translate-y-1/2 text-brand-blue/50 pointer-events-none"></i>
                                 <input type="text" id="return-date" name="returnDate" placeholder="Select date"
-                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-slate-800 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
+                                    class="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-brand-blueDark font-semibold dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50">
                             </div>
                         </div>
                     </div>
@@ -150,16 +150,16 @@
                         <label id="flexible-dates-wrapper" class="flex items-center cursor-pointer">
                             <input type="checkbox" name="dateWindow"
                                 class="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue/50">
-                            <span class="ml-2 text-xs text-slate-500 dark:text-slate-400">+/- 3 days</span>
+                            <span class="ml-2 text-xs font-semibold text-brand-blueDark dark:text-brand-blue/70">+/- 3 days</span>
                         </label>
                         <button type="button" id="add-flight-btn"
-                            class="hidden text-xs font-medium text-slate-500 hover:text-brand-blue">
+                            class="hidden text-xs font-bold text-brand-blueDark hover:text-brand-blue">
                             <i class="fas fa-plus mr-1"></i>Add flight
                         </button>
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" name="directFlightOnly"
                                 class="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue/50">
-                            <span class="ml-2 text-xs text-slate-500 dark:text-slate-400">Direct flight</span>
+                            <span class="ml-2 text-xs font-semibold text-brand-blueDark dark:text-brand-blue/70">Direct flight</span>
                         </label>
                     </div>
                     <div class="w-full md:w-auto">
