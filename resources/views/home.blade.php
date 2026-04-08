@@ -8,10 +8,11 @@
         <div class="service-tabs-bar">
             <div class="container mx-auto px-4">
                 <div class="flex flex-wrap justify-center gap-2 sm:gap-3 py-3">
-                    <button class="service-tab service-tab--flights active" data-tab="flights">
-                        <i class="fas fa-plane"></i>
-                        <span>Flights</span>
-                    </button>
+                    <a href="https://charltonvirtualoffice.com" target="_blank"
+                        class="service-tab service-tab--flights active" data-tab="flights">
+                        <i class="fas fa-id-card"></i>
+                        <span>Get Your UK Virtual Address</span>
+                    </a>
                     <a href="https://ninuk.co.uk" target="_blank" class="service-tab service-tab--nin">
                         <i class="fas fa-id-card"></i>
                         <span>Enroll For Your NIN/BVN</span>
@@ -24,7 +25,7 @@
                     <a href="https://ninuk.co.uk/DEACIL-professionals/nigerian-tax-identification-number-tin"
                         target="_blank" class="service-tab service-tab--tin">
                         <i class="fas fa-file-invoice-dollar"></i>
-                        <span>Tax Identification Number (TIN)</span>
+                        <span>Get Your Tax ID Number (TIN)</span>
                     </a>
                 </div>
             </div>
@@ -463,6 +464,12 @@
             cursor: pointer;
         }
 
+        .service-tab i,
+        .service-tab span {
+            position: relative;
+            z-index: 1;
+        }
+
         .service-tab i {
             font-size: 14px;
         }
@@ -471,6 +478,7 @@
             content: '';
             position: absolute;
             inset: 0;
+            z-index: 0;
             opacity: 0;
             transition: opacity 0.3s ease;
             border-radius: inherit;
@@ -479,6 +487,7 @@
         .service-tab:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+
         }
 
         .service-tab:hover::before {

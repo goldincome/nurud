@@ -1,6 +1,6 @@
 <!-- Header -->
 <header
-    class="bg-white backdrop-blur-md sticky top-0 z-50 border-b border-brand-blue shadow-[0_4px_15px_-3px_rgba(0,45,114,0.15)]">
+    class="bg-white backdrop-blur-md sticky top-0 z-50 border-b border-brand-blue shadow-md shadow-brand-blue/10 relative">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center relative">
         <!-- Logo -->
         <div class="flex items-center space-x-2">
@@ -78,15 +78,15 @@
             <!-- Mobile Menu Button -->
             <button type="button" id="mobile-menu-btn"
                 class="md:hidden text-brand-blue hover:text-brand-blue/80 focus:outline-none p-2 ml-1 relative z-[60]"
-                onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                onclick="const m = document.getElementById('mobile-menu'); if(m.style.display === 'none' || m.classList.contains('hidden')){ m.style.display = 'block'; m.classList.remove('hidden'); } else { m.style.display = 'none'; m.classList.add('hidden'); }">
                 <i class="fas fa-bars text-xl"></i>
             </button>
         </div>
     </div>
 
     <!-- Mobile Menu Dropdown -->
-    <div id="mobile-menu"
-        class="hidden md:hidden absolute top-full left-0 right-0 bg-white shadow-xl border-t border-brand-blue/10 z-[100] animate-fade-in-down">
+    <div id="mobile-menu" style="display: none;"
+        class="md:hidden absolute top-full left-0 right-0 w-full bg-white shadow-xl border-t border-brand-blue/10 z-[100] animate-fade-in-down">
         <div class="flex flex-col p-4 space-y-4 text-sm font-medium text-brand-blue">
             <a href="/"
                 class="{{ request()->is('/') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Home</a>

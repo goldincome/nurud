@@ -93,7 +93,8 @@
                 <div class="space-y-4">
                     <div id="single-flight-form" class="grid grid-cols-1 md:grid-cols-10 gap-3 items-end">
                         <div class="col-span-12 md:col-span-3 relative autocomplete">
-                            <label for="origin" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Where
+                            <label for="origin"
+                                class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Where
                                 From?</label>
                             <div class="relative">
                                 <i
@@ -104,7 +105,8 @@
                             </div>
                         </div>
                         <div class="col-span-12 md:col-span-3 relative autocomplete">
-                            <label for="destination" class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Going
+                            <label for="destination"
+                                class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Going
                                 To?</label>
                             <div class="relative">
                                 <i
