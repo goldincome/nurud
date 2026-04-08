@@ -5,7 +5,8 @@
         <!-- Logo -->
         <div class="flex items-center space-x-2">
             <a href="/" class="flex items-center space-x-2">
-                <img src="{{ asset('images/nurud-logo.png') }}" alt="Nurud Travels" class="h-10 sm:h-12 w-auto transform scale-[1.4] md:scale-[1.45] origin-left"
+                <img src="{{ asset('images/nurud-logo.png') }}" alt="Nurud Travels"
+                    class="h-10 sm:h-12 w-auto transform scale-[1.4] md:scale-[1.45] origin-left"
                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                 <span class="text-2xl font-bold hidden" style="display:none;">
                     <span class="text-brand-blue">Nurud</span>
@@ -91,11 +92,10 @@
             <a href="/"
                 class="{{ request()->is('/') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Home</a>
             <a href="#"
+                class="{{ request()->is('financing*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Services</a>
+            <a href="#"
                 class="{{ request()->is('about*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">About
                 Us</a>
-            <a href="#"
-                class="{{ request()->is('financing*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Travel
-                Financing</a>
             <a href="#"
                 class="{{ request()->is('contact*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Contact
                 Us</a>
