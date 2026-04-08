@@ -47,8 +47,11 @@
             </div>
         </div>
 
-        <div id="search-form" class="hidden">
-            @include('common.front.booking-form')
+        <div id="search-form" class="hidden mt-6 relative overflow-hidden rounded-2xl shadow-xl">
+            <div class="absolute inset-0" style="background: linear-gradient(135deg, #151F55 0%, #2E3B82 40%, #4A5BA0 80%, #5B6CB5 100%);"></div>
+            <div class="relative z-10 pt-16 pb-6 px-2 md:px-0">
+                @include('common.front.booking-form')
+            </div>
         </div>
     </div>
 

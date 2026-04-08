@@ -448,4 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    if (tripTypeSelect) {
+        tripTypeSelect.dispatchEvent(new Event('change'));
+    }
 });

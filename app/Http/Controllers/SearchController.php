@@ -49,6 +49,7 @@ class SearchController extends Controller
 
             // Store only the reference ID in the session
             session()->put('current_search_id', $searchId);
+            session()->put('last_flight_search', $validated);
 
             return redirect()->route('search.results');
         } catch (\Exception $e) {
@@ -153,15 +154,15 @@ class SearchController extends Controller
         $origin = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin') : 'Origin';
         $destination = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['arrCity'] ?? 'Destination') : 'Destination';
         $tripDate = $searchResults['search_data']['departureDate'] ?? now()->format('Y-m-d');
-        
+
         $returnDate = $searchResults['search_data']['returnDate'] ?? null;
-        
+
         $travelers = $searchResults['search_data']['travelers'] ?? [];
         $travelersCount = ($travelers['numberOfAdults'] ?? 1) + ($travelers['numberOfChildren'] ?? 0) + ($travelers['numberOfInfants'] ?? 0);
-        
+
         $flightClass = $searchResults['search_data']['flightClass'] ?? 'ECONOMY';
         $flightClass = ucfirst(strtolower(str_replace('_', ' ', $flightClass)));
-        
+
         //dd($formattedFlights);
         return view('search-result', [
             'flights' => $formattedFlights,
