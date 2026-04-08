@@ -3,8 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let airports = [];
 
     // --- 2. Fetch Data from API ---
-    // Fetches the full list once. The browser will cache this based on your Controller headers.
-    fetch('/api/airports')
+    // Fetches the full list once. Append a timestamp to break previous 24h browser cache
+    const cacheBuster = new Date().getTime();
+    fetch(`/api/airports?v=${cacheBuster}`)
         .then(response => response.json())
         .then(data => {
             airports = data;
@@ -28,12 +29,34 @@ document.addEventListener('DOMContentLoaded', function() {
             a.setAttribute("class", "autocomplete-items dark:bg-slate-700");
             this.parentNode.appendChild(a);
 
-            // Filter the global 'airports' array
-            // Matches against the 'label' (e.g., "Lagos (LOS) - Murtala...")
-            // Limit to top 20 results for performance
-            const matches = airports.filter(item => 
-                item.label.toLowerCase().includes(val.toLowerCase())
-            ).slice(0, 20);
+            // Cascading search: code → state_name → airport name
+            const q = val.toLowerCase();
+            let matches = [];
+
+            // 1. Try matching by IATA code first
+            matches = airports.filter(item => item.code.includes(q));
+            if (matches.length) {
+                // Sort: exact code match first, then startsWith, then partial
+                matches.sort((a, b) => {
+                    if (a.code === q && b.code !== q) return -1;
+                    if (b.code === q && a.code !== q) return 1;
+                    if (a.code.startsWith(q) && !b.code.startsWith(q)) return -1;
+                    if (b.code.startsWith(q) && !a.code.startsWith(q)) return 1;
+                    return a.code.localeCompare(b.code);
+                });
+            }
+
+            // 2. If no code match, try city/state_name
+            if (!matches.length) {
+                matches = airports.filter(item => item.city.includes(q));
+            }
+
+            // 3. If still nothing, try airport name
+            if (!matches.length) {
+                matches = airports.filter(item => item.name.includes(q));
+            }
+
+            matches = matches.slice(0, 20);
 
             for (i = 0; i < matches.length; i++) {
                 let item = matches[i];

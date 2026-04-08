@@ -1,0 +1,1 @@
+<?php require 'vendor/autoload.php'; \ = require_once 'bootstrap/app.php'; \->make('Illuminate\Contracts\Console\Kernel')->bootstrap(); \ = app(\App\Services\AirportService::class)->getAll()->firstWhere('code', 'los'); print_r(\);

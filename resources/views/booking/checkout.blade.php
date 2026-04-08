@@ -101,14 +101,17 @@
                                                 <td class="px-4 py-4 text-slate-600">{{ $bank->account_name }}</td>
                                                 <td class="px-4 py-4 text-slate-600 font-medium">
                                                     {{ $bank->iban ?: $bank->account_number }}
-                                                    @if($bank->routing_number)<div class="text-[10px] text-slate-400">Routing: {{ $bank->routing_number }}</div>@endif
+                                                    @if($bank->routing_number)
+                                                        <div class="text-[10px] text-slate-400">Routing: {{ $bank->routing_number }}
+                                                    </div>@endif
                                                 </td>
                                                 <td class="px-4 py-4 text-slate-600">{{ $bank->swift_code ?: '-' }}</td>
                                                 <td class="px-4 py-4 font-medium text-slate-700">{{ $bank->bank_name }}</td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="px-6 py-4 text-center text-slate-500">No bank accounts available.</td>
+                                                <td colspan="4" class="px-6 py-4 text-center text-slate-500">No bank accounts
+                                                    available.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -119,7 +122,8 @@
                                 <form method="POST" action="{{ route('bookings.store') }}">
                                     @csrf
                                     <input type="hidden" name="booking_type" value="bank_transfer">
-                                    <button type="submit" class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-10 rounded-full shadow-md transition-colors">
+                                    <button type="submit"
+                                        class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-10 rounded-full shadow-md transition-colors">
                                         Confirm Reservation
                                     </button>
                                 </form>
@@ -163,32 +167,32 @@
                                     <p class="text-xs text-slate-500 ml-13">Visa, Mastercard, American Express and more.</p>
                                 </div>
 
-                                <!-- Paystack Section -->
-                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-10 h-10 bg-green-500 rounded flex items-center justify-center text-white font-bold text-xs">
-                                                Paystack</div>
-                                            <div>
-                                                <h3 class="font-bold text-slate-800">Pay with Paystack</h3>
-                                                <p class="text-xs text-slate-500">Secure card payment via Paystack
-                                                    (Local/Africa)</p>
+                                <!-- Paystack Section 
+                                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-5">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-10 h-10 bg-green-500 rounded flex items-center justify-center text-white font-bold text-xs">
+                                                    Paystack</div>
+                                                <div>
+                                                    <h3 class="font-bold text-slate-800">Pay with Paystack</h3>
+                                                    <p class="text-xs text-slate-500">Secure card payment via Paystack
+                                                        (Local/Africa)</p>
+                                                </div>
                                             </div>
+                                            <form method="POST" action="{{ route('bookings.store') }}">
+                                                @csrf
+                                                <input type="hidden" name="booking_type" value="paystack">
+                                                <button type="submit"
+                                                    class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-2 px-6 rounded-full shadow-sm transition-colors text-sm">
+                                                    Pay with Card
+                                                </button>
+                                            </form>
                                         </div>
-                                        <form method="POST" action="{{ route('bookings.store') }}">
-                                            @csrf
-                                            <input type="hidden" name="booking_type" value="paystack">
-                                            <button type="submit"
-                                                class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-2 px-6 rounded-full shadow-sm transition-colors text-sm">
-                                                Pay with Card
-                                            </button>
-                                        </form>
-                                    </div>
-                                    <p class="text-xs text-slate-500 ml-13">Mastercard, Visa, and Verve accepted.</p>
-                                </div>
+                                        <p class="text-xs text-slate-500 ml-13">Mastercard, Visa, and Verve accepted.</p>
+                                    </div> -->
                             </div>
-
+                             <!--
                             <table class="w-full text-sm text-left border border-slate-200 rounded-lg overflow-hidden mb-6">
                                 <thead class="bg-slate-50 text-slate-500 font-bold text-xs uppercase">
                                     <tr>
@@ -207,7 +211,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-
+                            -->
 
                         </div>
                     </div>
@@ -239,17 +243,24 @@
                                     <tbody class="divide-y divide-slate-100">
                                         @forelse($banks as $bank)
                                             <tr class="hover:bg-slate-50">
-                                                <td class="px-4 py-4 text-slate-600 border-b border-gray-100">{{ $bank->account_name }}</td>
+                                                <td class="px-4 py-4 text-slate-600 border-b border-gray-100">
+                                                    {{ $bank->account_name }}</td>
                                                 <td class="px-4 py-4 text-slate-600 border-b border-gray-100 font-medium">
                                                     {{ $bank->iban ?: $bank->account_number }}
-                                                    @if($bank->routing_number)<div class="text-[10px] text-slate-400">Routing: {{ $bank->routing_number }}</div>@endif
+                                                    @if($bank->routing_number)
+                                                        <div class="text-[10px] text-slate-400">Routing: {{ $bank->routing_number }}
+                                                    </div>@endif
                                                 </td>
-                                                <td class="px-4 py-4 text-slate-600 border-b border-gray-100">{{ $bank->swift_code ?: '-' }}</td>
-                                                <td class="px-4 py-4 font-medium text-slate-700 border-b border-gray-100">{{ $bank->bank_name }}</td>
+                                                <td class="px-4 py-4 text-slate-600 border-b border-gray-100">
+                                                    {{ $bank->swift_code ?: '-' }}</td>
+                                                <td class="px-4 py-4 font-medium text-slate-700 border-b border-gray-100">
+                                                    {{ $bank->bank_name }}</td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="px-6 py-4 text-center text-slate-500 border-b border-gray-100">No bank accounts available.</td>
+                                                <td colspan="4"
+                                                    class="px-6 py-4 text-center text-slate-500 border-b border-gray-100">No
+                                                    bank accounts available.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -272,22 +283,26 @@
                         </div>
                         <div class="p-6">
                             <div class="text-center py-6">
-                                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <div
+                                    class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <i class="fas fa-handshake text-brand-blue text-2xl"></i>
                                 </div>
                                 <h3 class="text-xl font-bold text-slate-800 mb-2">Flexible Credit Facility</h3>
                                 <p class="text-sm text-slate-600 max-w-md mx-auto mb-6">
-                                    Take advantage of our exclusive Credit Facility to secure your flight immediately while you spread the payments. 
+                                    Take advantage of our exclusive Credit Facility to secure your flight immediately while
+                                    you spread the payments.
                                     With Nurud's BNPL, you don't have to miss out on great fares.
                                 </p>
-                                <button type="button" onclick="openBnplModal()" class="text-brand-orange hover:text-orange-700 underline text-sm font-bold mb-8 block mx-auto">
+                                <button type="button" onclick="openBnplModal()"
+                                    class="text-brand-orange hover:text-orange-700 underline text-sm font-bold mb-8 block mx-auto">
                                     Read Terms & Conditions
                                 </button>
-                                
+
                                 <form method="POST" action="{{ route('bookings.store') }}">
                                     @csrf
                                     <input type="hidden" name="booking_type" value="pay_later">
-                                    <button type="button" onclick="openBnplModal()" class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-10 rounded-full shadow-md transition-colors">
+                                    <button type="button" onclick="openBnplModal()"
+                                        class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-10 rounded-full shadow-md transition-colors">
                                         Kick Start Process
                                     </button>
                                 </form>
@@ -509,31 +524,42 @@
     </main>
 
     <!-- BNPL Terms Modal -->
-    <div id="bnpl-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
+    <div id="bnpl-modal"
+        class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-slate-200 bg-slate-50 rounded-t-xl">
                 <h3 class="text-xl font-bold text-brand-blue">Credit Facility Terms & Conditions</h3>
-                <button type="button" onclick="closeBnplModal()" class="text-slate-400 hover:text-slate-600 focus:outline-none">
+                <button type="button" onclick="closeBnplModal()"
+                    class="text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 text-sm text-slate-600 space-y-4">
-                <p>By proceeding with the "Buy Now, Pay Later" (BNPL) credit facility managed by Nurud, you agree to the following terms:</p>
+                <p>By proceeding with the "Buy Now, Pay Later" (BNPL) credit facility managed by Nurud, you agree to the
+                    following terms:</p>
                 <ul class="list-disc pl-5 space-y-2">
-                    <li><strong>Immediate Reservation:</strong> Your selected flight will be booked and a PNR will be generated and reserved.</li>
-                    <li><strong>Contact Requirement:</strong> You must contact our customer support team via phone within <strong>12 hours</strong> of this reservation to finalize your payment plan.</li>
-                    <li><strong>Cancellation:</strong> Failure to contact us or reach an agreement within the stipulated 12 hours will lead to the automatic cancellation of your reserved ticket without prior notice.</li>
-                    <li><strong>Alternative Payment:</strong> Should you decide against using the credit facility, you may settle the total amount via direct bank transfer to our provided accounts.</li>
-                    <li><strong>Eligibility:</strong> The credit facility is subject to approval, and terms of the installment will be decided during your phone consultation.</li>
+                    <li><strong>Immediate Reservation:</strong> Your selected flight will be booked and a PNR will be
+                        generated and reserved.</li>
+                    <li><strong>Contact Requirement:</strong> You must contact our customer support team via phone within
+                        <strong>12 hours</strong> of this reservation to finalize your payment plan.</li>
+                    <li><strong>Cancellation:</strong> Failure to contact us or reach an agreement within the stipulated 12
+                        hours will lead to the automatic cancellation of your reserved ticket without prior notice.</li>
+                    <li><strong>Alternative Payment:</strong> Should you decide against using the credit facility, you may
+                        settle the total amount via direct bank transfer to our provided accounts.</li>
+                    <li><strong>Eligibility:</strong> The credit facility is subject to approval, and terms of the
+                        installment will be decided during your phone consultation.</li>
                 </ul>
                 <p>We look forward to helping you travel with flexibility!</p>
             </div>
             <div class="p-6 border-t border-slate-200 flex justify-end gap-3 bg-slate-50 rounded-b-xl">
-                <button type="button" onclick="closeBnplModal()" class="px-6 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors">Decline</button>
+                <button type="button" onclick="closeBnplModal()"
+                    class="px-6 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors">Decline</button>
                 <form method="POST" action="{{ route('bookings.store') }}" class="m-0">
                     @csrf
                     <input type="hidden" name="booking_type" value="pay_later">
-                    <button type="submit" class="px-6 py-2 rounded-full text-sm font-bold bg-brand-blue text-white shadow-md hover:bg-blue-900 transition-colors">Accept & Kick Start Process</button>
+                    <button type="submit"
+                        class="px-6 py-2 rounded-full text-sm font-bold bg-brand-blue text-white shadow-md hover:bg-blue-900 transition-colors">Accept
+                        & Kick Start Process</button>
                 </form>
             </div>
         </div>

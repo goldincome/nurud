@@ -4,12 +4,13 @@ namespace App\Mail;
 
 use App\Models\Booking;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PaymentConfirmed extends Mailable
+class StripePaymentProcessingEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -17,26 +18,23 @@ class PaymentConfirmed extends Mailable
 
     public function __construct(Booking $booking)
     {
-        $this->booking = $booking->load(['travelers', 'payments']);
+        $this->booking = $booking;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment Confirmed - Ticket Processing : ' . $this->booking->reference_number,
+            subject: 'Payment Processing - Reservation : ' . $this->booking->reference_number,
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'booking.reservation_ticket',
+            view: 'emails.stripe.processing',
             with: [
                 'booking' => $this->booking,
-                'banks' => \App\Models\Bank::all(),
-                'issuedAt' => $this->booking->ticket_issued_at,
             ],
-
         );
     }
 }

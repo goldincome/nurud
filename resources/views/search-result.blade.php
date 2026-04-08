@@ -94,8 +94,8 @@
                             {{-- All Airlines master checkbox --}}
                             <label class="flex items-center space-x-2 cursor-pointer pb-2 mb-1 border-b border-slate-100">
                                 <input type="checkbox" id="filter-airline-all" checked
-                                    class="rounded text-brand-orange focus:ring-brand-orange border-slate-300">
-                                <span class="text-sm font-bold text-brand-orange">All Airlines</span>
+                                    class="rounded text-brand-blue focus:ring-brand-blue border-slate-300">
+                                <span class="text-sm font-bold text-brand-blue">All Airlines</span>
                             </label>
                             @if (count($airlines) > 0)
                                 @foreach ($airlines as $index => $airline)
@@ -119,12 +119,12 @@
                             <h4 class="font-semibold text-sm text-slate-700">Max Price</h4>
                             <span id="price-display" class="text-xs font-bold text-brand-blue">{{
         config('app.currency_symbol')
-                                                    }}5,000,000</span>
+                                                                                                }}5,000,000</span>
                         </div>
-                        <input type="range" id="price-slider" min="1000000" max="5000000" step="100000" value="5000000"
+                        <input type="range" id="price-slider" min="500" max="5000000" step="500" value="5000000"
                             class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                         <div class="flex justify-between text-xs text-slate-500 mt-2">
-                            <span>{{ config('app.currency_symbol') }}1M</span>
+                            <span>{{ config('app.currency_symbol') }}500</span>
                             <span>{{ config('app.currency_symbol') }}5M+</span>
                         </div>
                     </div>
@@ -392,94 +392,94 @@
                     }
 
                     return `
-                                                                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 ${index > 0 ? 'mt-4 pt-4 border-t border-slate-100' : ''}">
-                                                                        <div class="flex items-center gap-4 w-full md:w-1/4">
-                                                                            <img src="https://pics.avs.io/200/60/${leg.airlineCode}.png" class="h-6 object-contain" alt="${leg.airlineName}">
-                                                                            <div>
-                                                                                <div class="text-[10px] uppercase font-bold text-slate-400">
-                                                                                    ${legLabel}
-                                                                                </div>
-                                                                                <h3 class="font-bold text-sm text-slate-800">${leg.airlineName}</h3>
-                                                                            </div>
-                                                                        </div>
+                                                                                                                <div class="flex flex-col md:flex-row justify-between items-center gap-4 ${index > 0 ? 'mt-4 pt-4 border-t border-slate-100' : ''}">
+                                                                                                                    <div class="flex items-center gap-4 w-full md:w-1/4">
+                                                                                                                        <img src="https://pics.avs.io/200/60/${leg.airlineCode}.png" class="h-6 object-contain" alt="${leg.airlineName}">
+                                                                                                                        <div>
+                                                                                                                            <div class="text-[10px] uppercase font-bold text-slate-400">
+                                                                                                                                ${legLabel}
+                                                                                                                            </div>
+                                                                                                                            <h3 class="font-bold text-sm text-slate-800">${leg.airlineName}</h3>
+                                                                                                                        </div>
+                                                                                                                    </div>
 
-                                                                        <div class="flex flex-1 justify-between items-center text-center w-full gap-4 md:gap-0">
-                                                                            <div class="text-left min-w-[80px]">
-                                                                                <div class="text-lg font-bold text-slate-800 leading-tight">${leg.depTime}</div>
-                                                                                <div class="text-xs font-semibold text-slate-600">${leg.depCity}</div>
-                                                                                <div class="text-[10px] text-brand-blue">${leg.depDate}</div>
-                                                                            </div>
+                                                                                                                    <div class="flex flex-1 justify-between items-center text-center w-full gap-4 md:gap-0">
+                                                                                                                        <div class="text-left min-w-[80px]">
+                                                                                                                            <div class="text-lg font-bold text-slate-800 leading-tight">${leg.depTime}</div>
+                                                                                                                            <div class="text-xs font-semibold text-slate-600">${leg.depCity}</div>
+                                                                                                                            <div class="text-[10px] text-brand-blue">${leg.depDate}</div>
+                                                                                                                        </div>
 
-                                                                            <div class="flex flex-col items-center flex-1 px-4">
-                                                                                <div class="text-[10px] text-brand-blue mb-1">${leg.duration}</div>
-                                                                                <div class="w-full h-px bg-slate-300 relative flex items-center justify-center">
-                                                                                    <div class="w-1.5 h-1.5 rounded-full bg-slate-300 absolute left-0"></div>
-                                                                                    <i class="fas fa-plane text-slate-300 text-[10px] transform rotate-90"></i>
-                                                                                    <div class="w-1.5 h-1.5 rounded-full bg-slate-300 absolute right-0"></div>
-                                                                                </div>
-                                                                                <div class="text-[10px] font-medium text-brand-orange mt-1">
-                                                                                    ${leg.stops} ${leg.stopCity ? `(${leg.stopCity})` : ''}
-                                                                                </div>
-                                                                            </div>
+                                                                                                                        <div class="flex flex-col items-center flex-1 px-4">
+                                                                                                                            <div class="text-[10px] text-brand-blue mb-1">${leg.duration}</div>
+                                                                                                                            <div class="w-full h-px bg-slate-300 relative flex items-center justify-center">
+                                                                                                                                <div class="w-1.5 h-1.5 rounded-full bg-slate-300 absolute left-0"></div>
+                                                                                                                                <i class="fas fa-plane text-slate-300 text-[10px] transform rotate-90"></i>
+                                                                                                                                <div class="w-1.5 h-1.5 rounded-full bg-slate-300 absolute right-0"></div>
+                                                                                                                            </div>
+                                                                                                                            <div class="text-[10px] font-medium text-brand-orange mt-1">
+                                                                                                                                ${leg.stops} ${leg.stopCity ? `(${leg.stopCity})` : ''}
+                                                                                                                            </div>
+                                                                                                                        </div>
 
-                                                                            <div class="text-right min-w-[80px]">
-                                                                                <div class="text-lg font-bold text-slate-800 leading-tight">${leg.arrTime}</div>
-                                                                                <div class="text-xs font-semibold text-slate-600">${leg.arrCity}</div>
-                                                                                <div class="text-[10px] text-brand-blue">${leg.arrDate}</div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    `;
+                                                                                                                        <div class="text-right min-w-[80px]">
+                                                                                                                            <div class="text-lg font-bold text-slate-800 leading-tight">${leg.arrTime}</div>
+                                                                                                                            <div class="text-xs font-semibold text-slate-600">${leg.arrCity}</div>
+                                                                                                                            <div class="text-[10px] text-brand-blue">${leg.arrDate}</div>
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                                `;
                 }).join('');
 
                 const card = `
-                                                        <div class="bg-white rounded-lg p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden flex flex-col md:flex-row gap-6">
-                                                            <div class="flex-1 flex flex-col justify-center">
-                                                                ${legsHtml}
-                                                            </div>
-                                                            <div class="w-full md:w-1/5 flex flex-row md:flex-col justify-between items-center md:items-center gap-2 md:pl-6 md:border-l border-slate-100 min-h-full">
-                                                                <div class="text-right md:text-center mt-auto mb-auto w-full">
-                                                                    <!-- Pill decoration above price -->
-                                                                    <div class="w-8 h-1.5 bg-slate-900 rounded-full mb-2 mx-auto hidden md:block"></div>
+                                                                                                    <div class="bg-white rounded-lg p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden flex flex-col md:flex-row gap-6">
+                                                                                                        <div class="flex-1 flex flex-col justify-center">
+                                                                                                            ${legsHtml}
+                                                                                                        </div>
+                                                                                                        <div class="w-full md:w-1/5 flex flex-row md:flex-col justify-between items-center md:items-center gap-2 md:pl-6 md:border-l border-slate-100 min-h-full">
+                                                                                                            <div class="text-right md:text-center mt-auto mb-auto w-full">
+                                                                                                                <!-- Pill decoration above price -->
+                                                                                                                <div class="w-8 h-1.5 bg-slate-900 rounded-full mb-2 mx-auto hidden md:block"></div>
 
-                                                                    <div class="text-2xl font-bold text-slate-900">
-                                                                        <span>{{ config('app.currency_symbol') }}</span>${flight.price}
-                                                                    </div>
+                                                                                                                <div class="text-2xl font-bold text-slate-900">
+                                                                                                                    <span>{{ config('app.currency_symbol') }}</span>${flight.price}
+                                                                                                                </div>
 
-                                                                    <form action="{{ route('api.offer.verify') }}" method="POST" class="w-full mt-3">
-                                                                        @csrf
-                                                                        <input type="hidden" name="allOffer" value="${encodeURIComponent(JSON.stringify(flight.allOffer))}">
+                                                                                                                <form action="{{ route('api.offer.verify') }}" method="POST" class="w-full mt-3">
+                                                                                                                    @csrf
+                                                                                                                    <input type="hidden" name="allOffer" value="${encodeURIComponent(JSON.stringify(flight.allOffer))}">
 
-                                                                        <button type="submit" class="bg-brand-blue hover:bg-brand-blueHover text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-brand-blue/20 w-full block">
-                                                                        Book Now
-                                                                    </button>
-                                                                </form>
+                                                                                                                    <button type="submit" class="bg-brand-blue hover:bg-brand-blueHover text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors shadow-lg shadow-brand-blue/20 w-full block">
+                                                                                                                    Book Now
+                                                                                                                </button>
+                                                                                                            </form>
 
-                                                                <button type="button" onclick="openCreditModal()" class="text-brand-blue hover:text-blue-700 text-xs font-bold mt-3 underline underline-offset-2 cursor-pointer transition-colors">
-                                                                    Credit Facility Available
-                                                                </button>
+                                                                                                            <button type="button" onclick="openCreditModal()" class="text-brand-blue hover:text-blue-700 text-xs font-bold mt-3 underline underline-offset-2 cursor-pointer transition-colors">
+                                                                                                                Credit Facility Available
+                                                                                                            </button>
 
-                                                                    <div class="mt-3 text-center">
-                                                                        <div class="text-[10px] text-slate-500">Offer expires in:</div>
-                                                                        <div class="text-xs font-bold text-brand-orange countdown-timer" data-minutes="${Math.floor(Math.random() * 30) + 15}">
-                                                                            --m --s
-                                                                        </div>
-                                                                    </div>
+                                                                                                                <div class="mt-3 text-center">
+                                                                                                                    <div class="text-[10px] text-slate-500">Offer expires in:</div>
+                                                                                                                    <div class="text-xs font-bold text-brand-orange countdown-timer" data-minutes="${Math.floor(Math.random() * 30) + 15}">
+                                                                                                                        --m --s
+                                                                                                                    </div>
+                                                                                                                </div>
 
-                                                                    <div class="flex items-center justify-center gap-4 mt-3 font-bold text-xs text-slate-600" style="background-color: #f3ef09ff; padding: 2px; border-radius: 10px;">
-                                                                        <div class="flex items-center gap-1" title="Checked Baggage">
-                                                                            <i class="fas fa-briefcase text-brand-blue"></i>
-                                                                            <span>${displayBag}</span>
-                                                                        </div>
-                                                                        <div class="flex items-center gap-1" title="Cabin Baggage">
-                                                                            <i class="fas fa-suitcase-rolling text-brand-orange"></i>
-                                                                            <span>${flight.cabinBag || '7kg'}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    `;
+                                                                                                                <div class="flex items-center justify-center gap-4 mt-3 font-bold text-xs text-slate-600" style="background-color: #d4d4e0ff; padding: 2px; border-radius: 10px;">
+                                                                                                                    <div class="flex items-center gap-1" title="Checked Baggage">
+                                                                                                                        <i class="fas fa-briefcase text-brand-orange"></i>
+                                                                                                                        <span>${displayBag}</span>
+                                                                                                                    </div>
+                                                                                                                    <div class="flex items-center gap-1" title="Cabin Baggage">
+                                                                                                                        <i class="fas fa-suitcase-rolling text-brand-orange"></i>
+                                                                                                                        <span>${flight.cabinBag || '7kg'}</span>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                `;
                 container.innerHTML += card;
             });
 

@@ -341,10 +341,12 @@
                     adventure?</h2>
                 <p class="text-brand-gray dark:text-slate-400 text-base mb-8 max-w-xl mx-auto">Sign up for price alerts and
                     never miss a deal on flights to your favourite destinations.</p>
-                <form id="subscribe-form" class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto items-start">
+                <form id="subscribe-form"
+                    class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto items-start">
                     @csrf
                     <div class="flex-1 w-full relative">
-                        <input type="email" id="subscribe-email" name="email" placeholder="Enter your email address" required
+                        <input type="email" id="subscribe-email" name="email" placeholder="Enter your email address"
+                            required
                             class="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue text-sm">
                         <div id="subscribe-message" class="absolute -bottom-6 left-0 text-xs w-full text-left"></div>
                     </div>
@@ -691,11 +693,11 @@
                     const email = document.getElementById('subscribe-email').value;
                     const btn = document.getElementById('subscribe-btn');
                     const messageDiv = document.getElementById('subscribe-message');
-                    
+
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Subscribing...';
                     messageDiv.textContent = '';
-                    
+
                     fetch('{{ route('subscribe') }}', {
                         method: 'POST',
                         headers: {
@@ -705,37 +707,37 @@
                         },
                         body: JSON.stringify({ email: email })
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        btn.disabled = false;
-                        btn.textContent = 'Get Alerts';
-                        
-                        if (data.success) {
-                            messageDiv.textContent = data.message;
-                            messageDiv.className = 'absolute -bottom-6 left-0 text-xs w-full text-left text-green-600';
-                            document.getElementById('subscribe-email').value = '';
-                        } else if (data.errors && data.errors.email) {
-                            messageDiv.textContent = data.errors.email[0];
+                        .then(response => response.json())
+                        .then(data => {
+                            btn.disabled = false;
+                            btn.textContent = 'Get Alerts';
+
+                            if (data.success) {
+                                messageDiv.textContent = data.message;
+                                messageDiv.className = 'absolute -bottom-6 left-0 text-xs w-full text-left text-green-600';
+                                document.getElementById('subscribe-email').value = '';
+                            } else if (data.errors && data.errors.email) {
+                                messageDiv.textContent = data.errors.email[0];
+                                messageDiv.className = 'absolute -bottom-6 left-0 text-xs w-full text-left text-brand-red';
+                            } else {
+                                messageDiv.textContent = data.message || 'An error occurred. Please try again.';
+                                messageDiv.className = 'absolute -bottom-6 left-0 text-xs w-full text-left text-brand-red';
+                            }
+
+                            setTimeout(() => {
+                                messageDiv.textContent = '';
+                            }, 5000);
+                        })
+                        .catch(error => {
+                            btn.disabled = false;
+                            btn.textContent = 'Get Alerts';
+                            messageDiv.textContent = 'An error occurred. Please try again.';
                             messageDiv.className = 'absolute -bottom-6 left-0 text-xs w-full text-left text-brand-red';
-                        } else {
-                            messageDiv.textContent = data.message || 'An error occurred. Please try again.';
-                            messageDiv.className = 'absolute -bottom-6 left-0 text-xs w-full text-left text-brand-red';
-                        }
-                        
-                        setTimeout(() => {
-                            messageDiv.textContent = '';
-                        }, 5000);
-                    })
-                    .catch(error => {
-                        btn.disabled = false;
-                        btn.textContent = 'Get Alerts';
-                        messageDiv.textContent = 'An error occurred. Please try again.';
-                        messageDiv.className = 'absolute -bottom-6 left-0 text-xs w-full text-left text-brand-red';
-                        
-                        setTimeout(() => {
-                            messageDiv.textContent = '';
-                        }, 5000);
-                    });
+
+                            setTimeout(() => {
+                                messageDiv.textContent = '';
+                            }, 5000);
+                        });
                 });
             }
         });

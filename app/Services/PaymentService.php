@@ -185,6 +185,15 @@ class PaymentService
                     ]);
                 }
 
+                $booking = Booking::find($bookingId);
+                if ($booking && $booking->customer_email) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($booking->customer_email)->send(new \App\Mail\StripePaymentDeclinedEmail($booking));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send Stripe payment declined email', ['error' => $e->getMessage()]);
+                    }
+                }
+
                 Log::info('Payment marked as failed', ['booking_id' => $bookingId]);
             }
 

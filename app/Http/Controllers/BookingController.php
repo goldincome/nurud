@@ -290,6 +290,20 @@ class BookingController extends Controller
             return redirect()->back()->with('error', 'Booking not found');
         }
 
+        if (request()->has('session_id')) {
+            $payment = $booking->payments()->where('stripe_session_id', request()->session_id)->first();
+            if ($payment && $payment->status === \App\Enums\PaymentStatus::PENDING) {
+                if (!Cache::has('processing_email_sent_' . $payment->id)) {
+                    Cache::put('processing_email_sent_' . $payment->id, true, now()->addHours(1));
+                    try {
+                        Mail::to($booking->customer_email)->send(new \App\Mail\StripePaymentProcessingEmail($booking));
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send Stripe processing email', ['error' => $e->getMessage()]);
+                    }
+                }
+            }
+        }
+
 
         //dd($booking->travelers);
         return view('booking.confirmation', [

@@ -15,7 +15,8 @@
         <h3 style="margin-top: 0; color: #c2410c;">Urgent Action Required</h3>
         <p style="margin-bottom: 0;">Please contact us via phone immediately at <strong>+44 (0) 2032474747</strong> to
             finalize your flexible payment and credit arrangement. <strong>If we do not communicate within 12 hours of
-                this email, this reservation will automatically be cancelled.</strong></p>
+                this email, this reservation will automatically be cancelled.</strong>
+            You will be asked to provide your reference number below.</p>
     </div>
 
     <h3>Booking Details</h3>
