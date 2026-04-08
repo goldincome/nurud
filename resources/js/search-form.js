@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- 2. Fetch Data from API ---
     // Fetches the full list once. Append a timestamp to break previous 24h browser cache
+    const baseUrl = (window.APP_URL || '').replace(/\/+$/, '');
     const cacheBuster = new Date().getTime();
-    fetch(`/api/airports?v=${cacheBuster}`)
+    fetch(`${baseUrl}/api/airports?v=${cacheBuster}`)
         .then(response => response.json())
         .then(data => {
             airports = data;
@@ -29,26 +30,64 @@ document.addEventListener('DOMContentLoaded', function() {
             a.setAttribute("class", "autocomplete-items dark:bg-slate-700");
             this.parentNode.appendChild(a);
 
-            // Cascading search: code → state_name → airport name
+            // Cascading search: priority depends on query length
+            // ≤ 3 chars → code first (likely IATA code like "LOS")
+            // > 3 chars → state_name first (likely city/state like "Lagos")
             const q = val.toLowerCase();
             let matches = [];
 
-            // 1. Try matching by IATA code first
-            matches = airports.filter(item => item.code.includes(q));
-            if (matches.length) {
-                // Sort: exact code match first, then startsWith, then partial
-                matches.sort((a, b) => {
-                    if (a.code === q && b.code !== q) return -1;
-                    if (b.code === q && a.code !== q) return 1;
-                    if (a.code.startsWith(q) && !b.code.startsWith(q)) return -1;
-                    if (b.code.startsWith(q) && !a.code.startsWith(q)) return 1;
-                    return a.code.localeCompare(b.code);
-                });
-            }
+            if (q.length <= 3) {
+                // 1. Try IATA code first
+                matches = airports.filter(item => item.code.includes(q));
+                if (matches.length) {
+                    matches.sort((x, y) => {
+                        if (x.code === q && y.code !== q) return -1;
+                        if (y.code === q && x.code !== q) return 1;
+                        if (x.code.startsWith(q) && !y.code.startsWith(q)) return -1;
+                        if (y.code.startsWith(q) && !x.code.startsWith(q)) return 1;
+                        return x.code.localeCompare(y.code);
+                    });
+                }
 
-            // 2. If no code match, try city/state_name
-            if (!matches.length) {
-                matches = airports.filter(item => item.city.includes(q));
+                // 2. If no code match, try state_name/city
+                if (!matches.length) {
+                    matches = airports.filter(item => item.state.includes(q));
+                    if (matches.length) {
+                        matches.sort((x, y) => {
+                            if (x.state === q && y.state !== q) return -1;
+                            if (y.state === q && x.state !== q) return 1;
+                            if (x.state.startsWith(q) && !y.state.startsWith(q)) return -1;
+                            if (y.state.startsWith(q) && !x.state.startsWith(q)) return 1;
+                            return x.state.localeCompare(y.state);
+                        });
+                    }
+                }
+            } else {
+                // 1. Try state_name/city first
+                matches = airports.filter(item => item.state.includes(q));
+                if (matches.length) {
+                    matches.sort((x, y) => {
+                        if (x.state === q && y.state !== q) return -1;
+                        if (y.state === q && x.state !== q) return 1;
+                        if (x.state.startsWith(q) && !y.state.startsWith(q)) return -1;
+                        if (y.state.startsWith(q) && !x.state.startsWith(q)) return 1;
+                        return x.state.localeCompare(y.state);
+                    });
+                }
+
+                // 2. If no state match, try IATA code
+                if (!matches.length) {
+                    matches = airports.filter(item => item.code.includes(q));
+                    if (matches.length) {
+                        matches.sort((x, y) => {
+                            if (x.code === q && y.code !== q) return -1;
+                            if (y.code === q && x.code !== q) return 1;
+                            if (x.code.startsWith(q) && !y.code.startsWith(q)) return -1;
+                            if (y.code.startsWith(q) && !x.code.startsWith(q)) return 1;
+                            return x.code.localeCompare(y.code);
+                        });
+                    }
+                }
             }
 
             // 3. If still nothing, try airport name
@@ -62,11 +101,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 let item = matches[i];
                 
                 b = document.createElement("DIV");
-                // Display the Label
-                b.innerHTML = item.label;
+                b.style.cssText = "display:flex; align-items:center; justify-content:space-between; gap:8px;";
+                
+                // Left side: airport name + state
+                const leftDiv = document.createElement("DIV");
+                leftDiv.style.cssText = "flex:1; min-width:0;";
+                
+                const nameSpan = document.createElement("DIV");
+                nameSpan.style.cssText = "font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;";
+                nameSpan.textContent = item.raw_name;
+                
+                const stateSpan = document.createElement("DIV");
+                stateSpan.style.cssText = "font-size:11px; opacity:0.7; margin-top:2px;";
+                stateSpan.textContent = item.raw_state;
+                
+                leftDiv.appendChild(nameSpan);
+                leftDiv.appendChild(stateSpan);
+                
+                // Right side: IATA code badge
+                const codeBadge = document.createElement("SPAN");
+                codeBadge.style.cssText = "background:#2E3B82; color:#fff; font-weight:700; font-size:12px; padding:3px 8px; border-radius:4px; letter-spacing:0.5px; flex-shrink:0;";
+                codeBadge.textContent = item.raw_code;
+                
+                b.appendChild(leftDiv);
+                b.appendChild(codeBadge);
 
-                // Store the IATA Code (item.value) in the hidden input
-                b.innerHTML += "<input type='hidden' value='" + item.value + "'>";
+                // Store the IATA Code (item.value) in a hidden input
+                const hiddenInput = document.createElement("INPUT");
+                hiddenInput.type = "hidden";
+                hiddenInput.value = item.value;
+                b.appendChild(hiddenInput);
                 
                 b.addEventListener("click", function(e) {
                     // Set the input value to the Airport Code (e.g., "LOS")

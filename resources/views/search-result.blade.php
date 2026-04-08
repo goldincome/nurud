@@ -20,9 +20,19 @@
                         <span class="text-white/60 text-xs uppercase">Departing</span>
                         <span class="text-white font-bold">{{ $tripDate }}</span>
                     </div>
+                    @if($returnDate)
+                    <div class="hidden lg:flex flex-col">
+                        <span class="text-white/60 text-xs uppercase">Returning</span>
+                        <span class="text-white font-bold">{{ $returnDate }}</span>
+                    </div>
+                    @endif
+                    <div class="hidden xl:flex flex-col">
+                        <span class="text-white/60 text-xs uppercase">Travelers</span>
+                        <span class="text-white font-bold">{{ $travelersCount }}</span>
+                    </div>
                     <div class="hidden xl:flex flex-col">
                         <span class="text-white/60 text-xs uppercase">Cabin</span>
-                        <span class="text-white font-bold">Economy</span>
+                        <span class="text-white font-bold">{{ $flightClass }}</span>
                     </div>
                     <div class="hidden xl:flex flex-col">
                         <span class="text-white/60 text-xs uppercase">Flights Found</span>
@@ -69,12 +79,12 @@
                         <h4 class="font-semibold text-sm mb-3 text-slate-700">Stops</h4>
                         <div class="space-y-2">
                             <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" value="Non-stop Flights"
+                                <input type="checkbox" value="Direct"
                                     class="filter-stop rounded text-brand-blue focus:ring-brand-blue border-slate-300">
                                 <span class="text-sm text-slate-600">Non-stop Flights</span>
                             </label>
                             <label class="flex items-center space-x-2 cursor-pointer">
-                                <input type="checkbox" value="1 Stop" checked
+                                <input type="checkbox" value="1 Stop"
                                     class="filter-stop rounded text-brand-blue focus:ring-brand-blue border-slate-300">
                                 <span class="text-sm text-slate-600">1 Stop</span>
                             </label>
@@ -93,7 +103,7 @@
                         <div class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
                             {{-- All Airlines master checkbox --}}
                             <label class="flex items-center space-x-2 cursor-pointer pb-2 mb-1 border-b border-slate-100">
-                                <input type="checkbox" id="filter-airline-all" checked
+                                <input type="checkbox" id="filter-airline-all"
                                     class="rounded text-brand-blue focus:ring-brand-blue border-slate-300">
                                 <span class="text-sm font-bold text-brand-blue">All Airlines</span>
                             </label>
@@ -101,7 +111,7 @@
                                 @foreach ($airlines as $index => $airline)
                                     @if ($index !== 0)
                                         <label class="flex items-center space-x-2 cursor-pointer">
-                                            <input type="checkbox" value="{{ $airline['name'] }}" checked
+                                            <input type="checkbox" value="{{ $airline['name'] }}"
                                                 class="filter-airline rounded text-brand-blue focus:ring-brand-blue border-slate-300">
                                             <span class="text-sm text-slate-600">{{ $airline['name'] }}</span>
                                         </label>

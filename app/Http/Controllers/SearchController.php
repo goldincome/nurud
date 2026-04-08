@@ -150,9 +150,18 @@ class SearchController extends Controller
 
         usort($airlineGroups, fn($a, $b) => $a['cheapestPrice'] <=> $b['cheapestPrice']);
 
-        $origin = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin') : 'Origin'; //$formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin';
-        $destination = !empty($formattedFlights) ? end($formattedFlights[0]['itineraries'])['arrCity'] : 'Destination';
-        $tripDate = $searchResults['search_data']['departure_date'] ?? now()->format('Y-m-d');
+        $origin = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin') : 'Origin';
+        $destination = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['arrCity'] ?? 'Destination') : 'Destination';
+        $tripDate = $searchResults['search_data']['departureDate'] ?? now()->format('Y-m-d');
+        
+        $returnDate = $searchResults['search_data']['returnDate'] ?? null;
+        
+        $travelers = $searchResults['search_data']['travelers'] ?? [];
+        $travelersCount = ($travelers['numberOfAdults'] ?? 1) + ($travelers['numberOfChildren'] ?? 0) + ($travelers['numberOfInfants'] ?? 0);
+        
+        $flightClass = $searchResults['search_data']['flightClass'] ?? 'ECONOMY';
+        $flightClass = ucfirst(strtolower(str_replace('_', ' ', $flightClass)));
+        
         //dd($formattedFlights);
         return view('search-result', [
             'flights' => $formattedFlights,
@@ -160,6 +169,9 @@ class SearchController extends Controller
             'origin' => $origin,
             'destination' => $destination,
             'tripDate' => date('D, M d', strtotime($tripDate)),
+            'returnDate' => $returnDate ? date('D, M d', strtotime($returnDate)) : null,
+            'travelersCount' => $travelersCount,
+            'flightClass' => $flightClass,
             'tripType' => $searchResults['search_data']['routeModel'] ?? 'Flight',
             'airlines' => $searchResults['flights']['airlines'] ?? [],
             'routeModel' => $routeModel

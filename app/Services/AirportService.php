@@ -42,16 +42,19 @@ class AirportService
 
         return collect($raw)
             ->map(function (array $airport) {
-                $city = $airport['state_name'] ?? '';
+                $stateName = $airport['state_name'] ?? '';
                 $code = $airport['code'] ?? '';
                 $name = $airport['name'] ?? '';
 
                 return [
-                    'value' => $code,
-                    'label' => "{$name}, {$city} ({$code})",
-                    'code'  => strtolower($code),
-                    'city'  => strtolower($city),
-                    'name'  => strtolower($name),
+                    'value'      => $code,
+                    'label'      => "{$name} ({$code}) - {$stateName}",
+                    'code'       => strtolower($code),
+                    'state'      => strtolower($stateName),
+                    'name'       => strtolower($name),
+                    'raw_name'   => $name,
+                    'raw_code'   => $code,
+                    'raw_state'  => $stateName,
                 ];
             })
             ->values();
