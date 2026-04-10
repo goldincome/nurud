@@ -171,12 +171,5 @@
         </div>
     </main>
 
-    <!-- Map Area (Visual decorative element spanning full width) -->
-    <div class="w-full h-80 md:h-[400px] mt-10">
-        <!-- Google Maps Embed of Lagos Nigeria (matching the footer address) -->
-        <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126839.81423408354!2d3.3514863!3d6.5243793!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b2ae68280c1%3A0xdc9e87a3671566bc!2sLagos%2C%20Nigeria!5e0!3m2!1sen!2sus!4v1712660000000!5m2!1sen!2sus"
-            width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade" class="grayscale opacity-90"></iframe>
-    </div>
+
 @endsection
