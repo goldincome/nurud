@@ -90,10 +90,10 @@ class PaymentService
 
             switch ($event['type']) {
                 case 'checkout.session.completed':
-                    return $this->handlePaymentSuccess($event['data']['object']);
+                    return $this->handlePaymentSuccess($event['data']['object']->toArray());
 
                 case 'payment_intent.payment_failed':
-                    return $this->handlePaymentFailure($event['data']['object']);
+                    return $this->handlePaymentFailure($event['data']['object']->toArray());
 
                 default:
                     Log::info('Unhandled webhook event', ['type' => $event['type']]);
@@ -132,30 +132,32 @@ class PaymentService
             if ($payment) {
                 $payment->update([
                     'status' => PaymentStatus::COMPLETED,
-                    'transaction_id' => $session['payment_intent'] ?? $session['id'],
+                    // 'transaction_id' => $session['payment_intent'] ?? $session['id'],
                     'gateway_response' => json_encode($session),
-                    'completed_at' => now(),
                 ]);
             }
 
             // Update booking status
             $booking->update([
                 'status' => BookingStatus::CONFIRMED,
-                'payment_status' => PaymentStatus::PAID,
+                //'payment_method' => PaymentMethod::STRIPE,
+                //'payment_status' => PaymentStatus::PAID,
             ]);
 
             // Send payment confirmation email
             dispatch(new SendPaymentConfirmation($booking));
 
-            Log::info('Payment processed successfully', [
+            Log::info('Webhook Payment processed successfully', [
                 'booking_id' => $bookingId,
-                'session_id' => $session['id']
+                'session_id' => $session['id'],
+                'booking data' => $booking,
+                'payment data' => $payment
             ]);
 
             return ['status' => 'success', 'booking_id' => $bookingId];
 
         } catch (\Exception $e) {
-            Log::error('Payment success handling failed', [
+            Log::error('Webhook Payment success handling failed', [
                 'error' => $e->getMessage(),
                 'session' => $session
             ]);
@@ -194,13 +196,13 @@ class PaymentService
                     }
                 }
 
-                Log::info('Payment marked as failed', ['booking_id' => $bookingId]);
+                Log::info('Webhook Payment marked as failed', ['booking_id' => $bookingId]);
             }
 
             return ['status' => 'failed', 'booking_id' => $bookingId];
 
         } catch (\Exception $e) {
-            Log::error('Payment failure handling failed', ['error' => $e->getMessage()]);
+            Log::error('Webhook Payment failure handling failed', ['error' => $e->getMessage()]);
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
     }

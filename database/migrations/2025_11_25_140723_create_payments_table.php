@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->foreignUuid('booking_id')->constrained()->onDelete('cascade');
             $table->string('transaction_ref');
             $table->decimal('amount', 12, 2);
-            $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
+            $table->enum('status', ['pending', 'completed', 'refunded', 'canceled', 'failed', 'paid'])->default('pending');
             $table->foreignId('verified_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
 

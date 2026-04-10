@@ -74,7 +74,7 @@
         <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl sm:text-2xl font-bold text-brand-grayDark dark:text-white">
-                    Travel deals under <span class="text-brand-red">$1,006</span>
+                    Travel deals under <span class="text-brand-red">£1,006</span>
                 </h2>
 
             </div>
@@ -99,7 +99,7 @@
                             </div>
                             <h3 class="font-bold text-brand-grayDark dark:text-white text-sm">{{ $deal['city'] }}</h3>
                             <p class="text-xs text-brand-grayLight dark:text-slate-400">{{ $deal['country'] }}</p>
-                            <p class="text-sm font-bold text-brand-blue mt-1">from ${{ $deal['price'] }}</p>
+                            <p class="text-sm font-bold text-brand-blue mt-1">from £{{ $deal['price'] }}</p>
                         </div>
                     @endforeach
                 </div>

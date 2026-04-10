@@ -13,7 +13,7 @@
                         class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mb-2 shadow-md">
                         <i class="fas fa-check"></i>
                     </div>
-                    <span class="text-xs text-brand-orange font-medium">Search flight</span>
+                    <span class="text-xs text-white font-medium">Search flight</span>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-completed">
@@ -21,7 +21,7 @@
                         class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mb-2 shadow-md">
                         <i class="fas fa-check"></i>
                     </div>
-                    <span class="text-xs text-brand-orange font-medium">Traveler Details</span>
+                    <span class="text-xs text-white font-medium">Traveler Details</span>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-active">
@@ -29,7 +29,7 @@
                         class="step-circle w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mb-2 shadow-md">
                         3
                     </div>
-                    <span class="text-xs text-white font-medium">Make payment</span>
+                    <span class="text-xs text-white font-bold">Make payment</span>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-inactive">
@@ -68,7 +68,7 @@
                     </button>
                     <button onclick="switchTab('bnpl')" id="btn-bnpl"
                         class="px-6 py-2 rounded-full text-sm font-bold transition-all bg-white text-brand-blue hover:bg-slate-50">
-                        Buy now, Pay later
+                        Installment Payment
                     </button>
                 </div>
 
@@ -279,7 +279,7 @@
 
                     <div id="tab-bnpl" class="hidden animate-fade-in">
                         <div class="bg-brand-blue px-6 py-4">
-                            <h2 class="text-white font-bold text-lg">Buy Now, Pay Later</h2>
+                            <h2 class="text-white font-bold text-lg">Installment Payment</h2>
                         </div>
                         <div class="p-6">
                             <div class="text-center py-6">
@@ -291,7 +291,7 @@
                                 <p class="text-sm text-slate-600 max-w-md mx-auto mb-6">
                                     Take advantage of our exclusive Credit Facility to secure your flight immediately while
                                     you spread the payments.
-                                    With Nurud's BNPL, you don't have to miss out on great fares.
+                                    With Nurud's Installment Payment, you don't have to miss out on great fares.
                                 </p>
                                 <button type="button" onclick="openBnplModal()"
                                     class="text-brand-orange hover:text-orange-700 underline text-sm font-bold mb-8 block mx-auto">
@@ -528,14 +528,14 @@
         class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center p-6 border-b border-slate-200 bg-slate-50 rounded-t-xl">
-                <h3 class="text-xl font-bold text-brand-blue">Credit Facility Terms & Conditions</h3>
+                <h3 class="text-xl font-bold text-brand-blue">Installment Payment(Credit Facility) Terms & Conditions</h3>
                 <button type="button" onclick="closeBnplModal()"
                     class="text-slate-400 hover:text-slate-600 focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 text-sm text-slate-600 space-y-4">
-                <p>By proceeding with the "Buy Now, Pay Later" (BNPL) credit facility managed by Nurud, you agree to the
+                <p>By proceeding with the Installment Payment (Credit Facility) managed by Nurud, you agree to the
                     following terms:</p>
                 <ul class="list-disc pl-5 space-y-2">
                     <li><strong>Immediate Reservation:</strong> Your selected flight will be booked and a PNR will be

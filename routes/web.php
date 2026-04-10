@@ -30,6 +30,30 @@ use App\Http\Controllers\SubscriberController;
 Route::get('/', function () {
     return view('home');
 });
+
+Route::get('/terms', function () {
+    return view('pages.terms');
+})->name('terms');
+
+Route::get('/about', function () {
+    return view('pages.about');
+})->name('about');
+
+Route::get('/contact', function () {
+    return view('pages.contact');
+})->name('contact');
+
+Route::get('/faq', function () {
+    return view('pages.faq');
+})->name('faq');
+
+Route::get('/privacy', function () {
+    return view('pages.privacy');
+})->name('privacy');
+Route::get('/services', function () {
+    return view('pages.services');
+})->name('services');
+
 Route::get('/booking', function () {
     return view('booking.booking');
 });

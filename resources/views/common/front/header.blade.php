@@ -19,12 +19,12 @@
         <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-brand-blue">
             <a href="/"
                 class="{{ request()->is('/') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">Home</a>
-            <a href="#"
+            <a href="{{ route('services') }}"
                 class="{{ request()->is('services*') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">Services</a>
-            <a href="#"
+            <a href="{{ route('about') }}"
                 class="{{ request()->is('about*') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">About
                 Us</a>
-            <a href="#"
+            <a href="{{ route('contact') }}"
                 class="{{ request()->is('contact*') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">Contact
                 Us</a>
             <a href="#"
@@ -91,12 +91,12 @@
         <div class="flex flex-col p-4 space-y-4 text-sm font-medium text-brand-blue">
             <a href="/"
                 class="{{ request()->is('/') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Home</a>
-            <a href="#"
-                class="{{ request()->is('financing*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Services</a>
-            <a href="#"
+            <a href="{{ route('services') }}"
+                class="{{ request()->is('services*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Services</a>
+            <a href="{{ route('about') }}"
                 class="{{ request()->is('about*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">About
                 Us</a>
-            <a href="#"
+            <a href="{{ route('contact') }}"
                 class="{{ request()->is('contact*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Contact
                 Us</a>
             <a href="#"
