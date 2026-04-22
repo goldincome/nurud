@@ -24,7 +24,12 @@ class BankTransferBookingEmail extends Mailable
 
     public function envelope(): Envelope
     {
+        $settings = \App\Models\GeneralSetting::first();
+        $fromEmail = (!empty($settings->contact_email)) ? $settings->contact_email : 'info@nurud.com';
+        $fromName = (!empty($settings->company_name)) ? $settings->company_name : 'Nurud Travels';
+
         return new Envelope(
+            from: new \Illuminate\Mail\Mailables\Address($fromEmail, $fromName),
             subject: 'Action Required: Complete Your Booking Payment',
         );
     }

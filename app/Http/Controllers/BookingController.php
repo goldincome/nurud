@@ -8,7 +8,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\BookingConfirmed;
-use App\Mail\PaymentConfirmed;
+use App\Mail\PaymentConfirmedTicketIssued;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\BookingService;
 use App\Services\PaymentService;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Jobs\SendBookingConfirmation;
-use App\Jobs\SendPaymentConfirmation;
+use App\Jobs\SendPaymentConfirmationWithTicket;
 use Illuminate\Support\Facades\Cache;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
@@ -138,6 +138,7 @@ class BookingController extends Controller
             'taxes' => $verifiedOffer['verifiedPriceBreakdown']['taxesAndFees'] + session()->get('markup_fee'),
             'simlessPayService' => $this->simlessPayService,
             'banks' => $banks,
+            'paymentMethod' => PaymentMethod::class,
         ]);
     }
 
@@ -149,26 +150,27 @@ class BookingController extends Controller
         if (!$bookingOffer) {
             return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
         }
-        //dd($bookingOffer);
+        //dd(json_encode($bookingOffer));
 
         try {
             $result = $this->flexiService->reserveFlight($bookingOffer);
+
             if (!$result) {
                 return redirect()->back()->with('error', 'Failed to reserve flight');
             }
             //dd($result);
             // Create booking and all related data in the database
-            $booking = $this->bookingService->createPendingBooking($result);
+            $booking = $this->bookingService->createPendingBooking($result, $bookingOffer);
 
             // Check for Buy Now, Pay Later (BNPL)
-            if ($request->booking_type === 'pay_later') {
+            if ($request->booking_type === PaymentMethod::PAY_LATER->value) {
                 // Record the payment method as pay_later
                 $booking->payments()->create([
                     'transaction_ref' => 'BNPL_' . strtoupper(uniqid()),
                     'amount' => $booking->total_price,
                     'currency' => $booking->currency,
-                    'status' => \App\Enums\PaymentStatus::PENDING,
-                    'payment_method' => \App\Enums\PaymentMethod::PAY_LATER,
+                    'status' => PaymentStatus::PENDING,
+                    'payment_method' => PaymentMethod::PAY_LATER,
                 ]);
 
                 // Send the BNPL Email
@@ -181,10 +183,9 @@ class BookingController extends Controller
                         'error' => $e->getMessage()
                     ]);
                 }
-
                 session()->put('booking_id', $booking->id);
                 session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
-                
+
                 return redirect()->route('bookings.confirmation')->with(
                     'success',
                     'Booking reserved successfully via BNPL Facility! Please check your email and contact us within 12 hours.'
@@ -192,14 +193,14 @@ class BookingController extends Controller
             }
 
             // Check for Bank Transfer
-            if ($request->booking_type === 'bank_transfer') {
+            if ($request->booking_type === PaymentMethod::BANK_TRANSFER->value) {
                 // Record the payment method as bank_transfer
                 $booking->payments()->create([
                     'transaction_ref' => 'TRF_' . strtoupper(uniqid()),
                     'amount' => $booking->total_price,
                     'currency' => $booking->currency,
-                    'status' => \App\Enums\PaymentStatus::PENDING,
-                    'payment_method' => \App\Enums\PaymentMethod::BANK_TRANSFER,
+                    'status' => PaymentStatus::PENDING,
+                    'payment_method' => PaymentMethod::BANK_TRANSFER,
                 ]);
 
                 // Send the Bank Transfer Email
@@ -215,7 +216,7 @@ class BookingController extends Controller
 
                 session()->put('booking_id', $booking->id);
                 session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
-                
+
                 return redirect()->route('bookings.confirmation')->with(
                     'success',
                     'Booking reserved successfully! Please check your email and complete the bank transfer within 12 hours.'
@@ -223,14 +224,14 @@ class BookingController extends Controller
             }
 
             // Check for Book On Hold
-            if ($request->booking_type === 'on_hold') {
+            if ($request->booking_type === PaymentMethod::BOOK_ON_HOLD->value) {
                 // Record the payment method as book_on_hold
                 $booking->payments()->create([
                     'transaction_ref' => 'HOLD_' . strtoupper(uniqid()),
                     'amount' => $booking->total_price,
                     'currency' => $booking->currency,
-                    'status' => \App\Enums\PaymentStatus::PENDING,
-                    'payment_method' => \App\Enums\PaymentMethod::BOOK_ON_HOLD,
+                    'status' => PaymentStatus::PENDING,
+                    'payment_method' => PaymentMethod::BOOK_ON_HOLD,
                 ]);
 
                 // Send the Book On Hold Email
@@ -246,7 +247,7 @@ class BookingController extends Controller
 
                 session()->put('booking_id', $booking->id);
                 session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
-                
+
                 return redirect()->route('bookings.confirmation')->with(
                     'success',
                     'Booking successfully placed on hold! Please check your email and complete the transfer within 12 hours.'
@@ -289,17 +290,15 @@ class BookingController extends Controller
         if (!$booking) {
             return redirect()->back()->with('error', 'Booking not found');
         }
-
+        //stripe confirmation and initial reservation email
         if (request()->has('session_id')) {
             $payment = $booking->payments()->where('stripe_session_id', request()->session_id)->first();
             if ($payment && $payment->status === \App\Enums\PaymentStatus::PENDING) {
-                if (!Cache::has('processing_email_sent_' . $payment->id)) {
-                    Cache::put('processing_email_sent_' . $payment->id, true, now()->addHours(1));
-                    try {
-                        Mail::to($booking->customer_email)->send(new \App\Mail\StripePaymentProcessingEmail($booking));
-                    } catch (\Exception $e) {
-                        Log::error('Failed to send Stripe processing email', ['error' => $e->getMessage()]);
-                    }
+
+                try {
+                    Mail::to($booking->customer_email)->send(new \App\Mail\StripePaymentProcessingEmail($booking));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send Stripe processing email', ['error' => $e->getMessage()]);
                 }
             }
         }
@@ -382,11 +381,11 @@ class BookingController extends Controller
                     ]);
 
                     // Confirm the booking
-                    app(BookingService::class)->confirmPayment($booking);
+                    //app(BookingService::class)->confirmPayment($booking);
 
                     // Send payment confirmation email
                     try {
-                        Mail::to($booking->guest_email)->send(new PaymentConfirmed($booking));
+                        Mail::to($booking->guest_email)->send(new PaymentConfirmedTicketIssued($booking));
                     } catch (\Exception $e) {
                         Log::error('Failed to send payment confirmation email', ['reservation_id' => $booking->reservation_id, 'error' => $e->getMessage()]);
                     }

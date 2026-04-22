@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Booking;
-use App\Mail\PaymentConfirmed;
+use App\Mail\PaymentConfirmedTicketIssued;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class SendPaymentConfirmation implements ShouldQueue
+class SendPaymentConfirmationWithTicket implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,7 +26,7 @@ class SendPaymentConfirmation implements ShouldQueue
     public function handle(): void
     {
         try {
-            Mail::to($this->booking->guest_email)->send(new PaymentConfirmed($this->booking));
+            Mail::to($this->booking->customer_email)->send(new PaymentConfirmedTicketIssued($this->booking));
             Log::info('Payment confirmation email queued successfully', ['pnr' => $this->booking->reference_number]);
         } catch (\Exception $e) {
             Log::error('Failed to send queued payment confirmation email', [

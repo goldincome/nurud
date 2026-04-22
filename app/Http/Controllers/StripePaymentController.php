@@ -16,18 +16,21 @@ use Illuminate\Support\Facades\DB;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
+use App\Services\SimlessPayService;
 
 class StripePaymentController extends Controller
 {
     protected PaymentService $paymentService;
     protected BookingService $bookingService;
     protected FlexiApiService $flexiService;
+    protected SimlessPayService $simlessPayService;
 
-    public function __construct(PaymentService $paymentService, BookingService $bookingService, FlexiApiService $flexiService)
+    public function __construct(PaymentService $paymentService, BookingService $bookingService, FlexiApiService $flexiService, SimlessPayService $simlessPayService)
     {
         $this->paymentService = $paymentService;
         $this->bookingService = $bookingService;
         $this->flexiService = $flexiService;
+        $this->simlessPayService = $simlessPayService;
     }
 
     public function checkout(Request $request)
@@ -43,6 +46,7 @@ class StripePaymentController extends Controller
                 return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
             }
 
+            //dd(number_format($this->simlessPayService->convertNairaToPounds($bookingOffer['offerInfo']['verifiedPriceBreakdown']['total'] + session()->get('markup_fee'))));
             try {
                 // 1. Reserve the flight (get PNR)
                 $result = $this->flexiService->reserveFlight($bookingOffer);
@@ -51,7 +55,7 @@ class StripePaymentController extends Controller
                 }
 
                 // 2. Create the pending booking
-                $booking = $this->bookingService->createPendingBooking($result);
+                $booking = $this->bookingService->createPendingBooking($result, $bookingOffer);
                 $bookingId = $booking->id;
 
                 // Clean up session if needed or keep it for context
@@ -66,7 +70,7 @@ class StripePaymentController extends Controller
             $booking = Booking::findOrFail($bookingId);
         }
         session()->put('booking_id', $booking->id);
-        if ($booking->status === BookingStatus::CONFIRMED && $booking->payment_status === PaymentStatus::PAID) {
+        if ($booking->status === BookingStatus::CONFIRMED && $booking->payment_status === PaymentStatus::COMPLETED) {
             return redirect()->route('bookings.confirmation')->with('success', 'Booking created successfully. Please complete payment within 24 hours.');
         }
 
@@ -83,7 +87,7 @@ class StripePaymentController extends Controller
         $paymentData = [
             'booking_id' => $booking->id,
             'pnr' => $booking->reference_number,
-            'amount' => $booking->priceInPounds->total_price + $booking->priceInPounds->markup,
+            'amount' => $booking->priceInPounds->total_price,
             'currency' => $booking->priceInPounds->currency ?? 'GBP',
         ];
 

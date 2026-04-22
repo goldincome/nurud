@@ -67,9 +67,9 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
-                                                            @if($booking->status->value === 'confirmed') bg-green-100 text-green-600
-                                                            @elseif($booking->status->value === 'cancelled') bg-red-100 text-red-600
-                                                            @elseif($booking->status->value === 'pending_payment') bg-yellow-100 text-yellow-600
+                                                            @if($booking->status->value === $bookingStatus::CONFIRMED->value) bg-green-100 text-green-600
+                                                            @elseif($booking->status->value === $bookingStatus::CANCELLED->value) bg-red-100 text-red-600
+                                                            @elseif($booking->status->value === $bookingStatus::PENDING_PAYMENT->value) bg-yellow-100 text-yellow-600
                                                             @else bg-slate-100 text-slate-600 @endif">
                                     {{ str_replace('_', ' ', $booking->status->value) }}
                                 </span>

@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Models\Payment;
 use App\Models\Booking;
-use App\Jobs\SendPaymentConfirmation;
+use App\Jobs\SendPaymentConfirmationWithTicket;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
+use App\Services\FlexiApiService;
+use App\Services\AdminNotificationService;
 
 class PaymentService
 {
@@ -124,37 +126,44 @@ class PaymentService
                 throw new \Exception('Booking not found');
             }
 
-            // Update payment record
-            $payment = Payment::where('booking_id', $bookingId)
-                ->where('payment_method', PaymentMethod::STRIPE)
-                ->first();
+            $result = app(FlexiApiService::class)->issueTicket($booking->offer_data);
+            if (isset($result) && $result['flightOrder']['pnr']) {
+                // Update payment record
+                $payment = Payment::where('booking_id', $bookingId)
+                    ->where('payment_method', PaymentMethod::STRIPE)
+                    ->first();
 
-            if ($payment) {
-                $payment->update([
-                    'status' => PaymentStatus::COMPLETED,
-                    // 'transaction_id' => $session['payment_intent'] ?? $session['id'],
-                    'gateway_response' => json_encode($session),
+                if ($payment) {
+                    $payment->update([
+                        'status' => PaymentStatus::COMPLETED,
+                        // 'transaction_id' => $session['payment_intent'] ?? $session['id'],
+                        'gateway_response' => json_encode($session),
+                    ]);
+                }
+
+                // Update booking status
+                $booking->update([
+                    'status' => BookingStatus::CONFIRMED,
+                    //'payment_method' => PaymentMethod::STRIPE,
+                    //'payment_status' => PaymentStatus::PAID,
                 ]);
+
+                // Send payment confirmation email
+                dispatch(new SendPaymentConfirmationWithTicket($booking));
+
+                Log::info('Webhook Payment processed successfully', [
+                    'booking_id' => $bookingId,
+                    'session_id' => $session['id'],
+                    'booking data' => $booking,
+                    'payment data' => $payment
+                ]);
+
+                return ['status' => 'success', 'booking_id' => $bookingId];
             }
 
-            // Update booking status
-            $booking->update([
-                'status' => BookingStatus::CONFIRMED,
-                //'payment_method' => PaymentMethod::STRIPE,
-                //'payment_status' => PaymentStatus::PAID,
-            ]);
-
-            // Send payment confirmation email
-            dispatch(new SendPaymentConfirmation($booking));
-
-            Log::info('Webhook Payment processed successfully', [
-                'booking_id' => $bookingId,
-                'session_id' => $session['id'],
-                'booking data' => $booking,
-                'payment data' => $payment
-            ]);
-
-            return ['status' => 'success', 'booking_id' => $bookingId];
+            // Notify admin: Stripe payment confirmed but ticket not issued
+            AdminNotificationService::notifyStripeNoTicket($booking, 'Payment is successful on Stripe but Ticket not issued');
+            return ['status' => 'error', 'message' => 'Payment is successful on Stripe but Ticket not issued'];
 
         } catch (\Exception $e) {
             Log::error('Webhook Payment success handling failed', [
@@ -248,7 +257,7 @@ class PaymentService
                 ]);
 
                 // Send payment confirmation email
-                dispatch(new SendPaymentConfirmation($booking));
+                dispatch(new SendPaymentConfirmationWithTicket($booking));
 
                 Log::info('Bank transfer verified', ['booking_id' => $bookingId, 'verified_by' => $userId]);
                 return true;

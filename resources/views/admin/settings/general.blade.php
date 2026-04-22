@@ -74,6 +74,19 @@
                     @enderror
                 </div>
 
+                <!-- Admin Email -->
+                <div class="space-y-1">
+                    <label for="admin_email" class="text-sm font-medium text-slate-700">Admin Email <span
+                            class="text-red-500">*</span></label>
+                    <input type="email" name="admin_email" id="admin_email"
+                        value="{{ old('admin_email', $settings->admin_email) }}"
+                        class="w-full rounded-lg border-slate-300 focus:border-brand-blue focus:ring-brand-blue/20 transition-colors placeholder-slate-400 text-sm"
+                        placeholder="e.g. admin@nurud.com">
+                    @error('admin_email')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Additional Emails -->
                 <div class="space-y-1 md:col-span-2">
                     <label for="emails" class="text-sm font-medium text-slate-700">Additional Emails (Optional)</label>
@@ -84,6 +97,70 @@
                     @error('emails')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                     @enderror
+                </div>
+            </div>
+
+            <!-- Email Notification Toggles -->
+            <div class="pt-6 border-t border-slate-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-1">Admin Email Notifications</h3>
+                <p class="text-sm text-slate-500 mb-4">Control which events trigger an email notification to the admin.</p>
+
+                <div class="space-y-4">
+                    <!-- Toggle 1: New Reservation -->
+                    <label for="notify_admin_new_reservation" class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100 transition">
+                        <div>
+                            <div class="text-sm font-medium text-slate-800">New Reservation Created</div>
+                            <div class="text-xs text-slate-500">Send admin an email when a new flight reservation is made.</div>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" name="notify_admin_new_reservation" id="notify_admin_new_reservation" value="1"
+                                {{ old('notify_admin_new_reservation', $settings->notify_admin_new_reservation) ? 'checked' : '' }}
+                                class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-300 peer-focus:ring-2 peer-focus:ring-brand-blue/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-brand-blue after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                        </div>
+                    </label>
+
+                    <!-- Toggle 2: Stripe Payment Confirmed but Ticket Not Issued -->
+                    <label for="notify_admin_stripe_no_ticket" class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100 transition">
+                        <div>
+                            <div class="text-sm font-medium text-slate-800">Stripe Payment Confirmed — Ticket Not Issued</div>
+                            <div class="text-xs text-slate-500">Send admin an email if Stripe payment is confirmed but ticket issuance fails.</div>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" name="notify_admin_stripe_no_ticket" id="notify_admin_stripe_no_ticket" value="1"
+                                {{ old('notify_admin_stripe_no_ticket', $settings->notify_admin_stripe_no_ticket) ? 'checked' : '' }}
+                                class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-300 peer-focus:ring-2 peer-focus:ring-brand-blue/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-brand-blue after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                        </div>
+                    </label>
+
+                    <!-- Toggle 3: 247 API Down -->
+                    <label for="notify_admin_247_api_down" class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100 transition">
+                        <div>
+                            <div class="text-sm font-medium text-slate-800">247 Travels API Down</div>
+                            <div class="text-xs text-slate-500">Send admin an email if the 247 Travels flight API is unreachable.</div>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" name="notify_admin_247_api_down" id="notify_admin_247_api_down" value="1"
+                                {{ old('notify_admin_247_api_down', $settings->notify_admin_247_api_down) ? 'checked' : '' }}
+                                class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-300 peer-focus:ring-2 peer-focus:ring-brand-blue/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-brand-blue after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                        </div>
+                    </label>
+
+                    <!-- Toggle 4: SimlessPay API Down -->
+                    <label for="notify_admin_simlesspay_api_down" class="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100 transition">
+                        <div>
+                            <div class="text-sm font-medium text-slate-800">SimlessPay API Down</div>
+                            <div class="text-xs text-slate-500">Send admin an email if the SimlessPay payment API is unreachable.</div>
+                        </div>
+                        <div class="relative">
+                            <input type="checkbox" name="notify_admin_simlesspay_api_down" id="notify_admin_simlesspay_api_down" value="1"
+                                {{ old('notify_admin_simlesspay_api_down', $settings->notify_admin_simlesspay_api_down) ? 'checked' : '' }}
+                                class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-300 peer-focus:ring-2 peer-focus:ring-brand-blue/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-brand-blue after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                        </div>
+                    </label>
                 </div>
             </div>
 

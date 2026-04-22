@@ -19,31 +19,37 @@
         <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-brand-blue">
             <a href="/"
                 class="{{ request()->is('/') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">Home</a>
-            <a href="{{ route('services') }}"
-                class="{{ request()->is('services*') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">Services</a>
-            <a href="{{ route('about') }}"
-                class="{{ request()->is('about*') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">About
-                Us</a>
-            <a href="{{ route('contact') }}"
-                class="{{ request()->is('contact*') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">Contact
-                Us</a>
-            <a href="#"
-                class="{{ request()->is('blog*') ? 'text-brand-red' : 'hover:text-brand-red' }} transition-colors">Blog</a>
         </div>
 
         <!-- Right Side Actions -->
         <div class="flex items-center space-x-3">
             @guest
-                <!-- Login Button -->
-                <a href="{{ route('login') }}"
-                    class="hidden md:block bg-transparent hover:bg-brand-blue/5 text-brand-blue px-4 py-2 rounded-full text-sm font-medium transition-all border border-brand-blue">
-                    Login
+                <!-- Help Button (desktop only) -->
+                <a href="{{ route('contact') }}"
+                    class="hidden md:inline-flex items-center gap-1.5 bg-transparent hover:bg-brand-blue/5 text-brand-blue px-4 py-2 rounded-full text-sm font-medium transition-all border border-brand-blue">
+                    <i class="fas fa-circle-question text-xs"></i> Help
                 </a>
-                <!-- Sign Up Button -->
-                <a href="{{ route('register') }}"
-                    class="hidden md:block bg-brand-red hover:bg-brand-redDark text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
-                    Sign Up
-                </a>
+
+                <!-- Login/Register Dropdown (desktop only) -->
+                <div class="relative hidden md:block" id="auth-dropdown-wrap">
+                    <button type="button" id="auth-dropdown-btn"
+                        onclick="document.getElementById('auth-dropdown').classList.toggle('hidden')"
+                        class="flex items-center gap-1.5 bg-brand-red hover:bg-brand-redDark text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
+                        Login / Register
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="auth-dropdown"
+                        class="hidden absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50">
+                        <a href="{{ route('login') }}"
+                            class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors">
+                            <i class="fas fa-sign-in-alt text-brand-blue w-4"></i> Login
+                        </a>
+                        <a href="{{ route('register') }}"
+                            class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-blue transition-colors">
+                            <i class="fas fa-user-plus text-brand-red w-4"></i> Register
+                        </a>
+                    </div>
+                </div>
             @endguest
 
             @auth
@@ -91,27 +97,21 @@
         <div class="flex flex-col p-4 space-y-4 text-sm font-medium text-brand-blue">
             <a href="/"
                 class="{{ request()->is('/') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Home</a>
-            <a href="{{ route('services') }}"
-                class="{{ request()->is('services*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Services</a>
-            <a href="{{ route('about') }}"
-                class="{{ request()->is('about*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">About
-                Us</a>
-            <a href="{{ route('contact') }}"
-                class="{{ request()->is('contact*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Contact
-                Us</a>
-            <a href="#"
-                class="{{ request()->is('blog*') ? 'text-brand-red' : 'hover:text-brand-red' }} hover:bg-slate-50 p-2 rounded transition-colors">Blog</a>
 
             <!-- Auth Section for Mobile -->
             <div class="border-t border-brand-blue/10 pt-4 mt-2">
                 @guest
+                    <a href="{{ route('contact') }}"
+                        class="flex items-center justify-center gap-2 w-full text-center bg-transparent border border-brand-blue text-brand-blue py-2 rounded-lg mb-2 hover:bg-brand-blue/5 transition-colors">
+                        <i class="fas fa-circle-question text-xs"></i> Help
+                    </a>
                     <a href="{{ route('login') }}"
                         class="block w-full text-center bg-transparent border border-brand-blue text-brand-blue py-2 rounded-lg mb-2 hover:bg-brand-blue/5 transition-colors">
                         Login
                     </a>
                     <a href="{{ route('register') }}"
                         class="block w-full text-center bg-brand-red text-white py-2 rounded-lg hover:bg-brand-redDark transition-colors">
-                        Sign Up
+                        Register
                     </a>
                 @endguest
 

@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use App\Services\AdminNotificationService;
 
 class SimlessPayService
 {
@@ -67,6 +68,7 @@ class SimlessPayService
             return null;
         } catch (\Exception $e) {
             $this->logException('Authentication exception', $e);
+            AdminNotificationService::notifySimlessPayApiDown($e->getMessage(), "{$this->baseUrl}/api/v1/auth/login/api-key");
             return null;
         }
     }
@@ -519,6 +521,8 @@ class SimlessPayService
     protected function handleException(string $message, \Exception $e): array
     {
         $this->logException($message, $e);
+
+        AdminNotificationService::notifySimlessPayApiDown($e->getMessage(), $message);
 
         return [
             'success' => false,

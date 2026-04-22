@@ -89,6 +89,15 @@
                         userDropdown.classList.add('hidden');
                     }
                 }
+
+                // Close auth (login/register) dropdown
+                const authDropdown = document.getElementById('auth-dropdown');
+                const authDropdownBtn = document.getElementById('auth-dropdown-btn');
+                if (authDropdown && !authDropdown.classList.contains('hidden')) {
+                    if (!authDropdown.contains(e.target) && e.target !== authDropdownBtn && !authDropdownBtn.contains(e.target)) {
+                        authDropdown.classList.add('hidden');
+                    }
+                }
             });
         });
     </script>

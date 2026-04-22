@@ -29,10 +29,9 @@
             <div>
                 <h5 class="text-white font-bold mb-4 text-xs uppercase tracking-wider">Company</h5>
                 <ul class="space-y-2">
+                    <li><a href="{{ route('services') }}" class="hover:text-white transition-colors">Services</a></li>
                     <li><a href="{{ route('about') }}" class="hover:text-white transition-colors">About Us</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Travel Financing</a></li>
                     <li><a href="{{ route('contact') }}" class="hover:text-white transition-colors">Contact Us</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
                 </ul>
             </div>
             {{-- Support --}}
@@ -44,7 +43,6 @@
                     </li>
                     <li><a href="{{ route('privacy') }}" class="hover:text-white transition-colors">Privacy Policy</a>
                     </li>
-                    <li><a href="#" class="hover:text-white transition-colors">Refund Policy</a></li>
                 </ul>
             </div>
             {{-- Explore --}}
@@ -73,14 +71,8 @@
         </div>
 
         {{-- Bottom Bar --}}
-        <div class="border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p class="text-xs text-white/30">&copy; 2026 Nurud Travels. All Rights Reserved.</p>
-            <div class="flex items-center gap-4">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png"
-                    alt="Mastercard" class="h-5 opacity-40">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png"
-                    alt="Visa" class="h-3 opacity-40">
-            </div>
+        <div class="border-t border-white/10 pt-6 flex justify-center items-center">
+            <p class="text-xs text-white/30 text-center">&copy; 2026 Nurud Travels. All Rights Reserved.</p>
         </div>
     </div>
 </footer>

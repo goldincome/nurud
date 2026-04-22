@@ -7,6 +7,8 @@ use App\Models\Booking;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateBookingStatusRequest;
 use App\Enums\BookingStatus;
+use App\Services\FlexiApiService;
+use App\Services\BookingService;
 
 class AdminBookingController extends Controller
 {
@@ -21,6 +23,7 @@ class AdminBookingController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('reservation_id', 'like', "%{$search}%")
+                    ->orWhere('pnr', 'like', "%{$search}%")
                     ->orWhere('reference_number', 'like', "%{$search}%")
                     ->orWhere('customer_email', 'like', "%{$search}%")
                     ->orWhere('customer_first_name', 'like', "%{$search}%")
@@ -30,7 +33,8 @@ class AdminBookingController extends Controller
 
         $bookings = $query->latest()->paginate(15);
 
-        return view('admin.bookings.index', compact('bookings'));
+        $bookingStatus = BookingStatus::class;
+        return view('admin.bookings.index', compact('bookings', 'bookingStatus'));
     }
 
     /**
@@ -39,7 +43,9 @@ class AdminBookingController extends Controller
     public function show(Booking $booking)
     {
         $booking->load(['travelers', 'payments', 'itineraries', 'travelerPricings']);
-        return view('admin.bookings.show', compact('booking'));
+        $bookingStatus = BookingStatus::class;
+        $paymentMethod = $booking->payments()->first()->payment_method->value ?? null;
+        return view('admin.bookings.show', compact('booking', 'bookingStatus', 'paymentMethod'));
     }
 
     /**
@@ -47,12 +53,14 @@ class AdminBookingController extends Controller
      */
     public function update(UpdateBookingStatusRequest $request, Booking $booking)
     {
-        $booking->update([
-            'status' => $request->status,
-        ]);
+        if ($request->status === BookingStatus::CONFIRMED->value) {
+            //dd(json_encode($booking->offer_data));
+            $isConfirmed = app(BookingService::class)->confirmBookingAndIssueTicket($booking);
+        }
 
         if ($request->status === BookingStatus::CANCELLED->value) {
             $booking->update([
+                'status' => BookingStatus::CANCELLED->value,
                 'cancelled_at' => now(),
                 'cancelled_by' => auth()->id(),
             ]);

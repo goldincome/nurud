@@ -30,6 +30,7 @@ class Booking extends Model
         'class',
         'ama_client_ref',
         'reservation_id',
+        'pnr',
         'base_price',
         'taxes_and_fees',
         'total_price',
@@ -39,6 +40,7 @@ class Booking extends Model
         'customer_last_name',
         'customer_email',
         'reservation_date',
+        'offer_data',
         'order_status',
         'date_created',
         'date_modified',
@@ -64,6 +66,7 @@ class Booking extends Model
     protected $casts = [
         'departure_date' => 'datetime',
         'reservation_date' => 'datetime',
+        'offer_data' => 'array',
         'date_created' => 'datetime',
         'date_modified' => 'datetime',
         'expires_at' => 'datetime',

@@ -139,9 +139,9 @@
         }
 
         .info-label {
-            font-size: 9px;
+            font-size: 11px;
             text-transform: uppercase;
-            color: #999;
+            color: #000;
             font-weight: bold;
             letter-spacing: 0.5px;
         }
@@ -163,16 +163,16 @@
             background: #f1f5f9;
             text-align: left;
             padding: 8px 12px;
-            font-size: 9px;
+            font-size: 11px;
             text-transform: uppercase;
-            color: #64748b;
+            color: #000;
             font-weight: bold;
             letter-spacing: 0.5px;
         }
 
         .travelers-table td {
             padding: 8px 12px;
-            font-size: 11px;
+            font-size: 13px;
             border-bottom: 1px solid #e2e8f0;
         }
 
@@ -205,8 +205,8 @@
             padding: 15px 30px;
             border-top: 1px dashed #cbd5e1;
             text-align: center;
-            font-size: 9px;
-            color: #94a3b8;
+            font-size: 11px;
+            color: #000;
         }
 
         .divider {
@@ -224,9 +224,9 @@
         }
 
         .price-label {
-            font-size: 9px;
+            font-size: 11px;
             text-transform: uppercase;
-            color: #64748b;
+            color: #000;
         }
 
         .price-value {
@@ -248,13 +248,13 @@
         }
 
         .itinerary-summary {
-            font-size: 10px;
-            color: #64748b;
+            font-size: 12px;
+            color: #000;
             margin-top: 2px;
         }
 
         .itinerary-duration {
-            font-size: 10px;
+            font-size: 12px;
             color: #002D72;
             font-weight: bold;
         }
@@ -293,8 +293,8 @@
         }
 
         .seg-date {
-            font-size: 9px;
-            color: #64748b;
+            font-size: 11px;
+            color: #000;
         }
 
         .seg-code {
@@ -305,31 +305,31 @@
         }
 
         .seg-airport {
-            font-size: 9px;
-            color: #64748b;
+            font-size: 11px;
+            color: #000;
         }
 
         .seg-city {
-            font-size: 8px;
-            color: #94a3b8;
+            font-size: 10px;
+            color: #000;
         }
 
         .seg-duration {
-            font-size: 9px;
+            font-size: 11px;
             font-weight: bold;
-            color: #64748b;
+            color: #000;
             text-transform: uppercase;
         }
 
         .seg-carrier {
-            font-size: 9px;
-            color: #64748b;
+            font-size: 11px;
+            color: #000;
             margin-top: 4px;
         }
 
         .seg-flight-no {
-            font-size: 9px;
-            color: #94a3b8;
+            font-size: 11px;
+            color: #000;
         }
 
         .seg-line {
@@ -347,12 +347,12 @@
 
         .layover-label {
             font-weight: bold;
-            color: #92400e;
+            color: #000;
         }
 
         .layover-detail {
-            color: #a16207;
-            font-size: 9px;
+            color: #000;
+            font-size: 11px;
         }
     </style>
 </head>
@@ -364,12 +364,29 @@
             <div class="logo">Nurud <span>Travel</span></div>
             <div class="ref">
                 Ref: <strong>{{ $booking->reference_number }}</strong><br>
-                @if($booking->status->value === 'confirmed')
-                PNR: {{ $booking->reservation_id }}<br>
+                @if(!empty($booking->pnr))
+                PNR: {{ $booking->pnr  }}<br>
                 @endif
                 Date: {{ $booking->created_at->format('M d, Y') }}
             </div>
         </div>
+
+        <div style="padding: 20px 30px 10px 30px; font-size: 13px; line-height: 1.5; color: #000;">
+            Dear Esteemed Customer,<br><br>
+            We are pleased to confirm your flight reservation. Your reservation is <strong>CONFIRMED</strong>.
+        </div>
+
+        @if(!empty($booking->pnr))
+        <!-- PNR Highlight -->
+        <div style="background-color: #e0f2fe; border-top: 1px solid #bae6fd; border-bottom: 2px solid #002D72; padding: 12px 30px; display: table; width: 100%; box-sizing: border-box;">
+            <div style="display: table-cell; vertical-align: middle; width: 50%; font-size: 13px; font-weight: bold; color: #002D72; text-transform: uppercase; letter-spacing: 1px;">
+                Airline PNR:
+            </div>
+            <div style="display: table-cell; vertical-align: middle; width: 50%; text-align: right; font-size: 24px; font-weight: bold; color: #b91c1c; font-family: 'Courier New', Courier, monospace; letter-spacing: 2px;">
+                {{ $booking->pnr }}
+            </div>
+        </div>
+        @endif
 
         <!-- Flight Route Banner -->
         <div class="flight-banner">
@@ -403,7 +420,7 @@
                         </div>
                         <div style="display: table-cell; vertical-align: middle; text-align: right;">
                             <div class="itinerary-duration">Duration: {{ $itinerary->duration }}</div>
-                            <div style="font-size: 9px; color: #64748b;">
+                            <div style="font-size: 11px; color: #000;">
                                 @if(count($itinerary->segments ?? []) > 1)
                                     {{ count($itinerary->segments) - 1 }} stop(s)
                                 @else
@@ -433,10 +450,24 @@
                         <div class="segment-cell mid">
                             <div class="seg-duration">{{ $segment['duration'] ?? '' }}</div>
                             <div class="seg-line"></div>
-                            <div style="font-size: 12px; color: #64748b;">✈</div>
+                            <div style="font-size: 14px; color: #000;">✈</div>
                             <div class="seg-line"></div>
                             <div class="seg-carrier">{{ $segment['carrier']['name'] ?? '' }}</div>
-                            <div class="seg-flight-no">{{ $segment['carrier']['iataCode'] ?? '' }}{{ $segment['number'] ?? '' }} &bull; Aircraft {{ $segment['aircraft']['code'] ?? 'N/A' }}</div>
+                            <div class="seg-flight-no">
+                                {{ $segment['carrier']['iataCode'] ?? '' }}{{ $segment['number'] ?? '' }} &bull; Aircraft {{ $segment['aircraft']['code'] ?? 'N/A' }}
+                                @php
+                                    $bagInfo = $booking->travelerPricings[0]->fare_details_by_segment[$segIndex]['includedCheckedBags'] ?? null;
+                                    $bagDisplay = 'Included';
+                                    if ($bagInfo) {
+                                        if (isset($bagInfo['quantity']) && $bagInfo['quantity'] > 0) {
+                                            $bagDisplay = $bagInfo['quantity'] . 'PCS 23kg';
+                                        } elseif (isset($bagInfo['weight']) && $bagInfo['weight'] > 0) {
+                                            $bagDisplay = '1PC x ' . $bagInfo['weight'] . ($bagInfo['weightUnit'] ?? 'kg');
+                                        }
+                                    }
+                                @endphp
+                                <br>&bull; Baggage: {{ $bagDisplay }}
+                            </div>
                         </div>
                         <div class="segment-cell arr">
                             <div class="seg-time">{{ isset($segment['segmentArrival']['at']) ? \Carbon\Carbon::parse($segment['segmentArrival']['at'])->format('H:i') : '--:--' }}</div>
@@ -472,10 +503,7 @@
         <!-- Booking Status -->
         <div class="details-section">
             <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Payment Method</div>
-                    <div class="info-value">{{ ucwords(str_replace('_', ' ', $booking->payment_method->value ?? $booking->payment_method ?? 'N/A')) }}</div>
-                </div>
+
                 <div class="info-item">
                     <div class="info-label">Status</div>
                     <div class="info-value">

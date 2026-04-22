@@ -34,7 +34,7 @@ class SearchController extends Controller
 
         try {
             // Fix for the 30s timeout error
-            set_time_limit(120);
+            set_time_limit(300);
 
             $flights = $this->flexiService->searchFlights($validated);
 

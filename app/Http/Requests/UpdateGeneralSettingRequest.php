@@ -25,6 +25,24 @@ class UpdateGeneralSettingRequest extends FormRequest
             'phone_number' => 'required|string|max:50',
             'support_email' => 'required|email|max:255',
             'contact_email' => 'required|email|max:255',
+            'admin_email' => 'required|email|max:255',
+            'notify_admin_new_reservation' => 'nullable|boolean',
+            'notify_admin_stripe_no_ticket' => 'nullable|boolean',
+            'notify_admin_247_api_down' => 'nullable|boolean',
+            'notify_admin_simlesspay_api_down' => 'nullable|boolean',
         ];
+    }
+
+    /**
+     * Prepare the data for validation (checkboxes send nothing if unchecked).
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'notify_admin_new_reservation' => $this->has('notify_admin_new_reservation') ? 1 : 0,
+            'notify_admin_stripe_no_ticket' => $this->has('notify_admin_stripe_no_ticket') ? 1 : 0,
+            'notify_admin_247_api_down' => $this->has('notify_admin_247_api_down') ? 1 : 0,
+            'notify_admin_simlesspay_api_down' => $this->has('notify_admin_simlesspay_api_down') ? 1 : 0,
+        ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use App\Services\AdminNotificationService;
 
 class FlexiApiService
 {
@@ -16,7 +17,7 @@ class FlexiApiService
     {
         $this->environment = config('247travels.environment');
         $this->baseUrl = config('247travels.live_url');
-        if($this->environment === 'test'){
+        if ($this->environment === 'test') {
             $this->baseUrl = config('247travels.test_url');
         }
         $this->apiKey = config('247travels.secret_key');
@@ -27,14 +28,14 @@ class FlexiApiService
         return Http::withHeaders([
             'Authorization-Bearer-Token' => $this->apiKey, // Custom Header Key
         ])
-        ->withToken($this->apiKey)
-        ->acceptJson()
-        ->timeout(120)
-        ->retry(3, 100, fn ($exception) => $exception instanceof \Illuminate\Http\Client\ConnectionException);
+            ->withToken($this->apiKey)
+            ->acceptJson()
+            ->timeout(120)
+            ->retry(3, 100, fn($exception) => $exception instanceof \Illuminate\Http\Client\ConnectionException);
     }
     public function searchFlights(array $validatedData): array
     {
-       // 1. Map the Flat Form Data to the Nested API JSON Structure
+        // 1. Map the Flat Form Data to the Nested API JSON Structure
         $payload = [
             'directFlightOnly' => $validatedData['directFlightOnly'],
             'flightClass' => $validatedData['flightClass'],
@@ -47,7 +48,7 @@ class FlexiApiService
             'routeModel' => (int) $validatedData['routeModel'],
         ];
 
-        if($payload['routeModel'] === 0){
+        if ($payload['routeModel'] === 0) {
             $payload['oneWay'] = [
                 'originLocationCode' => $validatedData['originLocationCode'],
                 'originDestinationCode' => $validatedData['originDestinationCode'],
@@ -60,8 +61,8 @@ class FlexiApiService
                 'originLocationCode' => $validatedData['originLocationCode'],
                 'originDestinationCode' => $validatedData['originDestinationCode'],
                 'departureDate' => Carbon::parse($validatedData['departureDate'])->format('Y-m-d'),
-                'returnDate' => isset($validatedData['returnDate']) 
-                    ? Carbon::parse($validatedData['returnDate'])->format('Y-m-d') 
+                'returnDate' => isset($validatedData['returnDate'])
+                    ? Carbon::parse($validatedData['returnDate'])->format('Y-m-d')
                     : null,
             ];
         }
@@ -75,22 +76,22 @@ class FlexiApiService
                 // Check if the "originLocationCodeX" exists for this number
                 if (isset($validatedData["originLocationCode{$i}"])) {
                     $segments = [
-                        'originLocationCode'.$i => $validatedData["originLocationCode{$i}"],
-                        'originDestinationCode'.$i => $validatedData["originDestinationCode{$i}"],
-                        'departureDate'.$i => Carbon::parse($validatedData["departureDate{$i}"])->format('Y-m-d'),
+                        'originLocationCode' . $i => $validatedData["originLocationCode{$i}"],
+                        'originDestinationCode' . $i => $validatedData["originDestinationCode{$i}"],
+                        'departureDate' . $i => Carbon::parse($validatedData["departureDate{$i}"])->format('Y-m-d'),
                     ];
                     $out = array_merge($segments, $out);
                 }
             }
-            
+
             // Assign the list of segments to the API payload
             // Note: I am assuming your API expects a key named 'multiCity' containing an array of flights
-            $payload['multiCity'] = $out ; //$segments;
+            $payload['multiCity'] = $out; //$segments;
         }
 
         try {
             $response = $this->getHttpClient()->post("{$this->baseUrl}/flight-search", $payload);
-            
+
             if ($response->successful()) {
                 return $response->json();
             }
@@ -107,6 +108,8 @@ class FlexiApiService
                 'error' => $e->getMessage(),
                 'params' => $payload
             ]);
+            // Notify admin if API is down
+            AdminNotificationService::notify247ApiDown($e->getMessage(), "{$this->baseUrl}/flight-search");
             // Fallback to mock data in case of API failure
             return [];
         }
@@ -178,6 +181,7 @@ class FlexiApiService
                 'error' => $e->getMessage(),
                 'offer' => $offer
             ]);
+            AdminNotificationService::notify247ApiDown($e->getMessage(), "{$this->baseUrl}/offer/verify");
             throw $e;
         }
     }
@@ -185,7 +189,7 @@ class FlexiApiService
     public function reserveFlight(array $offer): array
     {
         try {
-            $response = $this->getHttpClient()->post("{$this->baseUrl}/offer/reserve", $offer);     
+            $response = $this->getHttpClient()->post("{$this->baseUrl}/offer/reserve", $offer);
 
             if ($response->successful()) {
                 return $response->json();
@@ -201,33 +205,51 @@ class FlexiApiService
             Log::error('Flexi API reserve error', [
                 'error' => $e->getMessage(),
             ]);
+            AdminNotificationService::notify247ApiDown($e->getMessage(), "{$this->baseUrl}/offer/reserve");
             throw $e;
         }
     }
 
-    public function issueTicket(string $pnr): array
+    public function issueTicket(array $bookingOffer): array
     {
         try {
-            $response = $this->getHttpClient()->post("{$this->baseUrl}/offer/book", [
-                'pnr' => $pnr
-            ]);
+            $response = $this->getHttpClient()->post("{$this->baseUrl}/offer/book", $bookingOffer);
 
             if ($response->successful()) {
+
                 return $response->json();
             }
 
             Log::error('Flexi API book failed', [
                 'status' => $response->status(),
                 'body' => $response->body(),
-                'pnr' => $pnr
             ]);
+            if ($response->failed() && $response->json('title') === 'SEGMENT SELL FAILURE') {
+                // 1. Log it aggressively for manual intervention
+                Log::error(
+                    "Booking Failed",
+                    ['error' => 'MONEY TAKEN BUT BOOKING FAILED']
+                );
 
+                // 2. Trigger an automatic refund via Stripe
+                //$stripe->refunds->create(['payment_intent' => $session->payment_intent]);
+
+                // 3. Update your local database booking status
+                //$booking->update(['status' => 'failed_and_refunded']);
+
+                // 4. Notify the user
+                // Mail::to($adminEmail)->send(new BookingFailedRefundedMail());
+            }
+            if ($response->status() === 400 && str_contains($response->body(), 'TOO_')) {
+                // 1. Log the PNR and Booking ID for manual review
+                Log::error("Booking Failed after Payment", ['error' => 'TOO_CLOSE_TO_DEPARTURE or TOO_LATE_TO_BOOK']);
+            }
             throw new \Exception("Ticket issuance failed: {$response->status()} - {$response->body()}");
         } catch (\Exception $e) {
             Log::error('Flexi API book error', [
                 'error' => $e->getMessage(),
-                'pnr' => $pnr
             ]);
+            AdminNotificationService::notify247ApiDown($e->getMessage(), "{$this->baseUrl}/offer/book");
             throw $e;
         }
     }

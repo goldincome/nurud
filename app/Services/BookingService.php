@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use App\Enums\PaymentStatus;
+use App\Services\FlexiApiService;
+use App\Jobs\SendPaymentConfirmationWithTicket;
+use App\Services\AdminNotificationService;
 
 class BookingService
 {
@@ -25,9 +29,9 @@ class BookingService
         $this->simlessPayService = $simlessPayService;
     }
 
-    public function createPendingBooking(array $bookingData): Booking
+    public function createPendingBooking(array $bookingData, array $bookingOffer): Booking
     {
-        return DB::transaction(function () use ($bookingData) {
+        return DB::transaction(function () use ($bookingData, $bookingOffer) {
             $order = $bookingData['flightOrder'];
 
             // 1. Create Booking
@@ -61,15 +65,16 @@ class BookingService
                 'currency' => $order['currency'] ?? 'NGN',
                 'status' => BookingStatus::PENDING_PAYMENT,
                 'expires_at' => now()->addHours(24),
+                'offer_data' => $bookingOffer,
             ]);
 
             // Save prices in pounds
             $booking->priceInPounds()->create([
                 'currency' => 'GBP',
                 'price' => $this->simlessPayService->convertNairaToPounds($booking->base_price),
-                'tax' => $this->simlessPayService->convertNairaToPounds($booking->taxes_and_fees),
-                'markup' => $this->simlessPayService->convertNairaToPounds($booking->markup_fee),
-                'total_price' => $this->simlessPayService->convertNairaToPounds($booking->total_price),
+                'tax' => number_format($this->simlessPayService->convertNairaToPounds($bookingOffer['offerInfo']['verifiedPriceBreakdown']['taxesAndFees'] + session()->get('markup_fee'))),
+                'markup' => $this->simlessPayService->convertNairaToPounds(session()->get('markup_fee')),
+                'total_price' => number_format($this->simlessPayService->convertNairaToPounds($bookingOffer['offerInfo']['verifiedPriceBreakdown']['total'] + session()->get('markup_fee'))),
             ]);
 
             // 2. Create Travelers
@@ -128,11 +133,14 @@ class BookingService
             //     'customer' => $booking->customer_email
             // ]);
 
+            // Notify admin of new reservation
+            AdminNotificationService::notifyNewReservation($booking);
+
             return $booking;
         });
     }
 
-    public function confirmPayment(Booking $booking): bool
+    public function confirmBookingAndIssueTicket(Booking $booking): bool
     {
         return DB::transaction(function () use ($booking) {
             if ($booking->status !== BookingStatus::PENDING_PAYMENT) {
@@ -141,20 +149,36 @@ class BookingService
 
             try {
                 // Issue ticket via API
-                $apiResponse = $this->flexiService->issueTicket($booking->reservation_id);
+                $result = app(FlexiApiService::class)->issueTicket($booking->offer_data);
+                if (isset($result) && $result['flightOrder']['pnr']) {
 
-                // Update booking
-                $booking->update([
-                    'status' => BookingStatus::CONFIRMED,
-                    'ticket_issued_at' => now(),
-                ]);
+                    $payment = Payment::where('booking_id', $booking->id)
+                        ->first();
+
+                    if ($payment) {
+                        $payment->update([
+                            'status' => PaymentStatus::COMPLETED,
+                        ]);
+                    }
+
+                    // Update booking status
+                    $booking->update([
+                        'status' => BookingStatus::CONFIRMED,
+                        'ticket_issued_at' => now(),
+                        'pnr' => $result['flightOrder']['pnr'],
+                    ]);
+
+                    // Send payment confirmation email
+                    dispatch(new SendPaymentConfirmationWithTicket($booking));
+
+                }
 
                 Log::info('Ticket issued successfully', ['reservation_id' => $booking->reservation_id]);
 
                 return true;
             } catch (\Exception $e) {
                 Log::error('Failed to issue ticket', ['reservation_id' => $booking->reservation_id, 'error' => $e->getMessage()]);
-                throw new \Exception('Payment confirmed but ticket issuance failed. Contact support.');
+                throw new \Exception('Payment confirmed but ticket issuance failed. Contact support.' . $e->getMessage());
             }
         });
     }

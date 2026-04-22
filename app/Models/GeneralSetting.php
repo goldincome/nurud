@@ -15,11 +15,26 @@ class GeneralSetting extends Model
         'phone_number',
         'support_email',
         'contact_email',
+        'admin_email',
+        'notify_admin_new_reservation',
+        'notify_admin_stripe_no_ticket',
+        'notify_admin_247_api_down',
+        'notify_admin_simlesspay_api_down',
     ];
 
     protected $casts = [
-        'emails' => 'array', // If user enters comma separated, we can handle it or just text. Let's assume text for now but 'emails' implies plural.
-        // Actually, let's keep it simple string for 'emails' (e.g. "info@nurud.com, sales@nurud.com") and let user format it.
-        // Or JSON if we want structured. The migration is 'text'.
+        'emails' => 'array',
+        'notify_admin_new_reservation' => 'boolean',
+        'notify_admin_stripe_no_ticket' => 'boolean',
+        'notify_admin_247_api_down' => 'boolean',
+        'notify_admin_simlesspay_api_down' => 'boolean',
     ];
+
+    /**
+     * Get the admin email, falling back to info@nurud.com.
+     */
+    public function getAdminNotificationEmail(): string
+    {
+        return !empty($this->admin_email) ? $this->admin_email : 'info@nurud.com';
+    }
 }

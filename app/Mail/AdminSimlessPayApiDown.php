@@ -3,23 +3,22 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class BookOnHoldEmail extends Mailable
+class AdminSimlessPayApiDown extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $booking;
-    public $banks;
+    public string $error;
+    public string $endpoint;
 
-    public function __construct(\App\Models\Booking $booking, $banks)
+    public function __construct(string $error = '', string $endpoint = '')
     {
-        $this->booking = $booking;
-        $this->banks = $banks;
+        $this->error = $error;
+        $this->endpoint = $endpoint;
     }
 
     public function envelope(): Envelope
@@ -30,24 +29,18 @@ class BookOnHoldEmail extends Mailable
 
         return new Envelope(
             from: new \Illuminate\Mail\Mailables\Address($fromEmail, $fromName),
-            subject: 'Action Required: Complete Your Booking Payment',
+            subject: '⚠️ SimlessPay API is DOWN — Immediate Attention Required',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.book_on_hold_email',
+            view: 'emails.admin.simlesspay-api-down',
+            with: [
+                'error' => $this->error,
+                'endpoint' => $this->endpoint,
+            ],
         );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
     }
 }

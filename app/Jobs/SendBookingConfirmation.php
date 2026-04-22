@@ -26,7 +26,7 @@ class SendBookingConfirmation implements ShouldQueue
     public function handle(): void
     {
         try {
-            Mail::to($this->booking->guest_email)->send(new BookingConfirmed($this->booking));
+            Mail::to($this->booking->customer_email)->send(new BookingConfirmed($this->booking));
             Log::info('Booking confirmation email queued successfully', ['pnr' => $this->booking->reference_number]);
         } catch (\Exception $e) {
             Log::error('Failed to send queued booking confirmation email', [

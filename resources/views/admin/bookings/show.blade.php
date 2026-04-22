@@ -13,47 +13,67 @@
             </div>
             
             <div class="flex gap-2">
-                @if($booking->status->value === 'pending_payment')
+                @if($booking->status->value === $bookingStatus::PENDING_PAYMENT->value)
                     <form action="{{ route('admin.bookings.update', $booking->id) }}" method="POST" onsubmit="return confirm('Confirm this booking?');">
                         @csrf @method('PUT')
-                        <input type="hidden" name="status" value="confirmed">
+                        <input type="hidden" name="status" value="{{ $bookingStatus::CONFIRMED->value }}">
                         <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition shadow-sm">
                             <i class="fas fa-check mr-2"></i> Confirm Booking
                         </button>
                     </form>
                 @endif
-                
-                @if($booking->status->value !== 'cancelled')
+                <!--
+                @if($booking->status->value === $bookingStatus::PENDING_PAYMENT->value )
                     <form action="{{ route('admin.bookings.update', $booking->id) }}" method="POST" onsubmit="return confirm('Cancel this booking? This action cannot be undone.');">
                         @csrf @method('PUT')
-                        <input type="hidden" name="status" value="cancelled">
+                        <input type="hidden" name="status" value="{{ $bookingStatus::CANCELLED->value }}">
                         <button type="submit" class="bg-white border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition shadow-sm">
                             <i class="fas fa-times mr-2"></i> Cancel Booking
                         </button>
                     </form>
                 @endif
-                
+                -->
                 <a href="{{ route('bookings.ticket.download', $booking->id) }}" target="_blank" class="bg-brand-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition shadow-sm">
                     <i class="fas fa-download mr-2"></i> Download Ticket
                 </a>
             </div>
         </div>
 
+        @if(!empty($booking->pnr))
+        <!-- PNR Highlight -->
+        <div class="bg-brand-blue rounded-xl shadow-md overflow-hidden flex items-center justify-between p-6">
+            <div class="flex items-center gap-5">
+                <div class="bg-white/20 p-4 rounded-xl text-white backdrop-blur-sm">
+                    <i class="fas fa-ticket-alt text-3xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-blue-100 font-bold uppercase tracking-wider text-sm mb-1">Airline PNR</h3>
+                    <p class="text-white text-4xl font-mono font-bold tracking-widest drop-shadow-sm">{{ $booking->pnr }}</p>
+                </div>
+            </div>
+            <div class="hidden sm:block">
+                <span class="bg-white text-brand-blue px-4 py-2 rounded-lg text-sm font-bold shadow-sm inline-flex items-center gap-2">
+                    <i class="fas fa-check-circle text-green-500"></i> Confirmed PNR
+                </span>
+            </div>
+        </div>
+        @endif
+
         <!-- Main Info -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <h3 class="font-bold text-slate-800">Booking Information</h3>
                 <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide
-                    @if($booking->status->value === 'confirmed') bg-green-100 text-green-600
-                    @elseif($booking->status->value === 'cancelled') bg-red-100 text-red-600
-                    @elseif($booking->status->value === 'pending_payment') bg-yellow-100 text-yellow-600
+                    @if($booking->status->value === $bookingStatus::CONFIRMED->value) bg-green-100 text-green-600
+                    @elseif($booking->status->value === $bookingStatus::CANCELLED->value) bg-red-100 text-red-600
+                    @elseif($booking->status->value === $bookingStatus:: PENDING_PAYMENT->value) bg-yellow-100 text-yellow-600
                     @else bg-slate-100 text-slate-600 @endif">
                     {{ str_replace('_', ' ', $booking->status->value) }}
                 </span>
             </div>
             <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase mb-1">Reference No. / PNR</p>
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-1">Reference No/Ref ID</p>
                     <p class="text-slate-800 font-mono font-bold">{{ $booking->reference_number }}</p>
                     <p class="text-xs text-slate-500 font-mono mt-1">{{ $booking->reservation_id }}</p>
                 </div>
@@ -71,7 +91,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase mb-1">Payment Method</p>
-                    <p class="text-slate-800 capitalize">{{ str_replace('_', ' ', $booking->payment_method->value ?? 'Not Set') }}</p>
+                    <p class="text-slate-800 capitalize">{{ str_replace('_', ' ', $paymentMethod ?? 'Not Set') }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase mb-1">Route</p>

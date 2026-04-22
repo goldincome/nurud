@@ -121,7 +121,7 @@
                             <div class="mt-8 text-center">
                                 <form method="POST" action="{{ route('bookings.store') }}">
                                     @csrf
-                                    <input type="hidden" name="booking_type" value="bank_transfer">
+                                    <input type="hidden" name="booking_type" value="{{ $paymentMethod::BANK_TRANSFER->value }}">
                                     <button type="submit"
                                         class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-10 rounded-full shadow-md transition-colors">
                                         Confirm Reservation
@@ -268,7 +268,7 @@
                             </div> </br>
                             <form method="POST" action="{{ route('bookings.store') }}">
                                 @csrf
-                                <input type="hidden" name="booking_type" value="on_hold">
+                                <input type="hidden" name="booking_type" value="{{$paymentMethod::BOOK_ON_HOLD->value}}">
                                 <button type="submit"
                                     class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-10 rounded-full shadow-md transition-colors">
                                     Confirm Booking on Hold
@@ -300,7 +300,7 @@
 
                                 <form method="POST" action="{{ route('bookings.store') }}">
                                     @csrf
-                                    <input type="hidden" name="booking_type" value="pay_later">
+                                    <input type="hidden" name="booking_type" value="{{ $paymentMethod::PAY_LATER->value }}">
                                     <button type="button" onclick="openBnplModal()"
                                         class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-10 rounded-full shadow-md transition-colors">
                                         Kick Start Process
@@ -556,7 +556,7 @@
                     class="px-6 py-2 rounded-full text-sm font-bold bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors">Decline</button>
                 <form method="POST" action="{{ route('bookings.store') }}" class="m-0">
                     @csrf
-                    <input type="hidden" name="booking_type" value="pay_later">
+                    <input type="hidden" name="booking_type" value="{{ $paymentMethod::PAY_LATER->value }}">
                     <button type="submit"
                         class="px-6 py-2 rounded-full text-sm font-bold bg-brand-blue text-white shadow-md hover:bg-blue-900 transition-colors">Accept
                         & Kick Start Process</button>

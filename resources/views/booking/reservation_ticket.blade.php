@@ -29,8 +29,8 @@
 
         body {
             font-family: 'Inter', 'DejaVu Sans', Arial, sans-serif;
-            font-size: 11px;
-            color: #333;
+            font-size: 12px;
+            color: #000;
             line-height: 1.5;
             max-width: 800px;
             margin: 0 auto;
@@ -62,8 +62,8 @@
         }
 
         .greeting {
-            font-size: 10px;
-            color: #555;
+            font-size: 12px;
+            color: #000;
             margin-top: 6px;
             margin-bottom: 10px;
             line-height: 1.6;
@@ -79,8 +79,8 @@
         }
 
         .reservation-label {
-            font-size: 10px;
-            color: #888;
+            font-size: 12px;
+            color: #000;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -121,14 +121,14 @@
         }
 
         .seg-time {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
-            color: #1a1a1a;
+            color: #000;
         }
 
         .seg-date {
-            font-size: 9px;
-            color: #64748b;
+            font-size: 11px;
+            color: #000;
         }
 
         .seg-airport-code {
@@ -138,8 +138,8 @@
         }
 
         .seg-airport-name {
-            font-size: 8px;
-            color: #888;
+            font-size: 10px;
+            color: #000;
             line-height: 1.3;
         }
 
@@ -149,13 +149,13 @@
         }
 
         .seg-duration {
-            font-size: 9px;
-            color: #555;
+            font-size: 11px;
+            color: #000;
             font-weight: bold;
         }
 
         .seg-cabin {
-            font-size: 8px;
+            font-size: 10px;
             color: #002D72;
             text-transform: uppercase;
             font-weight: bold;
@@ -179,8 +179,8 @@
 
         .airline-row td {
             padding: 3px 5px;
-            font-size: 9px;
-            color: #64748b;
+            font-size: 11px;
+            color: #000;
         }
 
         /* ── Layover ── */
@@ -188,8 +188,8 @@
             background: #fffbeb;
             border: 1px solid #fde68a;
             padding: 5px 10px;
-            font-size: 9px;
-            color: #92400e;
+            font-size: 11px;
+            color: #000;
             margin-bottom: 5px;
         }
 
@@ -204,14 +204,14 @@
             text-align: left;
             padding: 7px 10px;
             color: #002D72;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             border-bottom: 1px solid #e2e8f0;
         }
 
         .travelers-table td {
             padding: 7px 10px;
-            font-size: 10px;
+            font-size: 12px;
             border-bottom: 1px solid #f1f5f9;
         }
 
@@ -224,17 +224,17 @@
 
         .contact-table td {
             padding: 5px 10px;
-            font-size: 10px;
+            font-size: 12px;
         }
 
         .contact-label {
-            color: #888;
+            color: #000;
             font-weight: bold;
             width: 40%;
         }
 
         .contact-value {
-            color: #333;
+            color: #000;
         }
 
         /* ── Price Table ── */
@@ -248,7 +248,7 @@
             text-align: left;
             padding: 6px 10px;
             color: #002D72;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             border-bottom: 1px solid #e2e8f0;
         }
@@ -259,7 +259,7 @@
 
         .price-table td {
             padding: 5px 10px;
-            font-size: 10px;
+            font-size: 12px;
             border-bottom: 1px solid #f1f5f9;
         }
 
@@ -300,15 +300,15 @@
         .bank-table th {
             text-align: left;
             padding: 5px 8px;
-            font-size: 9px;
-            color: #64748b;
+            font-size: 11px;
+            color: #000;
             text-transform: uppercase;
             border-bottom: 1px solid #e2e8f0;
         }
 
         .bank-table td {
             padding: 5px 8px;
-            font-size: 10px;
+            font-size: 12px;
             border-bottom: 1px solid #f1f5f9;
         }
 
@@ -318,13 +318,13 @@
             padding-top: 12px;
             border-top: 1px solid #e2e8f0;
             text-align: center;
-            font-size: 8px;
-            color: #94a3b8;
+            font-size: 10px;
+            color: #000;
         }
 
         .footer-contact {
-            font-size: 9px;
-            color: #64748b;
+            font-size: 12px;
+            color: #000;
             margin-bottom: 5px;
         }
 
@@ -385,7 +385,13 @@
     <div class="reservation-box">
         <div class="reservation-label">Booking Reference</div>
         <div class="reservation-id" style="text-decoration: underline; text-decoration-color: #F58220;">{{ $booking->reference_number }}</div>
-        <div style="font-size: 9px; color: #888; margin-top: 4px;">PNR: {{ $booking->reservation_id }}</div>
+        @if(!empty($booking->pnr))
+            <div style="margin-top: 12px;">
+                <span style="background-color: #002D72; color: #ffffff; padding: 5px 12px; border-radius: 4px; font-size: 14px; font-weight: bold; letter-spacing: 2px;">
+                    PNR: {{ $booking->pnr }}
+                </span>
+            </div>
+        @endif
     </div>
 
     <div class="dashed-line"></div>
@@ -405,7 +411,7 @@
                 ({{ \Carbon\Carbon::parse($firstSeg['segmentDeparture']['at'])->format('D, M d, Y') }})
             @endif
         </div>
-        <div style="font-size: 9px; color: #888; margin-bottom: 8px;">
+        <div style="font-size: 11px; color: #000; margin-bottom: 8px;">
             {{ $firstSeg['segmentDeparture']['airport']['city'] ?? '' }} to {{ $lastSeg['segmentArrival']['airport']['city'] ?? '' }}
         </div>
 
@@ -562,7 +568,7 @@
     @if($booking->status->value !== 'confirmed')
         <div class="bank-section">
             <div class="bank-title">Bank Details for Payment</div>
-            <div style="font-size: 9px; color: #64748b; margin-bottom: 8px;">
+            <div style="font-size: 11px; color: #000; margin-bottom: 8px;">
                 Please use <strong>{{ $booking->reference_number }}</strong> as payment reference.
             </div>
             <table class="bank-table">
@@ -578,9 +584,9 @@
                         <tr>
                             <td>
                                 <strong>{{ $bank->bank_name }}</strong><br>
-                                @if($bank->swift_code)<span style="font-size: 8px; color: #64748b;">SWIFT: {{ $bank->swift_code }}</span><br>@endif
-                                @if($bank->iban)<span style="font-size: 8px; color: #64748b;">IBAN: {{ $bank->iban }}</span><br>@endif
-                                @if($bank->routing_number)<span style="font-size: 8px; color: #64748b;">Routing: {{ $bank->routing_number }}</span>@endif
+                                @if($bank->swift_code)<span style="font-size: 10px; color: #000;">SWIFT: {{ $bank->swift_code }}</span><br>@endif
+                                @if($bank->iban)<span style="font-size: 10px; color: #000;">IBAN: {{ $bank->iban }}</span><br>@endif
+                                @if($bank->routing_number)<span style="font-size: 10px; color: #000;">Routing: {{ $bank->routing_number }}</span>@endif
                             </td>
                             <td>{{ $bank->account_number }}</td>
                             <td>{{ $bank->account_name }}</td>

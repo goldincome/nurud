@@ -8,8 +8,8 @@
 <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
     <h2 style="color: #0b2c6a;">Hello {{ $booking->customer_first_name }} {{ $booking->customer_last_name }},</h2>
 
-    <p>Thank you for choosing Nurud. Your flight choice has been reserved successfully utilizing our <strong>Buy Now,
-            Pay Later</strong> (Credit Facility) workflow.</p>
+    <p>Thank you for choosing Nurud. Your flight choice has been reserved successfully utilizing our <strong>Installment
+            Payment</strong> (Credit Facility) workflow.</p>
 
     <div style="background-color: #fff3e0; border-left: 4px solid #f97316; padding: 15px; margin: 20px 0;">
         <h3 style="margin-top: 0; color: #c2410c;">Urgent Action Required</h3>

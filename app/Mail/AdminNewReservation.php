@@ -2,24 +2,22 @@
 
 namespace App\Mail;
 
+use App\Models\Booking;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class BookOnHoldEmail extends Mailable
+class AdminNewReservation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $booking;
-    public $banks;
+    public Booking $booking;
 
-    public function __construct(\App\Models\Booking $booking, $banks)
+    public function __construct(Booking $booking)
     {
         $this->booking = $booking;
-        $this->banks = $banks;
     }
 
     public function envelope(): Envelope
@@ -30,24 +28,15 @@ class BookOnHoldEmail extends Mailable
 
         return new Envelope(
             from: new \Illuminate\Mail\Mailables\Address($fromEmail, $fromName),
-            subject: 'Action Required: Complete Your Booking Payment',
+            subject: '🆕 New Reservation: ' . $this->booking->reference_number,
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.book_on_hold_email',
+            view: 'emails.admin.new-reservation',
+            with: ['booking' => $this->booking],
         );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
     }
 }

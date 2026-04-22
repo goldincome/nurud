@@ -3,45 +3,7 @@
 @section('content')
     <main>
         {{-- ============================================================ --}}
-        {{-- HERO SECTION - Deep blue gradient with floating city images --}}
-        {{-- ============================================================ --}}
-        <section class="hero-section relative overflow-hidden">
-            {{-- Blue gradient background --}}
-            <div class="absolute inset-0 hero-gradient"></div>
-            {{-- Decorative floating city images --}}
-            <div class="hero-city-images hidden lg:block">
-                <div class="hero-city-img hero-city-1">
-                    <img src="{{ asset("images/abuja-city.jpg") }}?q=80&w=600&auto=format&fit=crop" alt="City"
-                        class="w-full h-full object-cover rounded-2xl">
-                </div>
-                <div class="hero-city-img hero-city-2">
-                    <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=600&auto=format&fit=crop"
-                        alt="City" class="w-full h-full object-cover rounded-2xl">
-                </div>
-                <div class="hero-city-img hero-city-3">
-                    <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=600&auto=format&fit=crop"
-                        alt="City" class="w-full h-full object-cover rounded-2xl">
-                </div>
-            </div>
-
-            {{-- Booking form at the TOP of the hero --}}
-            <div class="relative z-20 pt-6 md:pt-10">
-                @include('common.front.error-and-message')
-                @include('common.front.booking-form')
-            </div>
-
-            {{-- "Get the best flight deals ever" heading BELOW the form --}}
-            <div class="relative z-10 container mx-auto px-4 pb-8 md:pb-12 text-center">
-                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-3 drop-shadow-lg">
-                    Get the best flight deals ever.</h1>
-                <p class="text-base sm:text-lg text-white/80 mb-0 max-w-2xl mx-auto">
-                    Discover and book flights to your dream destinations with ease.
-                </p>
-            </div>
-        </section>
-
-        {{-- ============================================================ --}}
-        {{-- SERVICE TABS BAR - Below the hero heading --}}
+        {{-- SERVICE TABS BAR - Right below main navigation --}}
         {{-- ============================================================ --}}
         <div class="service-tabs-bar">
             <div class="container mx-auto px-4">
@@ -68,6 +30,43 @@
                 </div>
             </div>
         </div>
+
+        {{-- ============================================================ --}}
+        {{-- HERO SECTION - Deep blue gradient with floating city images --}}
+        {{-- ============================================================ --}}
+        <section class="hero-section relative overflow-hidden">
+            {{-- Blue gradient background --}}
+            <div class="absolute inset-0 hero-gradient"></div>
+            {{-- Decorative floating city images --}}
+            <div class="hero-city-images hidden lg:block">
+                <div class="hero-city-img hero-city-1">
+                    <img src="{{ asset("images/abuja-city.jpg") }}?q=80&w=600&auto=format&fit=crop" alt="City"
+                        class="w-full h-full object-cover rounded-2xl">
+                </div>
+                <div class="hero-city-img hero-city-2">
+                    <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=600&auto=format&fit=crop"
+                        alt="City" class="w-full h-full object-cover rounded-2xl">
+                </div>
+                <div class="hero-city-img hero-city-3">
+                    <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=600&auto=format&fit=crop"
+                        alt="City" class="w-full h-full object-cover rounded-2xl">
+                </div>
+            </div>
+
+            <div class="relative z-10 container mx-auto px-4 pt-10 pb-6 md:pt-14 md:pb-10 text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-3 drop-shadow-lg">
+                    Get the best flight deals ever.</h1>
+                <p class="text-base sm:text-lg text-white/80 mb-0 max-w-2xl mx-auto">
+                    Discover and book flights to your dream destinations with ease.
+                </p>
+            </div>
+
+            {{-- Booking form directly inside hero, no gap --}}
+            <div class="relative z-20 pb-6 md:pb-10">
+                @include('common.front.error-and-message')
+                @include('common.front.booking-form')
+            </div>
+        </section>
 
         {{-- ============================================================ --}}
         {{-- TRAVEL DEALS UNDER $1,006 - Horizontal scrollable cards --}}
