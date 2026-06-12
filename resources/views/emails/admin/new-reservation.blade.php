@@ -40,7 +40,7 @@
             <div class="value">{{ $booking->departure_date ? $booking->departure_date->format('D, M d, Y') : 'N/A' }}</div>
 
             <div class="label">Total Price</div>
-            <div class="value">{{ $booking->currency }} {{ number_format($booking->total_price) }}</div>
+            <div class="value">{{ $booking->currency }} {{ number_format($booking->priceInPounds->total_price, 2) }}</div>
 
             <div class="label">Status</div>
             <div class="value">{{ ucwords(str_replace('_', ' ', $booking->status->value)) }}</div>

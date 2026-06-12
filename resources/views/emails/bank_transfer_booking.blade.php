@@ -24,17 +24,23 @@
     <ul>
         <li><strong>Booking Reference:</strong> {{ $booking->reference_number}}</li>
         <li><strong>Total Passengers:</strong> {{ $booking->travelers()->count() ?? 1 }}</li>
-        <li><strong>Total Base Price:</strong> {{ number_format($booking->base_price, 2) }} {{ $booking->currency }}
+        <li><strong>Total Base Price:</strong>
+            {{ config('app.currency_symbol') }}{{ number_format($booking->priceInPounds->price, 2) }}
         </li>
-        <li><strong>Taxes & Fees:</strong> {{ number_format($booking->taxes_and_fees, 2) }} {{ $booking->currency }}
+        <li><strong>Taxes & Fees:</strong>
+            {{ config('app.currency_symbol') }}{{ number_format($booking->priceInPounds->tax, 2) }}
         </li>
-        <li><strong>Total Flight Amount:</strong> <strong>{{ number_format($booking->total_price, 2) }}
-                {{ $booking->currency }}</strong></li>
+        <li><strong>Total Flight Amount:</strong>
+            <strong>{{ config('app.currency_symbol') }}{{ number_format($booking->priceInPounds->total_price, 2) }}
+            </strong>
+        </li>
     </ul>
 
     <h3>Account Details for Payment</h3>
-    <p>Please transfer exactly <strong>{{ number_format($booking->total_price, 2) }} {{ $booking->currency }}</strong>
-        to any of the following accounts:</p>
+    <p>Please transfer exactly
+        <strong>{{ config('app.currency_symbol') }}{{ number_format($booking->priceInPounds->total_price, 2) }}</strong>
+        to any of the following accounts:
+    </p>
 
     <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
         <thead>

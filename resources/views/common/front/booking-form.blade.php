@@ -40,7 +40,7 @@
                                     <div>
                                         <p class="font-bold text-brand-blueDark text-sm">Adults</p>
                                         <p class="text-xs text-brand-blueDark font-medium dark:text-brand-blue/70">Ages
-                                            12+</p>
+                                            18+</p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button type="button" data-type="adults" data-action="decrease"
@@ -54,7 +54,7 @@
                                     <div>
                                         <p class="font-bold text-brand-blueDark text-sm">Children</p>
                                         <p class="text-xs text-brand-blueDark font-medium dark:text-brand-blue/70">Ages
-                                            2-11</p>
+                                            2-17</p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button type="button" data-type="children" data-action="decrease"

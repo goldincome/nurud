@@ -4,26 +4,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Third Party Services
+    | SkyLink API (247Travels) Configuration
     |--------------------------------------------------------------------------
     |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
+    | This file stores credentials and configuration for the SkyLink API
+    | that replaces the legacy FlexiAPI.
     |
     */
 
-    'secret_key' => env('247TRAVELS_SECRET_KEY', 'otsk_sk_test_Clhv2UHvJZSrOPBEMpMATyGFZJmMSlcPC2OJVR2R7OSo'),
+    'username' => env('247TRAVELS_USERNAME'),
 
-    'public_key' => env('247TRAVELS_PUBLIC_KEY', ''),
+    'password' => env('247TRAVELS_PASSWORD'),
 
-    'environment' => env('247TRAVELS_ENVIRONMENT', 'test'),
+    'base_url' => env('247TRAVELS_BASE_URL', 'https://247travels.cloud'),
 
-    'test_url' => env('247TRAVELS_TEST_URL', 'https://test.ota.api.247travels.com/api'),
-
-    'live_url' => env('247TRAVELS_LIVE_URL','https://ota.api.247travels.com/api'),
-
-    
+    'token_cache_key' => 'skylink_access_token',
+    'refresh_token_cache_key' => 'skylink_refresh_token',
+    'token_expiry_cache_key' => 'skylink_token_expires_at',
 
 ];

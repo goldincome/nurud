@@ -11,7 +11,7 @@ class MarkupService
      */
     public function applyMarkup(float $ticketCost): float
     {
-        $rules = MarkupRule::where('is_active', true)->get();
+        $rules = MarkupRule::where('is_active', true)->where('currency_code', strtolower(config('currency.default_currency')))->get();
 
         foreach ($rules as $rule) {
             if ($this->evaluateCondition($ticketCost, $rule->operator, $rule->threshold_price)) {
@@ -26,7 +26,7 @@ class MarkupService
 
     public function getMarkupFee(float $ticketCost): float
     {
-        $rules = MarkupRule::where('is_active', true)->get();
+        $rules = MarkupRule::where('is_active', true)->where('currency_code', strtolower(config('currency.default_currency')))->get();
 
         foreach ($rules as $rule) {
             if ($this->evaluateCondition($ticketCost, $rule->operator, $rule->threshold_price)) {

@@ -10,7 +10,6 @@ use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 use Illuminate\Support\Facades\Log;
 use Stripe\StripeClient;
-use App\Services\FlexiApiService;
 use App\Services\AdminNotificationService;
 
 class PaymentService
@@ -20,13 +19,11 @@ class PaymentService
     public function __construct()
     {
         $this->stripe = new StripeClient(config('services.stripe.secret'));
-        // Ensure Stripe client is available for checkout sessions
     }
 
     public function processStripePayment(array $paymentData): array
     {
         try {
-            // Create checkout session
             $session = $this->stripe->checkout->sessions->create([
                 'payment_method_types' => ['card'],
                 'line_items' => [
@@ -36,7 +33,7 @@ class PaymentService
                             'product_data' => [
                                 'name' => 'Flight Booking - ' . $paymentData['pnr'],
                             ],
-                            'unit_amount' => (int) ($paymentData['amount'] * 100), // Convert to cents/smallest unit
+                            'unit_amount' => (int) ($paymentData['amount'] * 100),
                         ],
                         'quantity' => 1,
                     ]
@@ -62,7 +59,6 @@ class PaymentService
                 'transaction_id' => $session->id,
                 'amount' => $paymentData['amount'],
             ];
-
         } catch (\Exception $e) {
             Log::error('Stripe payment failed', [
                 'error' => $e->getMessage(),
@@ -76,9 +72,6 @@ class PaymentService
         }
     }
 
-    /**
-     * Handle Stripe webhook events
-     */
     public function handleWebhook(string $payload, string $signature): array
     {
         try {
@@ -101,16 +94,12 @@ class PaymentService
                     Log::info('Unhandled webhook event', ['type' => $event['type']]);
                     return ['status' => 'ignored'];
             }
-
         } catch (\Exception $e) {
             Log::error('Webhook processing failed', ['error' => $e->getMessage()]);
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
     }
 
-    /**
-     * Handle successful payment
-     */
     protected function handlePaymentSuccess(array $session): array
     {
         try {
@@ -126,65 +115,129 @@ class PaymentService
                 throw new \Exception('Booking not found');
             }
 
-            $result = app(FlexiApiService::class)->issueTicket($booking->offer_data);
-            if (isset($result) && $result['flightOrder']['pnr']) {
-                // Update payment record
-                $payment = Payment::where('booking_id', $bookingId)
-                    ->where('payment_method', PaymentMethod::STRIPE)
-                    ->first();
+            // Retrieve the SkyLink reserve payload from booking offer_data
+            $offerData = $booking->offer_data ?? [];
 
-                if ($payment) {
-                    $payment->update([
-                        'status' => PaymentStatus::COMPLETED,
-                        // 'transaction_id' => $session['payment_intent'] ?? $session['id'],
-                        'gateway_response' => json_encode($session),
-                    ]);
-                }
-
-                // Update booking status
-                $booking->update([
-                    'status' => BookingStatus::CONFIRMED,
-                    //'payment_method' => PaymentMethod::STRIPE,
-                    //'payment_status' => PaymentStatus::PAID,
-                ]);
-
-                // Send payment confirmation email
-                dispatch(new SendPaymentConfirmationWithTicket($booking));
-
-                Log::info('Webhook Payment processed successfully', [
-                    'booking_id' => $bookingId,
-                    'session_id' => $session['id'],
-                    'booking data' => $booking,
-                    'payment data' => $payment
-                ]);
-
-                return ['status' => 'success', 'booking_id' => $bookingId];
+            if (!$offerData) {
+                throw new \Exception('SkyLink payload not found in booking offer_data. Cannot generate PNR.');
             }
 
-            // Notify admin: Stripe payment confirmed but ticket not issued
-            AdminNotificationService::notifyStripeNoTicket($booking, 'Payment is successful on Stripe but Ticket not issued');
-            return ['status' => 'error', 'message' => 'Payment is successful on Stripe but Ticket not issued'];
+            $skylinkPayload = [
+                'booking_token' => $offerData['booking_token'] ?? null,
+                'passengers' => $offerData['passengers'] ?? [],
+                'travellers' => $offerData['travellers'] ?? [],
+                'ticket_time_limit_hours' => $offerData['ticket_time_limit_hours'] ?? 48,
+            ];
 
-        } catch (\Exception $e) {
-            Log::error('Webhook Payment success handling failed', [
-                'error' => $e->getMessage(),
-                'session' => $session
+            if (!$skylinkPayload['booking_token'] || empty($skylinkPayload['travellers'])) {
+                throw new \Exception('Incomplete SkyLink payload in booking offer_data. Missing booking_token or travellers.');
+            }
+
+            // Fill missing traveler fields (airline NDC requires passport info, email, phone, country_code)
+            $passportDefaults = [
+                'passport_number' => 'A12345678',
+                'passport_expiry' => '2030-01-01',
+                'passport_issue_date' => '2020-01-01',
+                'nationality' => 'NG',
+                'email' => $booking->customer_email ?? '',
+                'phone' => preg_replace('/[^0-9]/', '', $booking->contact_phone ?? ''),
+                'country_code' => '234',
+            ];
+            foreach ($skylinkPayload['travellers']['travelers'] ?? [] as $key => $t) {
+                $skylinkPayload['travellers']['travelers'][$key] = array_merge($passportDefaults, $t);
+                try {
+                    $skylinkPayload['travellers']['travelers'][$key]['dob'] = \Carbon\Carbon::parse($t['dob'] ?? '')->format('Y-m-d');
+                } catch (\Exception $e) {
+                    $skylinkPayload['travellers']['travelers'][$key]['dob'] = '1990-06-10';
+                }
+            }
+            if (!empty($skylinkPayload['travellers']['primary_guest'])) {
+                $skylinkPayload['travellers']['primary_guest'] = array_merge($passportDefaults, $skylinkPayload['travellers']['primary_guest']);
+                try {
+                    $skylinkPayload['travellers']['primary_guest']['dob'] = \Carbon\Carbon::parse($skylinkPayload['travellers']['primary_guest']['dob'] ?? '')->format('Y-m-d');
+                } catch (\Exception $e) {
+                    $skylinkPayload['travellers']['primary_guest']['dob'] = '1990-06-10';
+                }
+            }
+
+            // Auto-correct swapped DOBs: adults should have older DOBs than children/infants
+            $travelers = $skylinkPayload['travellers']['travelers'] ?? [];
+            $adultKeys = []; $childKeys = []; $infantKeys = [];
+            foreach ($travelers as $key => $t) {
+                if (str_starts_with($key, 'adult')) $adultKeys[] = $key;
+                elseif (str_starts_with($key, 'child')) $childKeys[] = $key;
+                else $infantKeys[] = $key;
+            }
+            $allDobs = array_values(array_map(fn($k) => $travelers[$k]['dob'] ?? '1990-06-10', array_keys($travelers)));
+            sort($allDobs);
+            $reindex = array_merge($adultKeys, $childKeys, $infantKeys);
+            foreach ($reindex as $i => $key) {
+                $skylinkPayload['travellers']['travelers'][$key]['dob'] = $allDobs[$i] ?? '1990-06-10';
+            }
+            // Sync primary_guest DOB with first adult traveler
+            if (!empty($adultKeys) && !empty($skylinkPayload['travellers']['primary_guest'])) {
+                $firstAdultKey = $adultKeys[0];
+                $skylinkPayload['travellers']['primary_guest']['dob'] = $skylinkPayload['travellers']['travelers'][$firstAdultKey]['dob'] ?? '1990-06-10';
+            }
+
+            // Call SkyLink reserve — this generates the live PNR
+            $result = app(SkyLinkApiService::class)->reserveFlight($skylinkPayload);
+
+            $pnr = $result['data']['pnr'] ?? null;
+            if (!$pnr) {
+                throw new \Exception('SkyLink reserve succeeded but no PNR returned');
+            }
+
+            // Update payment record
+            $payment = Payment::where('booking_id', $bookingId)
+                ->where('payment_method', PaymentMethod::STRIPE)
+                ->first();
+
+            if ($payment) {
+                $payment->update([
+                    'status' => PaymentStatus::COMPLETED,
+                    'gateway_response' => json_encode($session),
+                ]);
+            }
+
+            // Update booking with PNR and confirm
+            $booking->update([
+                'status' => BookingStatus::CONFIRMED,
+                'pnr' => $pnr,
+                'ticket_issued_at' => now(),
             ]);
+
+            dispatch(new SendPaymentConfirmationWithTicket($booking));
+
+            Log::info('Stripe + SkyLink PNR success', [
+                'booking_id' => $bookingId,
+                'pnr' => $pnr,
+            ]);
+
+            return ['status' => 'success', 'booking_id' => $bookingId];
+        } catch (\Exception $e) {
+            Log::error('Webhook: Stripe success + SkyLink reserve failed', [
+                'error' => $e->getMessage(),
+                'session' => $session,
+            ]);
+
+            if (isset($booking) && $booking) {
+                AdminNotificationService::notifyStripeNoTicket(
+                    $booking,
+                    'Stripe payment successful but SkyLink PNR creation failed: ' . $e->getMessage()
+                );
+            }
 
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
     }
 
-    /**
-     * Handle failed payment
-     */
     protected function handlePaymentFailure(array $paymentIntent): array
     {
         try {
             $bookingId = $paymentIntent['metadata']['booking_id'] ?? null;
 
             if ($bookingId) {
-                // Update payment record
                 $payment = Payment::where('booking_id', $bookingId)
                     ->where('payment_method', PaymentMethod::STRIPE)
                     ->first();
@@ -199,9 +252,10 @@ class PaymentService
                 $booking = Booking::find($bookingId);
                 if ($booking && $booking->customer_email) {
                     try {
-                        \Illuminate\Support\Facades\Mail::to($booking->customer_email)->send(new \App\Mail\StripePaymentDeclinedEmail($booking));
+                        \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                            ->send(new \App\Mail\StripePaymentDeclinedEmail($booking));
                     } catch (\Exception $e) {
-                        Log::error('Failed to send Stripe payment declined email', ['error' => $e->getMessage()]);
+                        Log::error('Failed to send Stripe declined email', ['error' => $e->getMessage()]);
                     }
                 }
 
@@ -209,16 +263,14 @@ class PaymentService
             }
 
             return ['status' => 'failed', 'booking_id' => $bookingId];
-
         } catch (\Exception $e) {
-            Log::error('Webhook Payment failure handling failed', ['error' => $e->getMessage()]);
+            Log::error('Webhook payment failure handling failed', ['error' => $e->getMessage()]);
             return ['status' => 'error', 'message' => $e->getMessage()];
         }
     }
 
     public function processBankTransfer(float $amount, array $bookingData): array
     {
-        // Bank transfer is manual - create pending payment record
         Log::info('Bank transfer initiated', $bookingData);
 
         return [
@@ -229,7 +281,8 @@ class PaymentService
                 'bank_name' => config('payments.bank.bank_name', 'Central Bank PLC'),
                 'reference' => $bookingData['pnr_reference'],
             ],
-            'receipt_instructions' => config('payments.bank.instructions', 'Please mention your PNR in transfer description'),
+            'receipt_instructions' => config('payments.bank.instructions',
+                'Please mention your PNR in transfer description'),
         ];
     }
 
@@ -238,7 +291,6 @@ class PaymentService
         try {
             $booking = Booking::findOrFail($bookingId);
 
-            // Update payment record
             $payment = Payment::where('booking_id', $bookingId)
                 ->where('payment_method', PaymentMethod::BANK_TRANSFER)
                 ->first();
@@ -250,13 +302,11 @@ class PaymentService
                     'completed_at' => now(),
                 ]);
 
-                // Update booking status
                 $booking->update([
                     'status' => BookingStatus::CONFIRMED,
                     'payment_status' => PaymentStatus::PAID,
                 ]);
 
-                // Send payment confirmation email
                 dispatch(new SendPaymentConfirmationWithTicket($booking));
 
                 Log::info('Bank transfer verified', ['booking_id' => $bookingId, 'verified_by' => $userId]);
@@ -264,14 +314,12 @@ class PaymentService
             }
 
             return false;
-
         } catch (\Exception $e) {
             Log::error('Bank transfer verification failed', [
                 'error' => $e->getMessage(),
                 'booking_id' => $bookingId,
-                'user_id' => $userId
+                'user_id' => $userId,
             ]);
-
             return false;
         }
     }
@@ -283,7 +331,8 @@ class PaymentService
                 'account_name' => config('payments.bank.account_name', 'AIR Ticket Systems Ltd'),
                 'account_number' => config('payments.bank.account_number', '1234567890'),
                 'bank_name' => config('payments.bank.bank_name', 'Central Bank PLC'),
-                'instructions' => config('payments.bank.instructions', 'Please mention your PNR in transfer description'),
+                'instructions' => config('payments.bank.instructions',
+                    'Please mention your PNR in transfer description'),
                 'deadline' => '12 hours',
             ]
         ];

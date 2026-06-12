@@ -22,10 +22,11 @@
                         class="bg-brand-orange text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-brand-orange/20 hover:bg-orange-600 transition-all flex items-center">
                         <i class="fas fa-file-download mr-2"></i> Download Ticket
                     </a>
+                    
                 @elseif($booking->status->value === 'pending_payment')
-                    <a href="{{ route('customer.bookings.ticket', $booking->id) }}" target="_blank"
+                    <a href="{{ route('bookings.invoice.download', $booking->id) }}" target="_blank"
                         class="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 hover:bg-slate-200 transition-all flex items-center">
-                        <i class="fas fa-file-pdf mr-2 text-red-500"></i> Download Reservation
+                        <i class="fas fa-file-pdf mr-2 text-red-500"></i> Download Invoice
                     </a>
                     <a href="#"
                         class="bg-brand-blue text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-brand-blue/20 hover:bg-sky-700 transition-all flex items-center">
@@ -159,8 +160,9 @@
                                     <th class="px-6 py-4">Document</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @foreach($booking->travelers as $traveler)
+                                                            <tbody class="divide-y divide-slate-100">
+                                                                @php $pricingTypes = $booking->travelerPricings->values(); @endphp
+                                                                @foreach($booking->travelers as $travIdx => $traveler)
                                     <tr class="hover:bg-slate-50/50 transition-colors">
                                         <td class="px-6 py-4">
                                             <div class="font-bold text-slate-800">{{ $traveler->first_name }}
@@ -170,10 +172,10 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             <span
-                                                class="px-2 py-0.5 bg-brand-blue/5 text-brand-blue rounded text-[10px] font-bold uppercase">{{ $traveler->traveler_type }}</span>
+                                                class="px-2 py-0.5 bg-brand-blue/5 text-brand-blue rounded text-[10px] font-bold uppercase">{{ \App\Enums\TravelerType::tryFrom($pricingTypes[$travIdx]->traveler_type ?? '')?->label() ?? 'Adult' }}</span>
                                         </td>
                                         <td class="px-6 py-4 capitalize text-sm text-slate-600">
-                                            {{ $traveler->gender }}
+                                            {{ $traveler->gender?->label() }}
                                         </td>
                                         <td class="px-6 py-4 font-mono text-xs text-slate-500">
                                             {{ $traveler->passport_number }}

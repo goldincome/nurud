@@ -34,6 +34,17 @@
                     </div>
                 </div>
 
+                <div>
+                    <label class="text-xs font-bold text-slate-500 uppercase">Currency</label>
+                    <select name="currency_code" class="w-full border border-slate-200 rounded-lg p-2 text-sm focus:ring-brand-orange">
+                        @foreach($currencies as $key => $currency)
+                            <option value="{{ $key }}" @if($key === config('currency.default_currency')) selected @endif>
+                                {{ $currency['code'] }} - {{ $currency['symbol'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <button type="submit" class="w-full bg-brand-orange text-white font-bold py-2 rounded-lg hover:bg-orange-600 transition-colors">
                     Save Rule
                 </button>
@@ -48,6 +59,7 @@
                     <tr>
                         <th class="px-6 py-4">If Price is...</th>
                         <th class="px-6 py-4">Apply Markup</th>
+                        <th class="px-6 py-4">Currency</th>
                         <th class="px-6 py-4 text-right">Action</th>
                     </tr>
                 </thead>
@@ -55,10 +67,15 @@
                     @foreach($rules as $rule)
                     <tr>
                         <td class="px-6 py-4 font-medium">
-                            {{ $rule->operator }} ₦{{ number_format($rule->threshold_price) }}
+                            {{ $rule->operator }} {{ $currencies[$rule->currency_code]['symbol'] }}{{ number_format($rule->threshold_price) }}
                         </td>
                         <td class="px-6 py-4">
-                            {{ $rule->markup_type === 'percentage' ? $rule->markup_value . '%' : '₦' . number_format($rule->markup_value) }}
+                            {{ $rule->markup_type === 'percentage' ? $rule->markup_value . '%' : $currencies[$rule->currency_code]['symbol'] . number_format($rule->markup_value) }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-block px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
+                                {{ $rule->currency_code }}
+                            </span>
                         </td>
                         <td class="px-6 py-4 text-right flex justify-end gap-3">
                             <button onclick="openEditModal({{ $rule->id }})" class="text-slate-400 hover:text-brand-blue transition-colors">
@@ -112,6 +129,17 @@
                 </div>
             </div>
 
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase">Currency</label>
+                <select id="edit_currency" name="currency_code" class="w-full border border-slate-200 rounded-lg p-2 text-sm">
+                    @foreach($currencies as $key => $currency)
+                        <option value="{{ $key }}">
+                            {{ $currency['code'] }} - {{ $currency['symbol'] }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeEditModal()" class="flex-1 bg-slate-100 text-slate-600 font-bold py-2 rounded-lg text-sm">Cancel</button>
                 <button type="submit" class="flex-1 bg-brand-blue text-white font-bold py-2 rounded-lg text-sm">Update Rule</button>
@@ -134,6 +162,7 @@
                 document.getElementById('edit_threshold').value = data.threshold_price;
                 document.getElementById('edit_type').value = data.markup_type;
                 document.getElementById('edit_value').value = data.markup_value;
+                document.getElementById('edit_currency').value = data.currency_code;
                 
                 // Set form action URL dynamically
                 document.getElementById('editForm').action = `/admin/markups/${id}`;

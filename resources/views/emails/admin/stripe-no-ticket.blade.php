@@ -41,7 +41,7 @@
             <div class="value">{{ $booking->origin_location }} → {{ $booking->origin_destination }}</div>
 
             <div class="label">Total Price</div>
-            <div class="value">{{ $booking->currency }} {{ number_format($booking->total_price) }}</div>
+            <div class="value">{{ $booking->currency }} {{ number_format($booking->priceInPounds->total_price, 2) }}</div>
 
             @if(!empty($error))
             <div class="label">Error Details</div>

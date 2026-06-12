@@ -50,6 +50,7 @@ class Booking extends Model
         'payment_method',
         'expires_at',
         'ticket_issued_at',
+        'skylink_data',
     ];
 
     protected static function boot()
@@ -81,6 +82,7 @@ class Booking extends Model
         'status' => BookingStatus::class,
         'payment_status' => PaymentStatus::class,
         'payment_method' => PaymentMethod::class,
+        'skylink_data' => 'array',
     ];
 
     public function user(): BelongsTo
@@ -111,5 +113,10 @@ class Booking extends Model
     public function priceInPounds(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(PriceInPounds::class);
+    }
+
+    public function getReservationIdAttribute(?string $value): string
+    {
+        return $value ?: ($this->pnr ?: $this->reference_number);
     }
 }

@@ -540,6 +540,7 @@
         </thead>
         <tbody>
             @php
+                $isNgnCurrency = isset($booking->currency) && strtoupper($booking->currency) === 'NGN';
                 $groupedPricings = $booking->travelerPricings->groupBy('traveler_type');
             @endphp
             @foreach($groupedPricings as $type => $group)
@@ -550,16 +551,16 @@
                 @endphp
                 <tr>
                     <td>{{ $label }} (x{{ $count }})</td>
-                    <td>{{ $booking->currency }} {{ number_format($totalGroupPrice) }}</td>
+                    <td>{{ config('app.currency_symbol') }} {{ number_format($isNgnCurrency ? app(\App\Services\SimlessPayService::class)->convertNairaToPounds($totalGroupPrice) : $totalGroupPrice, $isNgnCurrency ? 0 : 2) }}</td>
                 </tr>
             @endforeach
             <tr>
                 <td>Taxes & Fees</td>
-                <td>{{ $booking->currency }} {{ number_format($booking->taxes_and_fees + $booking->markup_fee) }}</td>
+                <td>{{ config('app.currency_symbol') }} {{ number_format($booking->priceInPounds->tax, 2) }}</td>
             </tr>
             <tr class="total-row">
                 <td>Total</td>
-                <td>{{ $booking->currency }} {{ number_format($booking->total_price + $booking->markup_fee) }}</td>
+                <td>{{ config('app.currency_symbol') }} {{ number_format($booking->priceInPounds->total_price, 2) }}</td>
             </tr>
         </tbody>
     </table>

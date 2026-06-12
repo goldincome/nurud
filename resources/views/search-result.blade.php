@@ -284,7 +284,7 @@
         let visibleCount = PAGE_SIZE;
         let currentFilteredFlights = [];
         let container = document.getElementById('flight-list');
-        const getPrice = (flight) => parseFloat(flight.rawPrice);
+        const getPrice = (flight) => parseFloat(flight.Price);
 
         function applyFiltersAndSort() {
             // ... (Keep existing filter logic: stops, airlines, sliders) ...

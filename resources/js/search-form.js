@@ -407,8 +407,19 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             const type = button.dataset.type;
             const action = button.dataset.action;
-            if (action === 'increase') { counts[type]++; } 
-            else if (action === 'decrease') { const min = type === 'adults' ? 1 : 0; if (counts[type] > min) { counts[type]--; } }
+            if (action === 'increase') {
+                if (type === 'infants' && counts.infants >= counts.adults) return;
+                const max = type === 'adults' ? 9 : 99;
+                if (counts[type] < max) { counts[type]++; }
+            } else if (action === 'decrease') {
+                const min = type === 'adults' ? 1 : 0;
+                if (counts[type] > min) {
+                    counts[type]--;
+                    if (type === 'adults' && counts.infants > counts.adults) {
+                        counts.infants = counts.adults;
+                    }
+                }
+            }
             updatePassengerDisplay();
         });
     });

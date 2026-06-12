@@ -19,6 +19,7 @@ class MarkupRule extends Model
         'threshold_price',
         'markup_type',
         'markup_value',
+        'currency_code',
         'is_active',
     ];
 
@@ -30,6 +31,7 @@ class MarkupRule extends Model
     protected $casts = [
         'threshold_price' => 'float',
         'markup_value' => 'float',
+        'currency_code' => 'string',
         'is_active' => 'boolean',
     ];
 

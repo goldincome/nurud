@@ -11,7 +11,8 @@ class MarkupController extends Controller
     public function index()
     {
         $rules = MarkupRule::orderBy('threshold_price', 'desc')->get();
-        return view('admin.settings.markups.index', compact('rules'));
+        $currencies = config('currency.supported_currencies');
+        return view('admin.settings.markups.index', compact('rules', 'currencies'));
     }
 
     public function store(Request $request)
@@ -21,6 +22,7 @@ class MarkupController extends Controller
             'threshold_price' => 'required|numeric|min:0',
             'markup_type' => 'required|in:percentage,flat',
             'markup_value' => 'required|numeric|min:0',
+            'currency_code' => 'required|string|in:usd,eur,gbp,ngn',
         ]);
 
         MarkupRule::create($data);
@@ -40,6 +42,7 @@ class MarkupController extends Controller
             'threshold_price' => 'required|numeric|min:0',
             'markup_type' => 'required|in:percentage,flat',
             'markup_value' => 'required|numeric|min:0',
+            'currency_code' => 'required|string|in:usd,eur,gbp,ngn',
         ]);
 
         $markup->update($data);

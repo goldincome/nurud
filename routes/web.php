@@ -84,6 +84,7 @@ Route::resource('bookings', BookingController::class);
 Route::get('/manage-booking', [BookingController::class, 'manage'])->name('manage.booking');
 Route::post('/manage-booking', [BookingController::class, 'manage'])->name('manage.booking.post');
 Route::get('/bookings/{id}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket.download');
+Route::get('/bookings/{id}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice.download');
 
 Route::get('/dashboard', function () {
     if (in_array(auth()->user()->type, [CustomerType::ADMIN, CustomerType::SUPERADMIN])) {
@@ -140,6 +141,7 @@ Route::middleware(['auth', 'verified'])->prefix('customer')->name('customer.')->
     Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{id}', [CustomerBookingController::class, 'show'])->name('bookings.show');
     Route::get('/bookings/{id}/ticket', [CustomerBookingController::class, 'downloadTicket'])->name('bookings.ticket');
+    Route::get('/bookings/{id}/invoice', [CustomerBookingController::class, 'downloadInvoice'])->name('bookings.invoice');
     Route::get('/payments', [CustomerPaymentController::class, 'index'])->name('payments.index');
     Route::get('/profile', [CustomerProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');

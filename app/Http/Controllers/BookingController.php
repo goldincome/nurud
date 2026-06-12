@@ -4,19 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Country;
+use App\Models\Bank;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Mail\BookingConfirmed;
-use App\Mail\PaymentConfirmedTicketIssued;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\BookingService;
 use App\Services\PaymentService;
-use App\Services\FlexiApiService;
+use App\Services\SkyLinkApiService;
+use App\Services\SkyLinkResponseMapper;
 use App\Services\SimlessPayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Jobs\SendBookingConfirmation;
 use App\Jobs\SendPaymentConfirmationWithTicket;
@@ -25,53 +26,84 @@ use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\PaymentMethod;
 
-
-
 class BookingController extends Controller
 {
     protected BookingService $bookingService;
-    protected FlexiApiService $flexiService;
+    protected SkyLinkApiService $skyLinkService;
+    protected SkyLinkResponseMapper $responseMapper;
     protected SimlessPayService $simlessPayService;
 
     public function __construct(
         BookingService $bookingService,
-        FlexiApiService $flexiService,
+        SkyLinkApiService $skyLinkService,
+        SkyLinkResponseMapper $responseMapper,
         SimlessPayService $simlessPayService
     ) {
         $this->bookingService = $bookingService;
-        $this->flexiService = $flexiService;
+        $this->skyLinkService = $skyLinkService;
+        $this->responseMapper = $responseMapper;
         $this->simlessPayService = $simlessPayService;
     }
 
     public function create()
     {
         $verifyId = session()->get('current_verify_id');
-        $verifiedOffer = Cache::get('verified_offer_' . $verifyId);
-        //dd($verifiedOffer, $verifiedOffer['verifiedPriceBreakdown']['taxesAndFees']);
-        if (!$verifiedOffer) {
+        $verifyCache = Cache::get('verified_offer_' . $verifyId);
+
+        if (!$verifyCache) {
             return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
         }
 
-        // Retrieve original search params to know how many travelers to show forms for
+        $pricingData = $verifyCache['pricing'];
+        $originalOffer = $verifyCache['originalOffer'];
+
         $searchId = session()->get('current_search_id');
         $searchData = Cache::get('flight_search_' . $searchId)['search_data'] ?? [];
 
+        $passengerCount = ($searchData['travelers']['numberOfAdults'] ?? 1)
+            + ($searchData['travelers']['numberOfChildren'] ?? 0)
+            + ($searchData['travelers']['numberOfInfants'] ?? 0);
+
         $countries = Country::orderBy('name')->get();
 
-        return view('booking.booking', [
-            'flightData' => $verifiedOffer,
-            'travelerCount' => $searchData['adults'] ?? 1,
+        $markupFee = (int) session()->get('markup_fee', 0);
+        $verifiedPrice = $pricingData['verified_price'] ?? $pricingData['original_price'] ?? 0;
+        $total = $verifiedPrice + $markupFee;
+       // $estimatedTax =  //round($verifiedPrice * 0.15) + $markupFee;
+
+        $flightData = $this->responseMapper->buildFlightDataForViews(
+            $originalOffer,
+            $pricingData,
+            $searchData,
+            $markupFee,
+            $this->simlessPayService
+        );
+        $taxes = $flightData['verifiedPriceBreakdown']['taxesAndFees'] ?? 0;
+       /* dd([
+            'flightData' => $flightData,
+            'pricingData' => $pricingData,
+            'travelerCount' => $passengerCount,
             'routeModel' => $searchData['routeModel'] ?? 0,
             'countries' => $countries,
-            'total' => ($verifiedOffer['verifiedPriceBreakdown']['total'] + session()->get('markup_fee')),
-            'taxes' => $verifiedOffer['verifiedPriceBreakdown']['taxesAndFees'] + session()->get('markup_fee'),
+            'total' => $total,
+            'taxes' => $taxes, 
+        ]);
+        */
+        return view('booking.booking', [
+            'flightData' => $flightData,
+            'pricingData' => $pricingData,
+            'travelerCount' => $passengerCount,
+            'routeModel' => $searchData['routeModel'] ?? 0,
+            'countries' => $countries,
+            'total' => $total,
+            'taxes' => $taxes,
             'simlessPayService' => $this->simlessPayService,
         ]);
     }
 
     public function checkout(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'email' => 'required|email',
             'phone' => 'nullable|string',
             'passengers' => 'required|array|min:1|max:9',
@@ -79,63 +111,81 @@ class BookingController extends Controller
             'passengers.*.surname' => 'required|string|max:255',
             'passengers.*.dob' => 'required|date',
             'passengers.*.gender' => 'required|in:1,2,3',
+            'passengers.*.title' => 'nullable|string|in:Mr,Mrs,Ms,Miss,Dr,Prof',
         ]);
 
+        $dobErrors = [];
+        foreach ($validated['passengers'] as $key => $passenger) {
+            $dob = \Carbon\Carbon::parse($passenger['dob']);
+            $age = $dob->age;
+            if (str_starts_with($key, 'adult') && $age < 18) {
+                $dobErrors["passengers.{$key}.dob"] = 'Adult must be 18 years or older';
+            } elseif (str_starts_with($key, 'child') && ($age < 2 || $age > 17)) {
+                $dobErrors["passengers.{$key}.dob"] = 'Child must be between 2 and 17 years old';
+            } elseif (str_starts_with($key, 'infant') && $age >= 2) {
+                $dobErrors["passengers.{$key}.dob"] = 'Infant must be less than 2 years old';
+            }
+        }
+        if (!empty($dobErrors)) {
+            return back()->withErrors($dobErrors)->withInput();
+        }
+
         $verifyId = session()->get('current_verify_id');
-        $verifiedOffer = Cache::get('verified_offer_' . $verifyId);
-        //dd($verifiedOffer, $request->all());
-        if (!$verifiedOffer) {
+        $verifyCache = Cache::get('verified_offer_' . $verifyId);
+
+        if (!$verifyCache) {
             return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
         }
-        $i = 1;
-        foreach ($request['passengers'] as $index => $passenger) {
-            $travelerPayload['travelers'][] = [
-                "travelerId" => (string) ($i),
-                "firstName" => $passenger['firstName'],
-                "lastName" => $passenger['surname'],
-                "dateOfBirth" => "1990-01-01",
-                "gender" => (int) $passenger['gender']
 
-            ];
-            $i++;
+        $pricingData = $verifyCache['pricing'];
+        $bookingToken = $pricingData['booking_token'] ?? '';
+
+        if (!$bookingToken) {
+            Log::error('SkyLink checkout: missing booking_token', ['pricingData' => $pricingData]);
+            return redirect()->route('search.results')->with('error', 'Pricing data invalid. Please search again.');
         }
-        //dd(  $travelerPayload['travelers'], $request['passengers']);
 
-        $payLoad = [
-            "officeId" => $verifiedOffer['officeId'],
-            "flightOfferId" => $verifiedOffer['offerId'],
-            "amaClientRef" => $verifiedOffer['amaClientRef'],
-            "travelers" => $travelerPayload['travelers'],
-            "travelerContact" => [
-                "email" => $request['email'],
-                "phone" => $request['phone'],
-                "countryCallingCode" => str_replace(')', '', Str::afterLast($request->countryCallingCode, '+')),
-                "firstName" => $request['passengers']['adult_1']['firstName'],
-                "lastName" => $request['passengers']['adult_1']['surname']
-            ],
-            "offerInfo" => $verifiedOffer
-        ];
+        $originalOffer = $verifyCache['originalOffer'];
 
-        //$result = $this->flexiService->reserveFlight($payLoad);
-        // if (!$result) {
-        //    return redirect()->back()->with('error', 'Failed to reserve flight');
-        //}
-        //dd($result);
-        // Generate a unique ID to avoid stuffing the SQL Session
+        $searchId = session()->get('current_search_id');
+        $searchData = Cache::get('flight_search_' . $searchId)['search_data'] ?? [];
+
+        $phone = preg_replace('/[^0-9+]/', '', $request->phone ?? '');
+
+        $payload = $this->responseMapper->buildReservePayload(
+            $bookingToken,
+            $pricingData,
+            $request->all(),
+            $searchData
+        );
+
+        $payload['flight_summary'] = $originalOffer;
+        $payload['search_params'] = $searchData;
+        $payload['fare_summary'] = $pricingData;
+
         $bookingId = Str::uuid()->toString();
-
-        // Store the heavydata in Cache (expires in 60 mins)
-        Cache::put('booking_offer_' . $bookingId, $payLoad, now()->addMinutes(60));
-
-        // Store only the reference ID in the session
+        Cache::put('booking_offer_' . $bookingId, $payload, now()->addMinutes(60));
         session()->put('offer_data_id', $bookingId);
 
-        $banks = \App\Models\Bank::all();
+        $banks = Bank::all();
+
+        $verifiedPrice = $pricingData['verified_price'] ?? $pricingData['original_price'] ?? 0;
+        $total = $verifiedPrice + session()->get('markup_fee', 0);
+        $estimatedTax = $verifiedPrice * 0.15 + session()->get('markup_fee', 0);
+
+        $flightData = $this->responseMapper->buildFlightDataForViews(
+            $originalOffer,
+            $pricingData,
+            $searchData,
+            (int) session()->get('markup_fee', 0),
+            $this->simlessPayService
+        );
 
         return view('booking.checkout', [
-            'flightData' => $verifiedOffer,
-            'total' => ($verifiedOffer['verifiedPriceBreakdown']['total'] + session()->get('markup_fee')),
-            'taxes' => $verifiedOffer['verifiedPriceBreakdown']['taxesAndFees'] + session()->get('markup_fee'),
+            'flightData' => $flightData,
+            'pricingData' => $pricingData,
+            'total' => $total,
+            'taxes' => $estimatedTax,
             'simlessPayService' => $this->simlessPayService,
             'banks' => $banks,
             'paymentMethod' => PaymentMethod::class,
@@ -145,140 +195,85 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $bookingId = session()->get('offer_data_id');
-        $bookingOffer = Cache::get('booking_offer_' . $bookingId);
+        $bookingPayload = Cache::get('booking_offer_' . $bookingId);
 
-        if (!$bookingOffer) {
+        if (!$bookingPayload) {
             return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
         }
-        //dd(json_encode($bookingOffer));
 
         try {
-            $result = $this->flexiService->reserveFlight($bookingOffer);
+            $deferredMethods = [
+                PaymentMethod::PAY_LATER->value,
+                PaymentMethod::BANK_TRANSFER->value,
+                PaymentMethod::BOOK_ON_HOLD->value,
+            ];
 
-            if (!$result) {
-                return redirect()->back()->with('error', 'Failed to reserve flight');
-            }
-            //dd($result);
-            // Create booking and all related data in the database
-            $booking = $this->bookingService->createPendingBooking($result, $bookingOffer);
+            if (in_array($request->booking_type, $deferredMethods)) {
+                $flightSummary = $bookingPayload['flight_summary'] ?? [];
+                $searchParams = $bookingPayload['search_params'] ?? [];
 
-            // Check for Buy Now, Pay Later (BNPL)
-            if ($request->booking_type === PaymentMethod::PAY_LATER->value) {
-                // Record the payment method as pay_later
-                $booking->payments()->create([
-                    'transaction_ref' => 'BNPL_' . strtoupper(uniqid()),
-                    'amount' => $booking->total_price,
-                    'currency' => $booking->currency,
-                    'status' => PaymentStatus::PENDING,
-                    'payment_method' => PaymentMethod::PAY_LATER,
-                ]);
-
-                // Send the BNPL Email
-                try {
-                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                        ->send(new \App\Mail\BuyNowPayLaterEmail($booking, \App\Models\Bank::all()));
-                } catch (\Exception $e) {
-                    Log::error('Failed to send BNPL email', [
-                        'booking_id' => $booking->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-                session()->put('booking_id', $booking->id);
-                session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
-
-                return redirect()->route('bookings.confirmation')->with(
-                    'success',
-                    'Booking reserved successfully via BNPL Facility! Please check your email and contact us within 12 hours.'
+                $booking = $this->bookingService->createPendingBookingFromSkyLinkPayload(
+                    $bookingPayload,
+                    $flightSummary,
+                    $searchParams
                 );
-            }
 
-            // Check for Bank Transfer
-            if ($request->booking_type === PaymentMethod::BANK_TRANSFER->value) {
-                // Record the payment method as bank_transfer
+                $method = match ($request->booking_type) {
+                    PaymentMethod::PAY_LATER->value => PaymentMethod::PAY_LATER,
+                    PaymentMethod::BANK_TRANSFER->value => PaymentMethod::BANK_TRANSFER,
+                    PaymentMethod::BOOK_ON_HOLD->value => PaymentMethod::BOOK_ON_HOLD,
+                    default => PaymentMethod::BANK_TRANSFER,
+                };
+
                 $booking->payments()->create([
-                    'transaction_ref' => 'TRF_' . strtoupper(uniqid()),
+                    'transaction_ref' => strtoupper($method->name) . '_' . strtoupper(uniqid()),
                     'amount' => $booking->total_price,
                     'currency' => $booking->currency,
                     'status' => PaymentStatus::PENDING,
-                    'payment_method' => PaymentMethod::BANK_TRANSFER,
+                    'payment_method' => $method,
                 ]);
 
-                // Send the Bank Transfer Email
                 try {
-                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                        ->send(new \App\Mail\BankTransferBookingEmail($booking, \App\Models\Bank::all()));
+                    if ($method === PaymentMethod::PAY_LATER) {
+                        Mail::to($booking->customer_email)
+                            ->send(new \App\Mail\BuyNowPayLaterEmail($booking, Bank::all()));
+                    } elseif ($method === PaymentMethod::BANK_TRANSFER) {
+                        Mail::to($booking->customer_email)
+                            ->send(new \App\Mail\BankTransferBookingEmail($booking, Bank::all()));
+                    } elseif ($method === PaymentMethod::BOOK_ON_HOLD) {
+                        Mail::to($booking->customer_email)
+                            ->send(new \App\Mail\BookOnHoldEmail($booking, Bank::all()));
+                    }
                 } catch (\Exception $e) {
-                    Log::error('Failed to send Bank Transfer email', [
+                    Log::error('Failed to send deferred payment email', [
                         'booking_id' => $booking->id,
-                        'error' => $e->getMessage()
+                        'method' => $method->name,
+                        'error' => $e->getMessage(),
                     ]);
                 }
 
                 session()->put('booking_id', $booking->id);
                 session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
 
-                return redirect()->route('bookings.confirmation')->with(
-                    'success',
-                    'Booking reserved successfully! Please check your email and complete the bank transfer within 12 hours.'
-                );
+                $successMessage = match ($method) {
+                    PaymentMethod::PAY_LATER => 'Booking reserved successfully via BNPL Facility! Please check your email and contact us within 12 hours.',
+                    PaymentMethod::BANK_TRANSFER => 'Booking reserved successfully! Please check your email and complete the bank transfer within 12 hours.',
+                    PaymentMethod::BOOK_ON_HOLD => 'Booking successfully placed on hold! Please check your email and complete the transfer within 12 hours.',
+                    default => 'Booking reserved successfully.',
+                };
+
+                return redirect()->route('bookings.confirmation')->with('success', $successMessage);
             }
 
-            // Check for Book On Hold
-            if ($request->booking_type === PaymentMethod::BOOK_ON_HOLD->value) {
-                // Record the payment method as book_on_hold
-                $booking->payments()->create([
-                    'transaction_ref' => 'HOLD_' . strtoupper(uniqid()),
-                    'amount' => $booking->total_price,
-                    'currency' => $booking->currency,
-                    'status' => PaymentStatus::PENDING,
-                    'payment_method' => PaymentMethod::BOOK_ON_HOLD,
-                ]);
-
-                // Send the Book On Hold Email
-                try {
-                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                        ->send(new \App\Mail\BookOnHoldEmail($booking, \App\Models\Bank::all()));
-                } catch (\Exception $e) {
-                    Log::error('Failed to send Book On Hold email', [
-                        'booking_id' => $booking->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-
-                session()->put('booking_id', $booking->id);
-                session()->forget(['markup_fee', 'offer_data_id', 'current_verify_id']);
-
-                return redirect()->route('bookings.confirmation')->with(
-                    'success',
-                    'Booking successfully placed on hold! Please check your email and complete the transfer within 12 hours.'
-                );
-            }
-
-            // Normal Flow Confirmation Email (if not BNPL)
-            try {
-                //Mail::to($booking->customer_email)->send(new BookingConfirmed($booking));
-            } catch (\Exception $e) {
-                Log::error('Failed to send booking confirmation email', [
-                    'booking_id' => $booking->id,
-                    'reservation_id' => $booking->reservation_id,
-                    'error' => $e->getMessage()
-                ]);
-            }
-
-            session()->put('booking_id', $booking->id);
-            session()->forget('markup_fee');
-            session()->forget('offer_data_id');
-            session()->forget('current_verify_id');
-            return redirect()->route('bookings.confirmation')->with(
-                'success',
-                'Booking created successfully. Please complete payment within 24 hours.'
-            );
+            Log::warning('Unknown booking type in store', ['type' => $request->booking_type]);
+            return redirect()->back()->with('error', 'Invalid booking type selected.');
 
         } catch (\Exception $e) {
-            Log::error('Flight reservation failed', [
+            Log::error('Booking store failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('error', 'Failed to reserve flight: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create booking: ' . $e->getMessage());
         }
     }
 
@@ -286,39 +281,34 @@ class BookingController extends Controller
     {
         $bookingId = session()->get('booking_id');
         $booking = Booking::find($bookingId);
-        //dd($verifiedOffer);
+
         if (!$booking) {
             return redirect()->back()->with('error', 'Booking not found');
         }
-        //stripe confirmation and initial reservation email
+
         if (request()->has('session_id')) {
             $payment = $booking->payments()->where('stripe_session_id', request()->session_id)->first();
-            if ($payment && $payment->status === \App\Enums\PaymentStatus::PENDING) {
-
+            if ($payment && $payment->status === PaymentStatus::PENDING) {
                 try {
-                    Mail::to($booking->customer_email)->send(new \App\Mail\StripePaymentProcessingEmail($booking));
+                    Mail::to($booking->customer_email)
+                        ->send(new \App\Mail\StripePaymentProcessingEmail($booking));
                 } catch (\Exception $e) {
                     Log::error('Failed to send Stripe processing email', ['error' => $e->getMessage()]);
                 }
             }
         }
 
-
-        //dd($booking->travelers);
         return view('booking.confirmation', [
-            //'flightData' => $verifiedOffer,
             'booking' => $booking->load(['travelers', 'itineraries', 'travelerPricings']),
             'simlessPayService' => $this->simlessPayService,
-            'banks' => \App\Models\Bank::all(),
+            'banks' => Bank::all(),
         ]);
     }
-
 
     public function show(string $id): View
     {
         $booking = Booking::findOrFail($id);
 
-        // Check permissions
         if ($booking->user_id && $booking->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
@@ -332,14 +322,13 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
 
-        // Check permissions
         if ($booking->user_id && $booking->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
 
-        // Only allow payment for pending bookings
         if ($booking->status !== BookingStatus::PENDING_PAYMENT) {
-            return redirect()->route('bookings.show', $booking->id)->with('error', 'Payment not available for this booking status');
+            return redirect()->route('bookings.show', $booking->id)
+                ->with('error', 'Payment not available for this booking status');
         }
 
         return view('booking.payment', [
@@ -352,58 +341,55 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
 
-        // Check permissions
         if ($booking->user_id && $booking->user_id !== Auth::id()) {
             abort(403, 'Unauthorized');
         }
 
-        // Validate payment method
         $request->validate([
             'payment_method' => 'required|in:' . implode(',', array_column(PaymentMethod::cases(), 'value')),
         ]);
 
         if ($request->payment_method === PaymentMethod::STRIPE->value) {
-            // Process Stripe payment
             try {
                 $result = app(PaymentService::class)->processStripePayment([
-                    'amount' => $booking->total_amount,
+                    'amount' => $booking->total_price,
                     'currency' => $booking->currency,
                     'booking_id' => $booking->id,
                     'reservation_id' => $booking->reservation_id,
                 ]);
 
                 if ($result['status'] === 'success') {
-                    // Create payment record and confirm booking
                     $booking->payments()->create([
                         'transaction_ref' => $result['transaction_id'],
                         'amount' => $result['amount'],
                         'status' => PaymentStatus::COMPLETED,
                     ]);
 
-                    // Confirm the booking
-                    //app(BookingService::class)->confirmPayment($booking);
-
-                    // Send payment confirmation email
                     try {
-                        Mail::to($booking->guest_email)->send(new PaymentConfirmedTicketIssued($booking));
+                        Mail::to($booking->guest_email)
+                            ->send(new \App\Mail\PaymentConfirmedTicketIssued($booking));
                     } catch (\Exception $e) {
-                        Log::error('Failed to send payment confirmation email', ['reservation_id' => $booking->reservation_id, 'error' => $e->getMessage()]);
+                        Log::error('Failed to send payment confirmation email', [
+                            'reservation_id' => $booking->reservation_id,
+                            'error' => $e->getMessage(),
+                        ]);
                     }
 
-                    return redirect()->route('bookings.show', $booking->id)->with('success', 'Payment processed successfully!');
+                    return redirect()->route('bookings.show', $booking->id)
+                        ->with('success', 'Payment processed successfully!');
                 }
             } catch (\Exception $e) {
                 return back()->with('error', 'Payment processing failed: ' . $e->getMessage());
             }
         } elseif ($request->payment_method === PaymentMethod::BANK_TRANSFER->value) {
-            // Create pending payment record for bank transfer
             $booking->payments()->create([
                 'transaction_ref' => 'BANK_' . uniqid(),
                 'amount' => $booking->total_amount,
                 'status' => PaymentStatus::PENDING,
             ]);
 
-            return redirect()->route('bookings.show', $booking->id)->with('success', 'Bank transfer payment initiated. Please complete the transfer to confirm your booking.');
+            return redirect()->route('bookings.show', $booking->id)
+                ->with('success', 'Bank transfer payment initiated. Please complete the transfer to confirm your booking.');
         }
 
         return back()->with('error', 'Payment method not supported');
@@ -413,17 +399,18 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
 
-        $user = \Illuminate\Support\Facades\Auth::user();
-        $isAdmin = $user && in_array($user->type, [\App\Enums\CustomerType::ADMIN, \App\Enums\CustomerType::SUPERADMIN]);
+        $user = Auth::user();
+        $isAdmin = $user && in_array($user->type, [
+            \App\Enums\CustomerType::ADMIN,
+            \App\Enums\CustomerType::SUPERADMIN,
+        ]);
 
-        // Check permissions
         if ($booking->user_id) {
             if (!$user || ($booking->user_id !== $user->id && !$isAdmin)) {
                 abort(403, 'Unauthorized');
             }
         }
 
-        // Only allow download for active bookings (admins can download any status)
         if (!$isAdmin && in_array($booking->status, [BookingStatus::CANCELLED, BookingStatus::EXPIRED])) {
             abort(403, 'Ticket not available for this booking status');
         }
@@ -434,7 +421,36 @@ class BookingController extends Controller
             ->setPaper('a4', 'portrait')
             ->setWarnings(false);
 
-        $filename = 'ticket_' . $booking->reservation_id . '.pdf';
+        $filename = 'ticket_' . ($booking->pnr ?: $booking->reservation_id) . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    public function downloadInvoice(string $id): \Symfony\Component\HttpFoundation\Response
+    {
+        $booking = Booking::findOrFail($id);
+
+        $user = Auth::user();
+        $isAdmin = $user && in_array($user->type, [
+            \App\Enums\CustomerType::ADMIN,
+            \App\Enums\CustomerType::SUPERADMIN,
+        ]);
+
+        if ($booking->user_id) {
+            if (!$user || ($booking->user_id !== $user->id && !$isAdmin)) {
+                abort(403, 'Unauthorized');
+            }
+        }
+
+        $booking->load(['travelers', 'itineraries', 'payments', 'travelerPricings', 'priceInPounds']);
+
+        $banks = \App\Models\Bank::with('country')->get();
+
+        $pdf = Pdf::loadView('booking.invoice', compact('booking', 'banks'))
+            ->setPaper('a4', 'portrait')
+            ->setWarnings(false);
+
+        $filename = 'invoice_' . ($booking->pnr ?: $booking->reservation_id) . '.pdf';
 
         return $pdf->download($filename);
     }

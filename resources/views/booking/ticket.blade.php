@@ -575,7 +575,7 @@
 
             <div class="price-box">
                 <div class="price-label">Total Amount</div>
-                <div class="price-value">{{ $booking->currency }} {{ number_format($booking->total_price) }}</div>
+                <div class="price-value">{{ config('app.currency_symbol') }}{{ number_format($booking->priceInPounds->total_price, 2) }}</div>
             </div>
         </div>
 

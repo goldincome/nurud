@@ -92,10 +92,12 @@
                                     </div>
                                     <div class="flex-1 px-8 relative">
                                         <div class="h-[1px] bg-slate-300 w-full relative">
-                                            <div
-                                                class="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] text-slate-800 bg-white px-2">
-                                                {{ str_replace(['PT', 'H', 'M'], ['', 'h ', 'm'], $segment['duration']) }}
-                                            </div>
+                                            @if(isset($segment['duration']))
+                                                <div
+                                                    class="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] text-slate-800 bg-white px-2">
+                                                    {{ str_replace(['PT', 'H', 'M'], ['', 'h ', 'm'], $segment['duration']) }}
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="text-center">
@@ -162,10 +164,17 @@
                     </div> </br>
 
                     <div class="flex items-center justify-center gap-4 mt-12">
+                        @if($booking->status->value === 'confirmed')
                         <a href="{{ route('bookings.ticket.download', $booking->id) }}" target="_blank"
                             class="bg-white border-2 border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all flex items-center">
-                            <i class="fas fa-file-download mr-2"></i> Download Reservation
+                            <i class="fas fa-file-download mr-2"></i> Download Ticket
                         </a>
+                        @else
+                        <a href="{{ route('bookings.invoice.download', $booking->id) }}" target="_blank"
+                            class="bg-white border-2 border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all flex items-center">
+                            <i class="fas fa-file-download mr-2"></i> Download Invoice
+                        </a>
+                        @endif
                         <a href="{{ url('/') }}"
                             class="bg-brand-orange hover:bg-brand-orangeHover text-white font-bold py-4 px-16 rounded-full shadow-lg transition-all transform hover:scale-105">
                             Finish
@@ -285,6 +294,7 @@
 
                         <div class="mb-2">
                             <h4 class="font-bold text-md text-brand-textDark mb-3">Flight Base Fare</h4>
+                            @php $isNgnCurrency = isset($booking->currency) && strtoupper($booking->currency) === 'NGN'; @endphp
                             @if(isset($booking->travelerPricings))
                                 @php
                                     $groupedDetails = $booking->travelerPricings->groupBy('traveler_type');
@@ -303,7 +313,7 @@
                                     <div class="flex justify-between text-xs text-slate-800 mb-2">
                                         <span>{{ $label }} x ({{ $count }})</span>
                                         <span class="font-medium">{{ config('app.currency_symbol') }}
-                                            {{ number_format($simlessPayService->convertNairaToPounds($totalGroupPrice)) }}</span>
+                                            {{ number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($totalGroupPrice) : $totalGroupPrice, $isNgnCurrency ? 0 : 2) }}</span>
                                     </div>
                                 @endforeach
                             @endif
@@ -311,7 +321,7 @@
                             <div class="flex justify-between text-xs text-slate-800 mb-2">
                                 <span>Taxes and Fees</span>
                                 <span class="font-medium">{{ config('app.currency_symbol') }}
-                                    {{ number_format($simlessPayService->convertNairaToPounds($booking->taxes_and_fees + $booking->markup_fee)) }}</span>
+                                    {{ number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($booking->priceInPounds->tax) : $booking->priceInPounds->tax, $isNgnCurrency ? 0 : 2) }}</span>
                             </div>
 
                             <div class="flex justify-between text-xs text-slate-800 mb-2">
@@ -324,7 +334,7 @@
                             <span class="text-sm font-bold text-slate-800">Total Price</span>
                             <span class="text-2xl font-bold text-brand-textDark">
                                 {{ config('app.currency_symbol') }}
-                                {{ number_format($simlessPayService->convertNairaToPounds($booking->total_price + $booking->markup_fee)) }}
+                                {{ number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($booking->priceInPounds->total_price) : $booking->priceInPounds->total_price, $isNgnCurrency ? 0 : 2) }}
                             </span>
                         </div>
 

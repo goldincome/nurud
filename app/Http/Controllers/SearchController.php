@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Services\FlexiApiService;
+use App\Services\SkyLinkApiService;
+use App\Services\SkyLinkResponseMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\SearchFlightRequest;
@@ -17,37 +18,35 @@ use App\Services\SimlessPayService;
 
 class SearchController extends Controller
 {
-    protected FlexiApiService $flexiService;
+    protected SkyLinkApiService $skyLinkService;
+    protected SkyLinkResponseMapper $responseMapper;
 
-    public function __construct(FlexiApiService $flexiService)
+    public function __construct(SkyLinkApiService $skyLinkService, SkyLinkResponseMapper $responseMapper)
     {
-        $this->flexiService = $flexiService;
+        $this->skyLinkService = $skyLinkService;
+        $this->responseMapper = $responseMapper;
     }
 
     public function search(SearchFlightRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
-        if ($validated['routeModel'] == 0 || $validated['routeModel'] == 2) {
-            $validated['dateWindow'] = false;
-        }
-
         try {
-            // Fix for the 30s timeout error
             set_time_limit(300);
 
-            $flights = $this->flexiService->searchFlights($validated);
-
-            // Generate a unique ID to avoid stuffing the SQL Session
+            $result = $this->skyLinkService->searchFlights($validated);
+            
+            $flights = $result['data']['flights'] ?? [];
+            $meta = $result['data']['meta'] ?? [];
+           
             $searchId = Str::uuid()->toString();
 
-            // Store the heavy data in Cache (expires in 60 mins)
             Cache::put('flight_search_' . $searchId, [
                 'flights' => $flights,
+                'meta' => $meta,
                 'search_data' => $validated,
             ], now()->addMinutes(60));
 
-            // Store only the reference ID in the session
             session()->put('current_search_id', $searchId);
             session()->put('last_flight_search', $validated);
 
@@ -63,107 +62,47 @@ class SearchController extends Controller
         $searchId = session()->get('current_search_id');
         $searchResults = Cache::get('flight_search_' . $searchId);
 
-        //dd($searchResults);
-
         if (!$searchResults) {
             return redirect()->route('search')->with('error', 'Search results expired. Please search again.');
         }
 
-        $routeModel = $searchResults['search_data']['routeModel'] ?? 0;
-        $rawOffers = $searchResults['flights']['offerInfos'] ?? [];
-        $formattedFlights = [];
-        $airlineGroups = [];
+        $rawFlights = $searchResults['flights'] ?? [];
+        $searchData = $searchResults['search_data'] ?? [];
+        $routeModel = $searchData['routeModel'] ?? 0;
 
-        foreach ($rawOffers as $offer) {
-            $offerItineraries = [];
+        /* dd($rawFlights, $rawFlights[0]['price'] , app(MarkupService::class)->applyMarkup($rawFlights[0]['price'] ?? 0), number_format(app(SimlessPayService::class)->convertNairaToPounds(
+                app(MarkupService::class)->applyMarkup($rawFlights[0]['price'] ?? 0)
+            )), app(SimlessPayService::class)->getCachedExchangeRate(2)
+            );
+        */
+        list($formattedFlights, $airlineGroups) = $this->responseMapper->mapSearchResults(
+            $rawFlights,
+            $searchData,
+            $markupService,
+            $simlessPayService
+        );
 
-            $firstItinerarySegments = $offer['itineraries'][0]['segments'] ?? [];
-            if (empty($firstItinerarySegments))
-                continue;
-
-            $mainAirlineCode = $firstItinerarySegments[0]['carrier']['iataCode'] ?? $offer['validatingAirlineCodes'][0];
-            $mainAirlineName = $firstItinerarySegments[0]['carrier']['name'] ?? $offer['validatingAirlineCodes'][0];
-
-            foreach ($offer['itineraries'] as $itinerary) {
-                $segments = $itinerary['segments'];
-                $firstSegment = $segments[0];
-                $lastSegment = end($segments);
-
-                $stopCount = count($segments) - 1;
-                $stopsText = $stopCount === 0 ? 'Direct' : ($stopCount . ' Stop' . ($stopCount > 1 ? 's' : ''));
-
-                $stopCity = $stopCount > 0 ? ($firstSegment['segmentArrival']['airport']['city'] ?? $firstSegment['segmentArrival']['airport']['iataCode']) : '';
-
-                $offerItineraries[] = [
-                    'depTime' => date('H:i', strtotime($firstSegment['segmentDeparture']['at'])),
-                    'depAirport' => $firstSegment['segmentDeparture']['airport']['iataCode'],
-                    'depCity' => $firstSegment['segmentDeparture']['airport']['city'] ?? $firstSegment['segmentDeparture']['airport']['name'],
-                    'depDate' => date('D, d M', strtotime($firstSegment['segmentDeparture']['at'])),
-                    'arrTime' => date('H:i', strtotime($lastSegment['segmentArrival']['at'])),
-                    'arrAirport' => $lastSegment['segmentArrival']['airport']['iataCode'],
-                    'arrCity' => $lastSegment['segmentArrival']['airport']['city'] ?? $lastSegment['segmentArrival']['airport']['name'],
-                    'arrDate' => date('D, d M', strtotime($lastSegment['segmentArrival']['at'])),
-                    'duration' => $this->formatDuration($itinerary['durationInMinutes'] ?? 0),
-                    'durationMinutes' => $itinerary['durationInMinutes'] ?? 0,
-                    'stops' => $stopsText,
-                    'stopCity' => $stopCity,
-                    'airlineCode' => $firstSegment['carrier']['iataCode'] ?? '',
-                    'airlineName' => $firstSegment['carrier']['name'] ?? '',
-                ];
-            }
-
-            $bags = 'Check Details';
-            $baggageInfo = $offer['travelerPricings'][0]['fareDetailsBySegment'][0]['includedCheckedBags'] ?? null;
-            if ($baggageInfo) {
-                $bags = isset($baggageInfo['quantity']) ? $baggageInfo['quantity'] . ' Bags' : ($baggageInfo['weight'] . ' ' . ($baggageInfo['weightUnit'] ?? 'KG'));
-            }
-
-            $flightData = [
-                'id' => $offer['id'],
-                'airline' => $mainAirlineName,
-                'airlineCode' => $mainAirlineCode,
-                'price' => number_format($simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total']))),
-                'rawPrice' => $simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total'])),
-                'currency' => $offer['price']['currency'] ?? 'NGN',
-                'bags' => $bags,
-                'itineraries' => $offerItineraries,
-                'totalDuration' => $offer['durationInMinutes'] ?? 0,
-                'rawData' => json_encode($offer),
-                'allOffer' => $offer
-            ];
-
-            $formattedFlights[] = $flightData;
-
-            if (!isset($airlineGroups[$mainAirlineCode])) {
-                $airlineGroups[$mainAirlineCode] = [
-                    'airline' => $mainAirlineName,
-                    'airlineCode' => $mainAirlineCode,
-                    'cheapestPrice' => $simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total'])),
-                    'cheapestPriceFormatted' => number_format($simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total']))),
-                    'flights' => []
-                ];
-            } elseif ($offer['price']['total'] < $airlineGroups[$mainAirlineCode]['cheapestPrice']) {
-                $airlineGroups[$mainAirlineCode]['cheapestPrice'] = $simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total']));
-                $airlineGroups[$mainAirlineCode]['cheapestPriceFormatted'] = number_format($simlessPayService->convertNairaToPounds($markupService->applyMarkup($offer['priceBreakdown']['total'])));
-            }
-            $airlineGroups[$mainAirlineCode]['flights'][] = $flightData;
-        }
-
-        usort($airlineGroups, fn($a, $b) => $a['cheapestPrice'] <=> $b['cheapestPrice']);
-
-        $origin = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin') : 'Origin';
-        $destination = !empty($formattedFlights) ? ($formattedFlights[0]['itineraries'][0]['arrCity'] ?? 'Destination') : 'Destination';
-        $tripDate = $searchResults['search_data']['departureDate'] ?? now()->format('Y-m-d');
-
-        $returnDate = $searchResults['search_data']['returnDate'] ?? null;
-
-        $travelers = $searchResults['search_data']['travelers'] ?? [];
+        $origin = !empty($formattedFlights)
+            ? ($formattedFlights[0]['itineraries'][0]['depCity'] ?? 'Origin')
+            : 'Origin';
+        $destination = !empty($formattedFlights)
+            ? ($formattedFlights[0]['itineraries'][0]['arrCity'] ?? 'Destination')
+            : 'Destination';
+        $tripDate = $searchData['departureDate'] ?? now()->format('Y-m-d');
+        $returnDate = $searchData['returnDate'] ?? null;
+        $travelers = $searchData['travelers'] ?? [];
         $travelersCount = ($travelers['numberOfAdults'] ?? 1) + ($travelers['numberOfChildren'] ?? 0) + ($travelers['numberOfInfants'] ?? 0);
+        $flightClass = ucfirst(strtolower(str_replace('_', ' ', $searchData['flightClass'] ?? 'ECONOMY')));
 
-        $flightClass = $searchResults['search_data']['flightClass'] ?? 'ECONOMY';
-        $flightClass = ucfirst(strtolower(str_replace('_', ' ', $flightClass)));
+        $airlines = collect($rawFlights)
+            ->groupBy(fn($f) => $f['segments'][0][0]['img'] ?? $f['segments'][0][0]['airline'] ?? '')
+            ->map(fn($group, $code) => [
+                'code' => $code,
+                'name' => $group->first()['segments'][0][0]['airline'] ?? $code,
+            ])
+            ->values()
+            ->toArray();
 
-        //dd($formattedFlights);
         return view('search-result', [
             'flights' => $formattedFlights,
             'airlineGroups' => $airlineGroups,
@@ -173,9 +112,9 @@ class SearchController extends Controller
             'returnDate' => $returnDate ? date('D, M d', strtotime($returnDate)) : null,
             'travelersCount' => $travelersCount,
             'flightClass' => $flightClass,
-            'tripType' => $searchResults['search_data']['routeModel'] ?? 'Flight',
-            'airlines' => $searchResults['flights']['airlines'] ?? [],
-            'routeModel' => $routeModel
+            'tripType' => $routeModel,
+            'airlines' => $airlines,
+            'routeModel' => $routeModel,
         ]);
     }
 
@@ -184,26 +123,46 @@ class SearchController extends Controller
         $validated = $request->validate(['allOffer' => 'required|string']);
 
         $decodedJson = urldecode($validated['allOffer']);
-        // Convert JSON string to PHP Array
-        $data = json_decode($decodedJson, true);
+        $offer = json_decode($decodedJson, true);
+        //dd($offer, $offer['segments'][0][0]['currency'], session('last_flight_search'));
+        if (!$offer || !isset($offer['booking_token'])) {
+            Log::error('SkyLink verify: missing booking_token in offer', ['offer' => $offer]);
+            return back()->with('error', 'Invalid flight offer data. Please search again.');
+        }
+        $passengers = [
+            'adults' => session('last_flight_search.travelers.numberOfAdults', 1),
+            'children' => session('last_flight_search.travelers.numberOfChildren', 0),
+            'infants' => session('last_flight_search.travelers.numberOfInfants', 0),
+        ];      
+        $maxAttempts = 3;
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $pricingResult = $this->skyLinkService->verifyPrice($offer, $passengers);
+               
+                $pricingData = $pricingResult['data'] ?? [];
 
-        try {
-            $flightOutput = $this->flexiService->verifyPrice($data);
-            //Get Markeup Fee and put it in session
-            session()->put('markup_fee', $markupService->getMarkupFee($flightOutput['verifiedPrice']['total']));
+                $verifyId = Str::uuid()->toString();
+                Cache::put('verified_offer_' . $verifyId, [
+                    'pricing' => $pricingData,
+                    'originalOffer' => $offer,
+                ], now()->addMinutes(20));
 
-            // Move large verified offer to Cache instead of Session
-            $verifyId = Str::uuid()->toString();
-            Cache::put('verified_offer_' . $verifyId, $flightOutput, now()->addMinutes(20));
-            session()->put('current_verify_id', $verifyId);
-            //dd($flightOutput['verifiedPrice']['total']);
-            return redirect()->route('bookings.create')->with([
-                'success' => 'Flight offer verified successfully.',
-            ]);
+                session()->put('current_verify_id', $verifyId);
 
-        } catch (\Exception $e) {
-            Log::error('Verification failed: ' . $e->getMessage());
-            return back()->with('error', 'Flight offer verification failed.');
+                $verifiedPrice = $pricingData['verified_price'] ?? 0;
+                session()->put('markup_fee', $markupService->getMarkupFee($pricingData['original_price']));
+                //dd($pricingData, number_format($markupService->applyMarkup( $pricingData['original_price'] ?? 0)));
+                return redirect()->route('bookings.create')->with([
+                    'success' => 'Flight offer verified successfully.',
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Verification attempt {$attempt}/{$maxAttempts} failed: " . $e->getMessage());
+                if ($attempt < $maxAttempts) {
+                    usleep(500_000);
+                    continue;
+                }
+                return redirect()->route('search.results')->with('error', 'We could not verify the price from the airline at the moment. Please try again later and choose one of the airlines below.');
+            }
         }
     }
 

@@ -140,6 +140,171 @@ class BookingService
         });
     }
 
+    public function createPendingBookingFromSkyLinkPayload(array $payload, array $flightSummary = [], array $searchParams = []): Booking
+    {
+        return DB::transaction(function () use ($payload, $flightSummary, $searchParams) {
+            $fareSummary = $payload['fare_summary'] ?? [];
+            $contact = $payload['travellers']['primary_guest'] ?? [];
+            $flight = $flightSummary ?: ($payload['flight_summary'] ?? []);
+            $passengers = $payload['passengers'] ?? [];
+            $travelers = $payload['travellers']['travelers'] ?? [];
+
+            $adultCount = $passengers['adults'] ?? 1;
+            $childCount = $passengers['children'] ?? 0;
+            $infantCount = $passengers['infants'] ?? 0;
+
+            $verifiedPrice = $fareSummary['verified_price'] ?? $fareSummary['original_price'] ?? 0;
+            $basePrice = $fareSummary['original_price'] ?? $verifiedPrice;
+            $markupFee = (int) session()->get('markup_fee', 0);
+            $totalPrice = $verifiedPrice + $markupFee;
+            $currency = $fareSummary['currency'] ?? 'NGN';
+
+            $perPassenger = $fareSummary['per_passenger'] ?? [];
+            $perAdultBase = $perPassenger['adult'] ?? ($adultCount > 0 ? round($basePrice / max(1, $adultCount + $childCount + $infantCount)) : 0);
+            $perChildBase = $perPassenger['child'] ?? round($perAdultBase * 0.75);
+            $perInfantBase = $perPassenger['infant'] ?? round($perAdultBase * 0.1);
+            $totalBase = ($perAdultBase * $adultCount) + ($perChildBase * $childCount) + ($perInfantBase * $infantCount);
+
+            $seg = $flight['segments'][0][0] ?? $flight;
+            $originLocation = $seg['departure_code'] ?? ($flight['departure_code'] ?? $searchParams['originLocationCode'] ?? null);
+            $originDestination = $seg['arrival_code'] ?? ($flight['arrival_code'] ?? $searchParams['originDestinationCode'] ?? null);
+            $carrierCode = $seg['img'] ?? $seg['airline'] ?? ($flight['airline'] ?? null);
+
+            $booking = Booking::create([
+                'user_id' => auth()->id() ?? null,
+                'flight_offer_id' => $payload['booking_token'] ?? null,
+                'origin_location' => $originLocation,
+                'origin_destination' => $originDestination,
+                'carrier_code' => $carrierCode,
+                'route_model' => $searchParams['routeModel'] ?? 0,
+                'departure_date' => $searchParams['departureDate'] ?? null,
+                'cabin' => $seg['class'] ?? $flight['class'] ?? 'Economy',
+                'class' => $seg['class'] ?? $flight['class'] ?? 'Economy',
+                'base_price' => $verifiedPrice,
+                'total_price' => $totalPrice,
+                'markup_fee' => $markupFee,
+                'contact_phone' => $contact['phone'] ?? null,
+                'customer_first_name' => $contact['first_name'] ?? '',
+                'customer_last_name' => $contact['last_name'] ?? '',
+                'customer_email' => $contact['email'] ?? null,
+                'currency' => $currency,
+                'status' => BookingStatus::PENDING_PAYMENT,
+                'expires_at' => now()->addHours(24),
+                'offer_data' => $payload,
+                'skylink_data' => [
+                    'booking_token' => $payload['booking_token'] ?? null,
+                    'verified_price' => $verifiedPrice,
+                    'passenger_counts' => $passengers,
+                ],
+            ]);
+
+            $booking->priceInPounds()->create([
+                'currency' => 'GBP',
+                'price' => $totalBase,
+                'tax' => max(0, $verifiedPrice - $totalBase) + $markupFee,
+                'markup' => $markupFee,
+                'total_price' => $totalPrice,
+            ]);
+
+            foreach ($travelers as $key => $traveler) {
+                $type = match (true) {
+                    str_starts_with((string) $key, 'adult') => 'ADULT',
+                    str_starts_with((string) $key, 'child') => 'CHILD',
+                    str_starts_with((string) $key, 'infant') => 'HELD_INFANT',
+                    default => 'ADULT',
+                };
+
+                $perBase = match ($type) {
+                    'ADULT' => $perAdultBase,
+                    'CHILD' => $perChildBase,
+                    'HELD_INFANT' => $perInfantBase,
+                    default => $perAdultBase,
+                };
+
+                $gender = match ($traveler['gender'] ?? '') {
+                    'female' => 2,
+                    'male' => 3,
+                    default => 1,
+                };
+
+                $booking->travelers()->create([
+                    'first_name' => $traveler['first_name'] ?? '',
+                    'last_name' => $traveler['last_name'] ?? '',
+                    'gender' => $gender,
+                    'email' => $traveler['email'] ?? $contact['email'] ?? null,
+                    'phone' => $traveler['phone'] ?? $contact['phone'] ?? null,
+                    'date_of_birth' => $traveler['dob'] ?? null,
+                ]);
+
+                $booking->travelerPricings()->create([
+                    'traveler_id' => $key,
+                    'traveler_type' => $type,
+                    'fare_option' => 'STANDARD',
+                    'price' => ['base' => $perBase, 'total' => $perBase, 'currency' => $currency],
+                ]);
+            }
+
+            $segList = $flight['segments'][0] ?? [];
+            if (empty($segList)) { $segList = [$flight]; }
+            $builtSegments = [];
+            foreach ($segList as $s) {
+                $depDate = $s['departure_date'] ?? $searchParams['departureDate'] ?? '';
+                $depTime = $s['departure_time'] ?? '00:00';
+                $arrDate = $s['arrival_date'] ?? $searchParams['departureDate'] ?? '';
+                $arrTime = $s['arrival_time'] ?? '00:00';
+
+                try {
+                    $depAt = \Carbon\Carbon::parse($depDate)->format('Y-m-d') . 'T' . \Carbon\Carbon::parse($depTime)->format('H:i:s');
+                } catch (\Exception $e) {
+                    $depAt = $depDate . 'T' . $depTime;
+                }
+                try {
+                    $arrAt = \Carbon\Carbon::parse($arrDate)->format('Y-m-d') . 'T' . \Carbon\Carbon::parse($arrTime)->format('H:i:s');
+                } catch (\Exception $e) {
+                    $arrAt = $arrDate . 'T' . $arrTime;
+                }
+
+                $builtSegments[] = [
+                    'carrier' => [
+                        'iataCode' => $s['img'] ?? $s['airline'] ?? $carrierCode,
+                        'name' => $s['airline'] ?? $carrierCode,
+                    ],
+                    'number' => $s['flight_no'] ?? '',
+                    'duration' => $s['seg_duration'] ?? $s['duration_time'] ?? '',
+                    'segmentDeparture' => [
+                        'at' => $depAt,
+                        'airport' => [
+                            'iataCode' => $s['departure_code'] ?? $originLocation ?: '',
+                            'city' => $s['departure_city'] ?? ($s['departure_code'] ?? $originLocation ?: ''),
+                        ],
+                    ],
+                    'segmentArrival' => [
+                        'at' => $arrAt,
+                        'airport' => [
+                            'iataCode' => $s['arrival_code'] ?? $originDestination ?: '',
+                            'city' => $s['arrival_city'] ?? ($s['arrival_code'] ?? $originDestination ?: ''),
+                        ],
+                    ],
+                ];
+            }
+
+            $booking->itineraries()->create([
+                'itinerary_title' => match ($searchParams['routeModel'] ?? 0) {
+                    1 => 'Outbound',
+                    default => 'Flight 1',
+                },
+                'itinerary_summary' => ($originLocation ?: 'N/A') . ' to ' . ($originDestination ?: 'N/A'),
+                'itinerary_index' => 1,
+                'duration' => $seg['total_duration'] ?? $seg['duration_time'] ?? null,
+                'segments' => $builtSegments,
+            ]);
+
+            AdminNotificationService::notifyNewReservation($booking);
+
+            return $booking;
+        });
+    }
+
     public function confirmBookingAndIssueTicket(Booking $booking): bool
     {
         return DB::transaction(function () use ($booking) {

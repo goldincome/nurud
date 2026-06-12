@@ -167,12 +167,12 @@
                         @endif
 
                         <!-- Price Highlight inside card -->
+                        @php $isNgnCurrency = isset($flightData['currency']) && strtoupper($flightData['currency']) === 'NGN'; @endphp
                         <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center md:hidden">
                             <span class="text-sm font-semibold text-slate-500">Total Price:</span>
                             <span class="text-xl font-bold text-brand-textDark">
                                 @if(isset($flightData['verifiedPrice']['total']))
-                                    {{ config('app.currency_symbol') }}{{ number_format($simlessPayService->convertNairaToPounds($total))
-                                            }}
+                                    {{ config('app.currency_symbol') }}{{ number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($total) : $total, $isNgnCurrency ? 0 : 2) }}
                                 @else
                                     {{ config('app.currency_symbol') }}0
                                 @endif
@@ -210,11 +210,12 @@
                                     <!-- Title -->
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                                        @php $adultKey = "passengers.adult_{$i}"; @endphp
                                         <select name="passengers[adult_{{ $i }}][title]"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
-                                            <option value="Mr">Mr</option>
-                                            <option value="Mrs">Mrs</option>
-                                            <option value="Ms">Ms</option>
+                                            <option value="Mr" @selected(old("$adultKey.title") === 'Mr')>Mr</option>
+                                            <option value="Mrs" @selected(old("$adultKey.title") === 'Mrs')>Mrs</option>
+                                            <option value="Ms" @selected(old("$adultKey.title") === 'Ms')>Ms</option>
                                         </select>
                                     </div>
                                     <!-- First Name -->
@@ -222,6 +223,7 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
                                         <input type="text" name="passengers[adult_{{ $i }}][firstName]"
                                             placeholder="Enter first name"
+                                            value="{{ old("$adultKey.firstName") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Middle Name -->
@@ -229,12 +231,14 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
                                         <input type="text" name="passengers[adult_{{ $i }}][middleName]"
                                             placeholder="Enter middle name"
+                                            value="{{ old("$adultKey.middleName") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Surname -->
                                     <div class="md:col-span-4">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
                                         <input type="text" name="passengers[adult_{{ $i }}][surname]" placeholder="Enter surname"
+                                            value="{{ old("$adultKey.surname") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Gender -->
@@ -242,16 +246,18 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Gender</label>
                                         <select name="passengers[adult_{{ $i }}][gender]"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
-                                            <option value="1">Unspecified</option>
-                                            <option value="2">Female</option>
-                                            <option value="3">Male</option>
+                                            <option value="1" @selected(old("$adultKey.gender") === '1')>Unspecified</option>
+                                            <option value="2" @selected(old("$adultKey.gender") === '2')>Female</option>
+                                            <option value="3" @selected(old("$adultKey.gender") === '3')>Male</option>
                                         </select>
                                     </div>
                                     <!-- Date of Birth -->
                                     <div class="md:col-span-6">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Date of Birth</label>
-                                        <input type="date" name="passengers[adult_{{ $i }}][dob]"
-                                            class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                        <input type="date" name="passengers[adult_{{ $i }}][dob]" data-type="adult"
+                                            value="{{ old("$adultKey.dob") }}"
+                                            class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue @error('passengers.adult_'.$i.'.dob') border-red-500 @enderror">
+                                        <span class="text-red-500 text-xs {{ $errors->has('passengers.adult_'.$i.'.dob') ? '' : 'hidden' }} mt-1 dob-error">Adult must be 18 years or older</span>
                                     </div>
                                 </div>
                             </div>
@@ -267,10 +273,11 @@
                                     <!-- Title -->
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                                        @php $childKey = "passengers.child_{$i}"; @endphp
                                         <select name="passengers[child_{{ $i }}][title]"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
-                                            <option value="Mr">Mr</option>
-                                            <option value="Ms">Ms</option>
+                                            <option value="Mr" @selected(old("$childKey.title") === 'Mr')>Mr</option>
+                                            <option value="Ms" @selected(old("$childKey.title") === 'Ms')>Ms</option>
                                         </select>
                                     </div>
                                     <!-- First Name -->
@@ -278,6 +285,7 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
                                         <input type="text" name="passengers[child_{{ $i }}][firstName]"
                                             placeholder="Enter first name"
+                                            value="{{ old("$childKey.firstName") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Middle Name -->
@@ -285,12 +293,14 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
                                         <input type="text" name="passengers[child_{{ $i }}][middleName]"
                                             placeholder="Enter middle name"
+                                            value="{{ old("$childKey.middleName") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Surname -->
                                     <div class="md:col-span-4">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
                                         <input type="text" name="passengers[child_{{ $i }}][surname]" placeholder="Enter surname"
+                                            value="{{ old("$childKey.surname") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Gender -->
@@ -298,16 +308,18 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Gender</label>
                                         <select name="passengers[child_{{ $i }}][gender]"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
-                                            <option value="1">Unspecified</option>
-                                            <option value="2">Female</option>
-                                            <option value="3">Male</option>
+                                            <option value="1" @selected(old("$childKey.gender") === '1')>Unspecified</option>
+                                            <option value="2" @selected(old("$childKey.gender") === '2')>Female</option>
+                                            <option value="3" @selected(old("$childKey.gender") === '3')>Male</option>
                                         </select>
                                     </div>
                                     <!-- Date of Birth -->
                                     <div class="md:col-span-6">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Date of Birth</label>
-                                        <input type="date" name="passengers[child_{{ $i }}][dob]"
-                                            class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                        <input type="date" name="passengers[child_{{ $i }}][dob]" data-type="child"
+                                            value="{{ old("$childKey.dob") }}"
+                                            class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue @error('passengers.child_'.$i.'.dob') border-red-500 @enderror">
+                                        <span class="text-red-500 text-xs {{ $errors->has('passengers.child_'.$i.'.dob') ? '' : 'hidden' }} mt-1 dob-error">Child must be between 2 and 17 years old</span>
                                     </div>
                                 </div>
                             </div>
@@ -324,10 +336,11 @@
                                     <!-- Title -->
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                                        @php $infantKey = "passengers.infant_{$i}"; @endphp
                                         <select name="passengers[infant_{{ $i }}][title]"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
-                                            <option value="Mr">Mr</option>
-                                            <option value="Ms">Ms</option>
+                                            <option value="Mr" @selected(old("$infantKey.title") === 'Mr')>Mr</option>
+                                            <option value="Ms" @selected(old("$infantKey.title") === 'Ms')>Ms</option>
                                         </select>
                                     </div>
                                     <!-- First Name -->
@@ -335,6 +348,7 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">First Name</label>
                                         <input type="text" name="passengers[infant_{{ $i }}][firstName]"
                                             placeholder="Enter first name"
+                                            value="{{ old("$infantKey.firstName") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Middle Name -->
@@ -342,12 +356,14 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Middle Name</label>
                                         <input type="text" name="passengers[infant_{{ $i }}][middleName]"
                                             placeholder="Enter middle name"
+                                            value="{{ old("$infantKey.middleName") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Surname -->
                                     <div class="md:col-span-4">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Surname</label>
                                         <input type="text" name="passengers[infant_{{ $i }}][surname]" placeholder="Enter surname"
+                                            value="{{ old("$infantKey.surname") }}"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                     </div>
                                     <!-- Gender -->
@@ -355,16 +371,18 @@
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Gender</label>
                                         <select name="passengers[infant_{{ $i }}][gender]"
                                             class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
-                                            <option value="1">Unspecified</option>
-                                            <option value="2">Female</option>
-                                            <option value="3">Male</option>
+                                            <option value="1" @selected(old("$infantKey.gender") === '1')>Unspecified</option>
+                                            <option value="2" @selected(old("$infantKey.gender") === '2')>Female</option>
+                                            <option value="3" @selected(old("$infantKey.gender") === '3')>Male</option>
                                         </select>
                                     </div>
                                     <!-- Date of Birth -->
                                     <div class="md:col-span-6">
                                         <label class="block text-xs font-semibold text-slate-600 mb-1">Date of Birth</label>
-                                        <input type="date" name="passengers[infant_{{ $i }}][dob]"
-                                            class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
+                                        <input type="date" name="passengers[infant_{{ $i }}][dob]" data-type="infant"
+                                            value="{{ old("$infantKey.dob") }}"
+                                            class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue @error('passengers.infant_'.$i.'.dob') border-red-500 @enderror">
+                                        <span class="text-red-500 text-xs {{ $errors->has('passengers.infant_'.$i.'.dob') ? '' : 'hidden' }} mt-1 dob-error">Infant must be less than 2 years old</span>
                                     </div>
                                 </div>
                             </div>
@@ -431,6 +449,7 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Email Address</label>
                                 <input type="email" name="email" placeholder="Enter your email"
+                                    value="{{ old('email') }}"
                                     class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                             </div>
                             <div class="flex gap-2">
@@ -440,20 +459,21 @@
                                         class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                         @if(isset($countries))
                                             @foreach($countries as $country)
-                                                <option value="{{ $country->id }}">
+                                                <option value="{{ $country->id }}" @selected(old('countryCallingCode') == $country->id)>
                                                     {{ $country->full_dialing_code }}
                                                 </option>
                                             @endforeach
                                         @else
-                                            <option>Nigeria (+234)</option>
-                                            <option>USA (+1)</option>
-                                            <option>UK (+44)</option>
+                                            <option value="1" @selected(old('countryCallingCode') == '1')>Nigeria (+234)</option>
+                                            <option value="2" @selected(old('countryCallingCode') == '2')>USA (+1)</option>
+                                            <option value="3" @selected(old('countryCallingCode') == '3')>UK (+44)</option>
                                         @endif
                                     </select>
                                 </div>
                                 <div class="flex-1">
                                     <label class="block text-xs font-semibold text-slate-600 mb-1">Phone number</label>
                                     <input type="tel" name="phone" placeholder="Enter phone number"
+                                        value="{{ old('phone') }}"
                                         class="w-full bg-slate-100 border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-brand-blue">
                                 </div>
                             </div>
@@ -600,46 +620,35 @@
                             <h4 class="font-bold text-md text-brand-textDark mb-3">Flight Base Fare</h4>
                             @if(isset($flightData['travelerPricings']))
                                 @php
-                                    // 1. Group the travelers by type (ADULT, CHILD, HELD_INFANT)
                                     $groupedDetails = collect($flightData['travelerPricings'])->groupBy('travelerType');
                                     $sumTot = 0;
-                                    //dd($groupedDetails);
                                 @endphp
 
                                 @foreach($groupedDetails as $type => $group)
-                                                @php
-                                                    // 2. Calculate the count for this specific group
-                                                    $count = $group->count();
+                                    @php
+                                        $count = $group->count();
+                                        $totalGroupPrice = $group->sum(function ($traveler) {
+                                            return $traveler['price']['base'];
+                                        });
+                                        $label = match ($type) {
+                                            'HELD_INFANT' => 'Infant',
+                                            'CHILD' => 'Child',
+                                            default => 'Adult'
+                                        };
+                                    @endphp
 
-                                                    // 3. Sum the price for all travelers in this group
-                                                    $totalGroupPrice = $group->sum(function ($traveler) {
-                                                        return $traveler['price']['base'];
-                                                    });
-
-
-                                                    // 4. Format the Label
-                                                    $label = match ($type) {
-                                                        'HELD_INFANT' => 'Infant',
-                                                        'CHILD' => 'Child',
-                                                        default => 'Adult'
-                                                    };
-                                                @endphp
-
-                                                <div class="flex justify-between text-xs text-slate-800 mb-2">
-                                                    {{-- Output: "Adult x (2)" --}}
-                                                    <span>{{ $label }} x ({{ $count }})</span>
-
-                                                    {{-- Output: Total price for that group --}}
-                                                    <span class="font-medium">{{ config('app.currency_symbol') }}{{
-                                    number_format($simlessPayService->convertNairaToPounds($totalGroupPrice)) }}</span>
-                                                </div>
+                                    <div class="flex justify-between text-xs text-slate-800 mb-2">
+                                        <span>{{ $label }} x ({{ $count }})</span>
+                                        <span class="font-medium">{{ config('app.currency_symbol') }}{{
+                                        number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($totalGroupPrice) : $totalGroupPrice, $isNgnCurrency ? 0 : 2) }}</span>
+                                    </div>
                                 @endforeach
                             @endif
                             @if(isset($flightData['verifiedPriceBreakdown']['taxesAndFees']))
                                 <div class="flex justify-between text-xs text-slate-800 mb-2">
                                     <span>Taxes and Fees</span>
                                     <span class="font-medium">{{ config('app.currency_symbol') }}
-                                        {{number_format($simlessPayService->convertNairaToPounds($taxes)) }}</span>
+                                        {{number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($flightData['verifiedPriceBreakdown']['taxesAndFees']) : $flightData['verifiedPriceBreakdown']['taxesAndFees'], $isNgnCurrency ? 0 : 2) }}</span>
                                 </div>
                             @endif
                             <div class="flex justify-between text-xs text-slate-800 mb-2">
@@ -653,7 +662,7 @@
                             <span class="text-2xl font-bold text-brand-textDark">
                                 @if(isset($flightData['verifiedPrice']['total']))
                                                         {{ config('app.currency_symbol') }}{{
-                                    number_format($simlessPayService->convertNairaToPounds($total)) }}
+                                    number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($total) : $total, $isNgnCurrency ? 0 : 2) }}
                                 @else
                                     {{ config('app.currency_symbol') }}0
                                 @endif
@@ -677,4 +686,114 @@
             </aside>
         </div>
     </main>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    function yearsAgo(n) {
+        const d = new Date(today);
+        d.setFullYear(d.getFullYear() - n);
+        return d;
+    }
+
+    function addDays(date, days) {
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+    }
+
+    function toDateInputValue(date) {
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+    }
+
+    const childMin = toDateInputValue(yearsAgo(17));
+    const childMax = toDateInputValue(yearsAgo(2));
+    const infantMin = toDateInputValue(addDays(yearsAgo(2), 1));
+    const adultMax = toDateInputValue(yearsAgo(18));
+
+    document.querySelectorAll('input[data-type="adult"]').forEach(function (input) {
+        input.setAttribute('max', adultMax);
+
+        input.addEventListener('change', function () {
+            const error = this.parentElement.querySelector('.dob-error');
+            if (this.value && this.value > adultMax) {
+                error.classList.remove('hidden');
+                this.classList.add('border-red-500');
+            } else {
+                error.classList.add('hidden');
+                this.classList.remove('border-red-500');
+            }
+        });
+    });
+
+    document.querySelectorAll('input[data-type="child"]').forEach(function (input) {
+        input.setAttribute('min', childMin);
+        input.setAttribute('max', childMax);
+
+        input.addEventListener('change', function () {
+            const error = this.parentElement.querySelector('.dob-error');
+            if (this.value && (this.value < childMin || this.value > childMax)) {
+                error.classList.remove('hidden');
+                this.classList.add('border-red-500');
+            } else {
+                error.classList.add('hidden');
+                this.classList.remove('border-red-500');
+            }
+        });
+    });
+
+    document.querySelectorAll('input[data-type="infant"]').forEach(function (input) {
+        input.setAttribute('min', infantMin);
+
+        input.addEventListener('change', function () {
+            const error = this.parentElement.querySelector('.dob-error');
+            if (this.value && this.value < infantMin) {
+                error.classList.remove('hidden');
+                this.classList.add('border-red-500');
+            } else {
+                error.classList.add('hidden');
+                this.classList.remove('border-red-500');
+            }
+        });
+    });
+
+    document.querySelector('form').addEventListener('submit', function (e) {
+        let valid = true;
+
+        document.querySelectorAll('input[data-type="adult"]').forEach(function (input) {
+            const error = input.parentElement.querySelector('.dob-error');
+            if (input.value && input.value > adultMax) {
+                error.classList.remove('hidden');
+                input.classList.add('border-red-500');
+                valid = false;
+            }
+        });
+
+        document.querySelectorAll('input[data-type="child"]').forEach(function (input) {
+            const error = input.parentElement.querySelector('.dob-error');
+            if (input.value && (input.value < childMin || input.value > childMax)) {
+                error.classList.remove('hidden');
+                input.classList.add('border-red-500');
+                valid = false;
+            }
+        });
+
+        document.querySelectorAll('input[data-type="infant"]').forEach(function (input) {
+            const error = input.parentElement.querySelector('.dob-error');
+            if (input.value && input.value < infantMin) {
+                error.classList.remove('hidden');
+                input.classList.add('border-red-500');
+                valid = false;
+            }
+        });
+
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
 @endsection

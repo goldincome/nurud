@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 use App\Services\BookingService;
-use App\Services\FlexiApiService;
+use App\Services\SkyLinkApiService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Enums\BookingStatus;
@@ -22,14 +22,18 @@ class StripePaymentController extends Controller
 {
     protected PaymentService $paymentService;
     protected BookingService $bookingService;
-    protected FlexiApiService $flexiService;
+    protected SkyLinkApiService $skyLinkService;
     protected SimlessPayService $simlessPayService;
 
-    public function __construct(PaymentService $paymentService, BookingService $bookingService, FlexiApiService $flexiService, SimlessPayService $simlessPayService)
-    {
+    public function __construct(
+        PaymentService $paymentService,
+        BookingService $bookingService,
+        SkyLinkApiService $skyLinkService,
+        SimlessPayService $simlessPayService
+    ) {
         $this->paymentService = $paymentService;
         $this->bookingService = $bookingService;
-        $this->flexiService = $flexiService;
+        $this->skyLinkService = $skyLinkService;
         $this->simlessPayService = $simlessPayService;
     }
 
@@ -37,46 +41,51 @@ class StripePaymentController extends Controller
     {
         $bookingId = $request->input('booking_id');
 
-        // If no booking_id, we're likely coming from the pre-booking checkout page
         if (!$bookingId) {
             $sessionBookingId = session()->get('offer_data_id');
-            $bookingOffer = Cache::get('booking_offer_' . $sessionBookingId);
+            $bookingPayload = Cache::get('booking_offer_' . $sessionBookingId);
 
-            if (!$bookingOffer) {
-                return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
+            if (!$bookingPayload) {
+                return redirect()->route('search.results')
+                    ->with('error', 'Booking session expired. Please re-select your flight.');
             }
 
-            //dd(number_format($this->simlessPayService->convertNairaToPounds($bookingOffer['offerInfo']['verifiedPriceBreakdown']['total'] + session()->get('markup_fee'))));
             try {
-                // 1. Reserve the flight (get PNR)
-                $result = $this->flexiService->reserveFlight($bookingOffer);
-                if (!$result) {
-                    return back()->with('error', 'Failed to reserve flight with provider.');
-                }
+                // Create local pending booking — NO SkyLink reserve call yet
+                $flightSummary = $bookingPayload['flight_summary'] ?? [];
+                $searchParams = $bookingPayload['search_params'] ?? [];
 
-                // 2. Create the pending booking
-                $booking = $this->bookingService->createPendingBooking($result, $bookingOffer);
+                $booking = $this->bookingService->createPendingBookingFromSkyLinkPayload(
+                    $bookingPayload,
+                    $flightSummary,
+                    $searchParams
+                );
                 $bookingId = $booking->id;
 
-                // Clean up session if needed or keep it for context
                 session()->forget('markup_fee');
                 session()->forget('offer_data_id');
-                // We'll use this $booking below
             } catch (\Exception $e) {
-                Log::error('Stripe pre-checkout reservation failed', ['error' => $e->getMessage()]);
-                return back()->with('error', 'Failed to initiate reservation: ' . $e->getMessage());
+                Log::error('Stripe pre-checkout failed', ['error' => $e->getMessage()]);
+                return back()->with('error', 'Failed to initiate booking: ' . $e->getMessage());
             }
         } else {
             $booking = Booking::findOrFail($bookingId);
         }
+
         session()->put('booking_id', $booking->id);
-        if ($booking->status === BookingStatus::CONFIRMED && $booking->payment_status === PaymentStatus::COMPLETED) {
-            return redirect()->route('bookings.confirmation')->with('success', 'Booking created successfully. Please complete payment within 24 hours.');
+
+        if ($booking->status === BookingStatus::CONFIRMED) {
+            return redirect()->route('bookings.confirmation')
+                ->with('success', 'Booking already confirmed.');
         }
 
-        // 3. Create initial payment record
+        // Create payment record
         $payment = Payment::updateOrCreate(
-            ['booking_id' => $booking->id, 'payment_method' => PaymentMethod::STRIPE, 'status' => PaymentStatus::PENDING],
+            [
+                'booking_id' => $booking->id,
+                'payment_method' => PaymentMethod::STRIPE,
+                'status' => PaymentStatus::PENDING,
+            ],
             [
                 'transaction_ref' => 'STR-' . strtoupper(Str::random(10)),
                 'amount' => $booking->total_price,
@@ -91,7 +100,6 @@ class StripePaymentController extends Controller
             'currency' => $booking->priceInPounds->currency ?? 'GBP',
         ];
 
-        // 4. Create Stripe Session
         $response = $this->paymentService->processStripePayment($paymentData);
 
         if ($response['status'] === 'success') {

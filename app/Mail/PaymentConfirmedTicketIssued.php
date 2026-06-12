@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
+
 class PaymentConfirmedTicketIssued extends Mailable
 {
     use Queueable, SerializesModels;
@@ -40,6 +41,7 @@ class PaymentConfirmedTicketIssued extends Mailable
                 'booking' => $this->booking,
                 'banks' => \App\Models\Bank::all(),
                 'issuedAt' => $this->booking->ticket_issued_at,
+
             ],
 
         );
@@ -52,7 +54,7 @@ class PaymentConfirmedTicketIssued extends Mailable
         ])->setPaper('a4', 'portrait')->setWarnings(false);
 
         return [
-            \Illuminate\Mail\Mailables\Attachment::fromData(fn () => $pdf->output(), 'Ticket-' . str_replace('/', '-', $this->booking->pnr) . '.pdf')
+            \Illuminate\Mail\Mailables\Attachment::fromData(fn() => $pdf->output(), 'Ticket-' . str_replace('/', '-', $this->booking->pnr) . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

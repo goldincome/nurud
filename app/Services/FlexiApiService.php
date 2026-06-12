@@ -15,12 +15,12 @@ class FlexiApiService
 
     public function __construct()
     {
-        $this->environment = config('247travels.environment');
-        $this->baseUrl = config('247travels.live_url');
+        $this->environment = config('247travels.environment', 'live');
+        $this->baseUrl = config('247travels.live_url', config('247travels.base_url', 'https://247travels.cloud'));
         if ($this->environment === 'test') {
-            $this->baseUrl = config('247travels.test_url');
+            $this->baseUrl = config('247travels.test_url', config('247travels.base_url', 'https://247travels.cloud'));
         }
-        $this->apiKey = config('247travels.secret_key');
+        $this->apiKey = config('247travels.secret_key', '');
     }
 
     protected function getHttpClient()

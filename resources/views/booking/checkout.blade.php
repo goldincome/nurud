@@ -444,6 +444,7 @@
 
                         <div class="mb-2">
                             <h4 class="font-bold text-md text-brand-textDark mb-3">Flight Base Fare</h4>
+                            @php $isNgnCurrency = isset($flightData['currency']) && strtoupper($flightData['currency']) === 'NGN'; @endphp
                             @if(isset($flightData['travelerPricings']))
                                 @php
                                     // 1. Group the travelers by type (ADULT, CHILD, HELD_INFANT)
@@ -477,7 +478,7 @@
 
                                                     {{-- Output: Total price for that group --}}
                                                     <span class="font-medium">{{ config('app.currency_symbol') }}{{
-                                    number_format($simlessPayService->convertNairaToPounds($totalGroupPrice)) }}</span>
+                                    number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($totalGroupPrice) : $totalGroupPrice, $isNgnCurrency ? 0 : 2) }}</span>
                                                 </div>
                                 @endforeach
                             @endif
@@ -485,7 +486,7 @@
                                 <div class="flex justify-between text-xs text-slate-800 mb-2">
                                     <span>Taxes and Fees</span>
                                     <span class="font-medium">{{ config('app.currency_symbol') }}
-                                        {{number_format($simlessPayService->convertNairaToPounds($taxes)) }}</span>
+                                        {{number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($flightData['verifiedPriceBreakdown']['taxesAndFees']) : $flightData['verifiedPriceBreakdown']['taxesAndFees'], $isNgnCurrency ? 0 : 2) }}</span>
                                 </div>
                             @endif
                             <div class="flex justify-between text-xs text-slate-800 mb-2">
@@ -499,7 +500,7 @@
                             <span class="text-2xl font-bold text-brand-textDark">
                                 @if(isset($flightData['verifiedPrice']['total']))
                                                         {{ config('app.currency_symbol') }}{{
-                                    number_format($simlessPayService->convertNairaToPounds($total)) }}
+                                    number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($total) : $total, $isNgnCurrency ? 0 : 2) }}
                                 @else
                                     {{ config('app.currency_symbol') }}0
                                 @endif
