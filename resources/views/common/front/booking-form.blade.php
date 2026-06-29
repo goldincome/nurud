@@ -7,6 +7,7 @@
             @endphp
             <div id="booking-bar"
                 class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-700">
+                @include('common.front.error-and-message')
                 <div class="flex flex-col md:flex-row items-center gap-3 mb-4">
                     <div class="relative w-full md:w-auto">
                         <select id="trip-type" name="routeModel"

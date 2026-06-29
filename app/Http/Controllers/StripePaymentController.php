@@ -54,7 +54,7 @@ class StripePaymentController extends Controller
                 // Create local pending booking — NO SkyLink reserve call yet
                 $flightSummary = $bookingPayload['flight_summary'] ?? [];
                 $searchParams = $bookingPayload['search_params'] ?? [];
-
+                //dd($bookingPayload['fare_summary'],$flightSummary, session()->get('markup_fee'));
                 $booking = $this->bookingService->createPendingBookingFromSkyLinkPayload(
                     $bookingPayload,
                     $flightSummary,

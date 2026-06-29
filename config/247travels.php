@@ -1,5 +1,7 @@
 <?php
 
+$isLive = filter_var(env('247TRAVELS_IS_LIVE', false), FILTER_VALIDATE_BOOLEAN);
+
 return [
 
     /*
@@ -12,11 +14,13 @@ return [
     |
     */
 
-    'username' => env('247TRAVELS_USERNAME'),
+    'is_live' => $isLive,
 
-    'password' => env('247TRAVELS_PASSWORD'),
+    'username' => $isLive ? env('247TRAVELS_LIVE_USERNAME') : env('247TRAVELS_USERNAME'),
 
-    'base_url' => env('247TRAVELS_BASE_URL', 'https://247travels.cloud'),
+    'password' => $isLive ? env('247TRAVELS_LIVE_PASSWORD') : env('247TRAVELS_PASSWORD'),
+
+    'base_url' => $isLive ? env('247TRAVELS_LIVE_BASE_URL') : env('247TRAVELS_BASE_URL', 'https://247travels.cloud'),
 
     'token_cache_key' => 'skylink_access_token',
     'refresh_token_cache_key' => 'skylink_refresh_token',

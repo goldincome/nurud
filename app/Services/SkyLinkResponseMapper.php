@@ -96,12 +96,12 @@ class SkyLinkResponseMapper
             'id' => $flight['booking_token'] ?? '',
             'airline' => $airline,
             'airlineCode' => $airlineImg,
-            'price' => $rules->currency_code === strtolower(config('currency.default_currency')) ?  number_format($markupService->applyMarkup($flight['price'] ?? 0)) : number_format($simlessPayService->convertNairaToPounds(
+            'price' => $flight['currency'] === "NGN" ? number_format($simlessPayService->convertNairaToPounds(
                 $markupService->applyMarkup($flight['price'] ?? 0)
-            )) ,
-            'rawPrice' => $rules->currency_code === strtolower(config('currency.default_currency')) ?  number_format($markupService->applyMarkup($flight['price'] ?? 0)) : $simlessPayService->convertNairaToPounds(
+                )) : number_format($markupService->applyMarkup($flight['price'] ?? 0)),
+            'rawPrice' => $flight['currency'] === "NGN"  ? $simlessPayService->convertNairaToPounds(
                 $markupService->applyMarkup($flight['price'] ?? 0)
-            ),
+            ) : $markupService->applyMarkup($flight['price'] ?? 0),
             'currency' => $flight['currency'] ?? config('currency.default_currency'),
             'bags' => $bags,
             'cabinBag' => $cabinBag,
@@ -223,7 +223,7 @@ class SkyLinkResponseMapper
                 [
                     'segments' => $viewSegments,
                     'duration' => $totalDuration,
-                    'itineraryTitle' => $searchData['routeModel'] == 1 ? 'Outbound' : 'Flight 1',
+                    'itineraryTitle' => 'Outbound' ,
                 ],
             ],
             'travelerPricings' => $travelerPricings,

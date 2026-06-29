@@ -22,18 +22,22 @@ class BookingService
 {
     protected FlexiApiService $flexiService;
     protected SimlessPayService $simlessPayService;
+    protected VerifiedPriceService $verifiedPriceService;
 
-    public function __construct(FlexiApiService $flexiService, SimlessPayService $simlessPayService)
+    public function __construct(FlexiApiService $flexiService, 
+    SimlessPayService $simlessPayService, VerifiedPriceService $verifiedPriceService)
     {
         $this->flexiService = $flexiService;
         $this->simlessPayService = $simlessPayService;
+        $this->verifiedPriceService = $verifiedPriceService;
     }
 
     public function createPendingBooking(array $bookingData, array $bookingOffer): Booking
-    {
+    {  
+  
         return DB::transaction(function () use ($bookingData, $bookingOffer) {
             $order = $bookingData['flightOrder'];
-
+            
             // 1. Create Booking
             $booking = Booking::create([
                 'id' => $order['id'] ?? null,
@@ -71,7 +75,7 @@ class BookingService
             // Save prices in pounds
             $booking->priceInPounds()->create([
                 'currency' => 'GBP',
-                'price' => $this->simlessPayService->convertNairaToPounds($booking->base_price),
+                'price' =>  $bookingData['fare_summary']['price_changed']  ? $bookingData['fare_summary']['verified_price'] : $bookingData['fare_summary']['original_price'], //$this->simlessPayService->convertNairaToPounds($booking->base_price),
                 'tax' => number_format($this->simlessPayService->convertNairaToPounds($bookingOffer['offerInfo']['verifiedPriceBreakdown']['taxesAndFees'] + session()->get('markup_fee'))),
                 'markup' => $this->simlessPayService->convertNairaToPounds(session()->get('markup_fee')),
                 'total_price' => number_format($this->simlessPayService->convertNairaToPounds($bookingOffer['offerInfo']['verifiedPriceBreakdown']['total'] + session()->get('markup_fee'))),
@@ -148,15 +152,16 @@ class BookingService
             $flight = $flightSummary ?: ($payload['flight_summary'] ?? []);
             $passengers = $payload['passengers'] ?? [];
             $travelers = $payload['travellers']['travelers'] ?? [];
-
+            //dd($payload);
             $adultCount = $passengers['adults'] ?? 1;
             $childCount = $passengers['children'] ?? 0;
             $infantCount = $passengers['infants'] ?? 0;
 
-            $verifiedPrice = $fareSummary['verified_price'] ?? $fareSummary['original_price'] ?? 0;
+            $verifiedPrice = $this->verifiedPriceService->getVerifiedPrice($fareSummary);
             $basePrice = $fareSummary['original_price'] ?? $verifiedPrice;
             $markupFee = (int) session()->get('markup_fee', 0);
-            $totalPrice = $verifiedPrice + $markupFee;
+            $totalPrice = $payload['total_price'] ?? ($verifiedPrice + $markupFee);
+            $groupTotalPrice = $payload['group_total_price'] ?? ($verifiedPrice + $markupFee);
             $currency = $fareSummary['currency'] ?? 'NGN';
 
             $perPassenger = $fareSummary['per_passenger'] ?? [];
@@ -197,13 +202,16 @@ class BookingService
                     'passenger_counts' => $passengers,
                 ],
             ]);
+           
 
+            $theTax = ($totalPrice - $groupTotalPrice);
+            //dd(number_format($this->simlessPayService->convertNairaToPounds($theTax),0, '.', ''), $groupTotalPrice, $theTax, $totalPrice, $markupFee);
             $booking->priceInPounds()->create([
                 'currency' => 'GBP',
-                'price' => $totalBase,
-                'tax' => max(0, $verifiedPrice - $totalBase) + $markupFee,
-                'markup' => $markupFee,
-                'total_price' => $totalPrice,
+                'price' =>  number_format($this->simlessPayService->convertNairaToPounds($groupTotalPrice),0, '.', ''),
+                'tax' =>  number_format($this->simlessPayService->convertNairaToPounds($theTax),0, '.', ''),
+                'markup' => number_format($this->simlessPayService->convertNairaToPounds($markupFee),0, '.', ''),
+                'total_price' => number_format($this->simlessPayService->convertNairaToPounds($totalPrice),0, '.', ''),
             ]);
 
             foreach ($travelers as $key => $traveler) {

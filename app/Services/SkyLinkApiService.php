@@ -104,7 +104,9 @@ class SkyLinkApiService
             'currency' => $offer['segments'][0][0]['currency'] ?? config('currency.default_currency', 'GBP'),
             'class' => strtolower($offer['segments'][0][0]['class']) ?? 'economy',
         ];
-        //dd(json_encode($payload));
+        //dd(json_encode($payload, true));
+        
+         Log::info('SkyLink verify payload', ['payload' => $payload]);
         try {
             $response = $this->getHttpClient()->post("{$this->baseUrl}/api/flights/pricing", $payload);
             $decoded = $this->parseResponse($response);
@@ -141,7 +143,7 @@ class SkyLinkApiService
                     unset($logPayload['travellers']['primary_guest']['passport_issue_date']);
                 }
             }
-            Log::info('SkyLink reserve payload', ['payload' => $logPayload]);
+            //Log::info('SkyLink reserve payload', ['payload' => $logPayload]);
 
             $response = $this->getHttpClient()->post("{$this->baseUrl}/api/flights/reserve", $payload);
 

@@ -618,6 +618,7 @@
 
                         <div class="mb-2">
                             <h4 class="font-bold text-md text-brand-textDark mb-3">Flight Base Fare</h4>
+                             @php $isNgnCurrency = isset($flightData['currency']) && strtoupper($flightData['currency']) === 'NGN'; @endphp
                             @if(isset($flightData['travelerPricings']))
                                 @php
                                     $groupedDetails = collect($flightData['travelerPricings'])->groupBy('travelerType');
@@ -630,17 +631,13 @@
                                         $totalGroupPrice = $group->sum(function ($traveler) {
                                             return $traveler['price']['base'];
                                         });
-                                        $label = match ($type) {
-                                            'HELD_INFANT' => 'Infant',
-                                            'CHILD' => 'Child',
-                                            default => 'Adult'
-                                        };
+                                         $label = \App\Enums\TravelerType::from($type)->label();
                                     @endphp
 
                                     <div class="flex justify-between text-xs text-slate-800 mb-2">
                                         <span>{{ $label }} x ({{ $count }})</span>
-                                        <span class="font-medium">{{ config('app.currency_symbol') }}{{
-                                        number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($totalGroupPrice) : $totalGroupPrice, $isNgnCurrency ? 0 : 2) }}</span>
+                                        <span class="font-medium">  {{ config('app.currency_symbol') }}{{
+                                       number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($totalGroupPrice) : $totalGroupPrice, $isNgnCurrency ? 0 : 2) }}</span>
                                     </div>
                                 @endforeach
                             @endif
@@ -648,7 +645,7 @@
                                 <div class="flex justify-between text-xs text-slate-800 mb-2">
                                     <span>Taxes and Fees</span>
                                     <span class="font-medium">{{ config('app.currency_symbol') }}
-                                        {{number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($flightData['verifiedPriceBreakdown']['taxesAndFees']) : $flightData['verifiedPriceBreakdown']['taxesAndFees'], $isNgnCurrency ? 0 : 2) }}</span>
+                                        {{number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($taxes) : $taxes, $isNgnCurrency ? 0 : 2) }}</span>
                                 </div>
                             @endif
                             <div class="flex justify-between text-xs text-slate-800 mb-2">

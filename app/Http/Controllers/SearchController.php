@@ -2,29 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\View\View;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use App\Services\SkyLinkApiService;
-use App\Services\SkyLinkResponseMapper;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\SearchFlightRequest;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
+use App\Models\Country;
 use App\Services\MarkupService;
 use App\Services\SimlessPayService;
+use App\Services\SkyLinkApiService;
+use App\Services\SkyLinkResponseMapper;
+use App\Services\VerifiedPriceService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class SearchController extends Controller
 {
     protected SkyLinkApiService $skyLinkService;
     protected SkyLinkResponseMapper $responseMapper;
+    protected VerifiedPriceService $verifiedPriceService;
 
-    public function __construct(SkyLinkApiService $skyLinkService, SkyLinkResponseMapper $responseMapper)
+    public function __construct(SkyLinkApiService $skyLinkService, 
+    SkyLinkResponseMapper $responseMapper, VerifiedPriceService $verifiedPriceService)
     {
         $this->skyLinkService = $skyLinkService;
         $this->responseMapper = $responseMapper;
+        $this->verifiedPriceService = $verifiedPriceService;
     }
 
     public function search(SearchFlightRequest $request): RedirectResponse
@@ -40,12 +45,12 @@ class SearchController extends Controller
             $meta = $result['data']['meta'] ?? [];
            
             $searchId = Str::uuid()->toString();
-
+          
             Cache::put('flight_search_' . $searchId, [
                 'flights' => $flights,
                 'meta' => $meta,
                 'search_data' => $validated,
-            ], now()->addMinutes(60));
+            ], now()->addMinutes(14));
 
             session()->put('current_search_id', $searchId);
             session()->put('last_flight_search', $validated);
@@ -70,7 +75,7 @@ class SearchController extends Controller
         $searchData = $searchResults['search_data'] ?? [];
         $routeModel = $searchData['routeModel'] ?? 0;
 
-        /* dd($rawFlights, $rawFlights[0]['price'] , app(MarkupService::class)->applyMarkup($rawFlights[0]['price'] ?? 0), number_format(app(SimlessPayService::class)->convertNairaToPounds(
+        /*dd($rawFlights[21], $rawFlights[0]['price'] , app(MarkupService::class)->applyMarkup($rawFlights[0]['price'] ?? 0), number_format(app(SimlessPayService::class)->convertNairaToPounds(
                 app(MarkupService::class)->applyMarkup($rawFlights[0]['price'] ?? 0)
             )), app(SimlessPayService::class)->getCachedExchangeRate(2)
             );
@@ -142,16 +147,40 @@ class SearchController extends Controller
                 $pricingData = $pricingResult['data'] ?? [];
 
                 $verifyId = Str::uuid()->toString();
-                Cache::put('verified_offer_' . $verifyId, [
+               
+                session()->put('current_verify_id', $verifyId);
+                //use verified price for price change 
+                $verifiedPrice = $this->verifiedPriceService->getVerifiedPrice($pricingData);
+                $markUpFee = $markupService->getMarkupFee($verifiedPrice);
+
+                
+                $searchId = session()->get('current_search_id');
+                $searchData = Cache::get('flight_search_' . $searchId)['search_data'] ?? [];
+
+                //$verifiedPrice = $this->verifiedPriceService->getVerifiedPrice($pricingData);
+                $total = $verifiedPrice + $markUpFee;
+                // $estimatedTax =  //round($verifiedPrice * 0.15) + $markupFee;
+
+                $flightData = $this->responseMapper->buildFlightDataForViews(
+                    $offer,
+                    $pricingData,
+                    $searchData,
+                    $markUpFee,
+                    app(SimlessPayService::class)
+                );
+
+                 Cache::put('verified_offer_' . $verifyId, [
                     'pricing' => $pricingData,
                     'originalOffer' => $offer,
+                    'total' => $total,
+                    'flightData' => $flightData,
+                    'searchData' => $searchData,
+                    'verifiedPrice' => $verifiedPrice,
                 ], now()->addMinutes(20));
-
-                session()->put('current_verify_id', $verifyId);
-
-                $verifiedPrice = $pricingData['verified_price'] ?? 0;
-                session()->put('markup_fee', $markupService->getMarkupFee($pricingData['original_price']));
-                //dd($pricingData, number_format($markupService->applyMarkup( $pricingData['original_price'] ?? 0)));
+                
+                //dd($pricingResult, $fData, $passengers, $verifiedPrice);
+                session()->put('markup_fee', $markUpFee);
+                //dd($offer, $pricingData['price_changed'], json_encode($pricingData), number_format($markupService->applyMarkup( $verifiedPrice)));
                 return redirect()->route('bookings.create')->with([
                     'success' => 'Flight offer verified successfully.',
                 ]);

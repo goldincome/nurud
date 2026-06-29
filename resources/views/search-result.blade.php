@@ -64,7 +64,7 @@
         $destination }}</span>
             </h1>
             <button class="text-sky-600 text-sm font-medium hover:underline">
-                New Price Calendar <i class="fas fa-chevron-down ml-1"></i>
+                  @include('common.front.error-and-message')
             </button>
         </div>
 

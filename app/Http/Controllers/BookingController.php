@@ -2,29 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
-use App\Models\Country;
-use App\Models\Bank;
-use Illuminate\View\View;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Services\BookingService;
-use App\Services\PaymentService;
-use App\Services\SkyLinkApiService;
-use App\Services\SkyLinkResponseMapper;
-use App\Services\SimlessPayService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Mail;
+use App\Enums\BookingStatus;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Jobs\SendBookingConfirmation;
 use App\Jobs\SendPaymentConfirmationWithTicket;
+use App\Models\Bank;
+use App\Models\Booking;
+use App\Models\Country;
+use App\Services\BookingService;
+use App\Services\PaymentService;
+use App\Services\SimlessPayService;
+use App\Services\SkyLinkApiService;
+use App\Services\SkyLinkResponseMapper;
+use App\Services\VerifiedPriceService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use App\Enums\BookingStatus;
-use App\Enums\PaymentStatus;
-use App\Enums\PaymentMethod;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class BookingController extends Controller
 {
@@ -32,17 +33,20 @@ class BookingController extends Controller
     protected SkyLinkApiService $skyLinkService;
     protected SkyLinkResponseMapper $responseMapper;
     protected SimlessPayService $simlessPayService;
+    protected VerifiedPriceService $verifiedPriceService;
 
     public function __construct(
         BookingService $bookingService,
         SkyLinkApiService $skyLinkService,
         SkyLinkResponseMapper $responseMapper,
-        SimlessPayService $simlessPayService
+        SimlessPayService $simlessPayService,
+        VerifiedPriceService $verifiedPriceService
     ) {
         $this->bookingService = $bookingService;
         $this->skyLinkService = $skyLinkService;
         $this->responseMapper = $responseMapper;
         $this->simlessPayService = $simlessPayService;
+        $this->verifiedPriceService = $verifiedPriceService;
     }
 
     public function create()
@@ -56,7 +60,25 @@ class BookingController extends Controller
 
         $pricingData = $verifyCache['pricing'];
         $originalOffer = $verifyCache['originalOffer'];
+        $searchData = $verifyCache['searchData'] ?? [];
+        $markupFee = (int) session()->get('markup_fee');
+        $verifiedPrice = $verifyCache['verifiedPrice'] ?? $this->verifiedPriceService->getVerifiedPrice($pricingData);
+        $total = $verifyCache['total'] ?? ($verifiedPrice + $markupFee);
+        $flightData = $verifyCache['flightData'] ?? $this->responseMapper->buildFlightDataForViews(
+            $originalOffer,
+            $pricingData,
+            $searchData,
+            $markupFee,
+            $this->simlessPayService
+        );
 
+        $passengerCount = ($searchData['travelers']['numberOfAdults'] ?? 1)
+            + ($searchData['travelers']['numberOfChildren'] ?? 0)
+            + ($searchData['travelers']['numberOfInfants'] ?? 0);
+
+        $countries = Country::orderBy('name')->get();
+
+        /*
         $searchId = session()->get('current_search_id');
         $searchData = Cache::get('flight_search_' . $searchId)['search_data'] ?? [];
 
@@ -67,7 +89,7 @@ class BookingController extends Controller
         $countries = Country::orderBy('name')->get();
 
         $markupFee = (int) session()->get('markup_fee', 0);
-        $verifiedPrice = $pricingData['verified_price'] ?? $pricingData['original_price'] ?? 0;
+        $verifiedPrice = $this->verifiedPriceService->getVerifiedPrice($pricingData);
         $total = $verifiedPrice + $markupFee;
        // $estimatedTax =  //round($verifiedPrice * 0.15) + $markupFee;
 
@@ -78,8 +100,14 @@ class BookingController extends Controller
             $markupFee,
             $this->simlessPayService
         );
-        $taxes = $flightData['verifiedPriceBreakdown']['taxesAndFees'] ?? 0;
-       /* dd([
+        */
+        //$addToCache = ['flightData' => $flightData];
+        //Cache::put('flight_data' ,  $addToCache , now()->addMinutes(13));
+        
+        $groupTotalPrice = $this->verifiedPriceService->getGroupTotalPrice($flightData);
+        $taxes = $total - $groupTotalPrice; //$flightData['verifiedPriceBreakdown']['taxesAndFees']  ?? 0;
+        /*dd([
+            'verifyCache' => $verifyCache,
             'flightData' => $flightData,
             'pricingData' => $pricingData,
             'travelerCount' => $passengerCount,
@@ -87,6 +115,9 @@ class BookingController extends Controller
             'countries' => $countries,
             'total' => $total,
             'taxes' => $taxes, 
+            'markupFee' => $markupFee,
+            'groupTotalPrice' => $this->verifiedPriceService->getGroupTotalPrice($flightData),
+            'poundsTotal' => $this->simlessPayService->convertNairaToPounds($total),
         ]);
         */
         return view('booking.booking', [
@@ -98,6 +129,7 @@ class BookingController extends Controller
             'total' => $total,
             'taxes' => $taxes,
             'simlessPayService' => $this->simlessPayService,
+            'groupTotalPrice' => $this->verifiedPriceService->getGroupTotalPrice($flightData),
         ]);
     }
 
@@ -132,12 +164,13 @@ class BookingController extends Controller
 
         $verifyId = session()->get('current_verify_id');
         $verifyCache = Cache::get('verified_offer_' . $verifyId);
-
+    
         if (!$verifyCache) {
             return redirect()->route('search.results')->with('error', 'Booking session expired. Please re-select your flight.');
         }
 
         $pricingData = $verifyCache['pricing'];
+        $flightData = $verifyCache['flightData'];
         $bookingToken = $pricingData['booking_token'] ?? '';
 
         if (!$bookingToken) {
@@ -162,16 +195,20 @@ class BookingController extends Controller
         $payload['flight_summary'] = $originalOffer;
         $payload['search_params'] = $searchData;
         $payload['fare_summary'] = $pricingData;
+        $payload['flight_data'] = $flightData;
+        $payload['totalPrice'] = $verifyCache['total'] ?? ($this->verifiedPriceService->getVerifiedPrice($pricingData) + session()->get('markup_fee', 0));
 
+        $groupTotalPrice = $payload['group_total_price'] = $this->verifiedPriceService->getGroupTotalPrice($flightData);
         $bookingId = Str::uuid()->toString();
         Cache::put('booking_offer_' . $bookingId, $payload, now()->addMinutes(60));
         session()->put('offer_data_id', $bookingId);
 
         $banks = Bank::all();
-
-        $verifiedPrice = $pricingData['verified_price'] ?? $pricingData['original_price'] ?? 0;
-        $total = $verifiedPrice + session()->get('markup_fee', 0);
-        $estimatedTax = $verifiedPrice * 0.15 + session()->get('markup_fee', 0);
+        //dd($payload, $verifyCache, $pricingData);
+        //$verifiedPrice = $verifyCache['verifiedPrice']; //this->verifiedPriceService->getVerifiedPrice($pricingData);
+        $total = $verifyCache['total'];  //$verifiedPrice + session()->get('markup_fee', 0);
+       
+        $estimatedTax = $total - $groupTotalPrice;//$verifiedPrice * 0.15 + session()->get('markup_fee', 0);
 
         $flightData = $this->responseMapper->buildFlightDataForViews(
             $originalOffer,
@@ -297,7 +334,7 @@ class BookingController extends Controller
                 }
             }
         }
-
+        //dd($booking->load(['travelers', 'itineraries', 'travelerPricings']));
         return view('booking.confirmation', [
             'booking' => $booking->load(['travelers', 'itineraries', 'travelerPricings']),
             'simlessPayService' => $this->simlessPayService,

@@ -298,13 +298,14 @@
                             @if(isset($booking->travelerPricings))
                                 @php
                                     $groupedDetails = $booking->travelerPricings->groupBy('traveler_type');
+                                    $sumTot = 0;
                                 @endphp
 
                                 @foreach($groupedDetails as $type => $group)
                                     @php
                                         $count = $group->count();
                                         $totalGroupPrice = $group->sum(function ($pricing) {
-                                            return $pricing->price['base'] ?? 0;
+                                            return $pricing['price']['base'];
                                         });
 
                                         $label = \App\Enums\TravelerType::from($type)->label();
@@ -313,7 +314,7 @@
                                     <div class="flex justify-between text-xs text-slate-800 mb-2">
                                         <span>{{ $label }} x ({{ $count }})</span>
                                         <span class="font-medium">{{ config('app.currency_symbol') }}
-                                            {{ number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($totalGroupPrice) : $totalGroupPrice, $isNgnCurrency ? 0 : 2) }}</span>
+                                            {{ number_format($totalGroupPrice) }}</span>
                                     </div>
                                 @endforeach
                             @endif
@@ -321,7 +322,7 @@
                             <div class="flex justify-between text-xs text-slate-800 mb-2">
                                 <span>Taxes and Fees</span>
                                 <span class="font-medium">{{ config('app.currency_symbol') }}
-                                    {{ number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($booking->priceInPounds->tax) : $booking->priceInPounds->tax, $isNgnCurrency ? 0 : 2) }}</span>
+                                    {{ number_format($booking->priceInPounds->tax) }}</span>
                             </div>
 
                             <div class="flex justify-between text-xs text-slate-800 mb-2">
@@ -334,7 +335,7 @@
                             <span class="text-sm font-bold text-slate-800">Total Price</span>
                             <span class="text-2xl font-bold text-brand-textDark">
                                 {{ config('app.currency_symbol') }}
-                                {{ number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($booking->priceInPounds->total_price) : $booking->priceInPounds->total_price, $isNgnCurrency ? 0 : 2) }}
+                                {{ number_format($booking->priceInPounds->total_price) }}
                             </span>
                         </div>
 

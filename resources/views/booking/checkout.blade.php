@@ -486,7 +486,7 @@
                                 <div class="flex justify-between text-xs text-slate-800 mb-2">
                                     <span>Taxes and Fees</span>
                                     <span class="font-medium">{{ config('app.currency_symbol') }}
-                                        {{number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($flightData['verifiedPriceBreakdown']['taxesAndFees']) : $flightData['verifiedPriceBreakdown']['taxesAndFees'], $isNgnCurrency ? 0 : 2) }}</span>
+                                        {{number_format($isNgnCurrency ? $simlessPayService->convertNairaToPounds($taxes) : $taxes, $isNgnCurrency ? 0 : 2) }}</span>
                                 </div>
                             @endif
                             <div class="flex justify-between text-xs text-slate-800 mb-2">
