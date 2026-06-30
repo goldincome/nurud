@@ -68,6 +68,7 @@ class SearchFlightRequest extends FormRequest
         if ($this->routeModel == 1) {
             $rules['returnDate'] = ['required', 'date', 'after_or_equal:departureDate'];
             $rules['dateWindow'] = ['boolean'];
+            
         }
 
         // MULTI-CITY (2)

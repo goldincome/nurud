@@ -33,9 +33,9 @@ class SearchController extends Controller
     }
 
     public function search(SearchFlightRequest $request): RedirectResponse
-    {
+    { 
         $validated = $request->validated();
-
+        //dd($validated);
         try {
             set_time_limit(300);
 

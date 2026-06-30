@@ -52,6 +52,7 @@ class SkyLinkApiService
             'infants' => (int) ($validatedData['travelers']['numberOfInfants'] ?? 0),
             'class' => strtolower($validatedData['flightClass']),
             'currency' => config('currency.default_currency', 'GBP'),
+            'nonstop' => $validatedData['directFlightOnly'] ? 1 : 0,
         ];
 
         if ($payload['flight_type'] === 'multicity') {
@@ -73,6 +74,7 @@ class SkyLinkApiService
 
             if ($payload['flight_type'] === 'roundtrip' && isset($validatedData['returnDate'])) {
                 $payload['flights_return_date'] = Carbon::parse($validatedData['returnDate'])->format('Y-m-d');
+                $payload['flexible_days'] = $validatedData['dateWindow'] ? 1 : 0;
             }
         }
 
