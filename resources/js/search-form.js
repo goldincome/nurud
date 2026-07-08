@@ -108,11 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 leftDiv.style.cssText = "flex:1; min-width:0;";
                 
                 const nameSpan = document.createElement("DIV");
-                nameSpan.style.cssText = "font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;";
+                nameSpan.style.cssText = "font-weight:600; font-size:13px; white-space:normal; word-wrap:break-word;";
                 nameSpan.textContent = item.raw_name;
                 
                 const stateSpan = document.createElement("DIV");
-                stateSpan.style.cssText = "font-size:11px; opacity:0.7; margin-top:2px;";
+                stateSpan.style.cssText = "font-size:11px; white-space:normal; word-wrap:break-word; margin-top:2px;";
                 stateSpan.textContent = item.raw_state;
                 
                 leftDiv.appendChild(nameSpan);
