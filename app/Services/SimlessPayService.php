@@ -34,8 +34,9 @@ class SimlessPayService
 
     public function __construct()
     {
-        $this->baseUrl = config('simlesspay.base_url');
-        $this->apiKey = config('simlesspay.api_key');
+        $isLive = config('simlesspay.is_live', false);
+        $this->baseUrl = $isLive ? config('simlesspay.live_base_url') : config('simlesspay.base_url');
+        $this->apiKey = $isLive ? config('simlesspay.live_api_key') : config('simlesspay.api_key');
     }
 
     /**
@@ -49,7 +50,7 @@ class SimlessPayService
     }
 
     /**
-     * Authenticate with the API using the API Key.
+     * Authenticate with the $channel = collect($channels['data']['pay_out_channels'] ?? [])API using the API Key.
      */
     protected function authenticate(): ?string
     {
@@ -317,17 +318,34 @@ class SimlessPayService
     }
 
     /**
+     * Get the payout channel ID by source currency code.
+     *
+     * @param array $response
+     * @param string $currencyCode
+     * @return int|null
+     */
+    public function getChannelIdByCurrency(string $currencyCode = 'GBP'): ?int
+    {
+        $response = $this->getPayoutChannels();
+        return collect($response['data']['pay_out_channels'] ?? [])
+            ->firstWhere('source_currency.code', $currencyCode)['id'] ?? null;
+    }
+
+    /**
      * Get the exchange rate for a specific payout channel with caching.
      * * @param int $channelId The ID of the channel (e.g., the one for GBP/NGN)
      * @param int $ttl Seconds to cache (default 3600 / 1 hour)
      */
     public function getCachedExchangeRate(int $channelId = 2, int $ttl = 3600): float
     {
+        //$currencyCode = config('currency.supported_currencies')['gbp']['code'] ?? 'GBP';
+        $channelId = config('simlesspay.is_live') ? 1 : 2; //$channelId = $this->getChannelIdByCurrency($currencyCode) ?: $channelId ; // Default to channel ID 2 if not provided
+        //dd($channelId, $currencyCode);
         $cacheKey = "simlesspay_rate_channel_{$channelId}";
 
         return Cache::remember($cacheKey, $ttl, function () use ($channelId) {
             $channels = $this->getPayoutChannels();
-            //dd($channels);
+            dd($channels, $channelId);
             // Find the specific channel by ID to be safe
             $channel = collect($channels['data']['pay_out_channels'] ?? [])
                 ->firstWhere('id', $channelId);

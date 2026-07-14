@@ -52,37 +52,55 @@ class SkyLinkResponseMapper
     public function mapFlightToView(array $flight, array $searchData, MarkupService $markupService, SimlessPayService $simlessPayService): array
     {
         $seg = $this->getFirstSegment($flight);
-        $segments = $this->getSegments($flight);
+        $allItineraries = $flight['segments'] ?? [];
 
-        $depCode = $seg['departure_code'] ?? '';
-        $arrCode = $seg['arrival_code'] ?? '';
+        $firstItinerary = $allItineraries[0] ?? [];
+        $firstSegOfFirst = $firstItinerary[0] ?? $seg;
+
+        $depCode = $firstSegOfFirst['departure_code'] ?? '';
+        $lastSegOfFirst = !empty($firstItinerary) ? end($firstItinerary) : $firstSegOfFirst;
+        $arrCode = $lastSegOfFirst['arrival_code'] ?? '';
 
         $cityNames = $this->getAirportCityNames($depCode, $arrCode);
 
         $totalDuration = $seg['total_duration'] ?? $seg['duration_time'] ?? '0h 0m';
-        $isDirect = count($segments) <= 1;
 
         $itineraries = [];
-        foreach ($segments as $i => $s) {
+        foreach ($allItineraries as $itinSegments) {
+            if (empty($itinSegments)) continue;
+
+            $firstLeg = $itinSegments[0];
+            $lastLeg = end($itinSegments);
+
+            $totalStops = count($itinSegments) - 1;
+
+            $itinDuration = $firstLeg['total_duration'] ?? '';
+            if (!$itinDuration) {
+                $totalMins = 0;
+                foreach ($itinSegments as $s) {
+                    $totalMins += $this->parseDurationMinutes($s['seg_duration'] ?? $s['duration_time'] ?? '');
+                }
+                $itinDuration = $totalMins > 0 ? sprintf('%dh %dm', floor($totalMins / 60), $totalMins % 60) : '0h 0m';
+            }
+
+            $depDate = $firstLeg['departure_date'] ?? $searchData['departureDate'] ?? '';
+            $arrDate = $lastLeg['arrival_date'] ?? $searchData['departureDate'] ?? '';
+
             $itineraries[] = [
-                'depTime' => $s['departure_time'] ?? '',
-                'depAirport' => $s['departure_code'] ?? '',
-                'depCity' => $s['departure_city'] ?? '',
-                'depDate' => isset($searchData['departureDate'])
-                    ? date('D, d M', strtotime($searchData['departureDate']))
-                    : date('D, d M'),
-                'arrTime' => $s['arrival_time'] ?? '',
-                'arrAirport' => $s['arrival_code'] ?? '',
-                'arrCity' => $s['arrival_city'] ?? '',
-                'arrDate' => isset($searchData['departureDate'])
-                    ? date('D, d M', strtotime($searchData['departureDate']))
-                    : date('D, d M'),
-                'duration' => $s['seg_duration'] ?? $s['duration_time'] ?? '0h 0m',
-                'durationMinutes' => $this->parseDurationMinutes($s['seg_duration'] ?? $s['duration_time'] ?? ''),
-                'stops' => $isDirect ? 'Direct' : ($i === 0 ? count($segments) - 1 . ' Stop' : ''),
-                'stopCity' => $i > 0 ? ($s['departure_city'] ?? '') : '',
-                'airlineCode' => $s['img'] ?? $s['airline'] ?? '',
-                'airlineName' => $s['airline'] ?? '',
+                'depTime' => $firstLeg['departure_time'] ?? '',
+                'depAirport' => $firstLeg['departure_code'] ?? '',
+                'depCity' => $firstLeg['departure_city'] ?? '',
+                'depDate' => $depDate ? date('D, d M', strtotime($depDate)) : date('D, d M'),
+                'arrTime' => $lastLeg['arrival_time'] ?? '',
+                'arrAirport' => $lastLeg['arrival_code'] ?? '',
+                'arrCity' => $lastLeg['arrival_city'] ?? '',
+                'arrDate' => $arrDate ? date('D, d M', strtotime($arrDate)) : date('D, d M'),
+                'duration' => $itinDuration,
+                'durationMinutes' => $this->parseDurationMinutes($itinDuration),
+                'stops' => $totalStops === 0 ? 'Direct' : $totalStops . ' Stop' . ($totalStops > 1 ? 's' : ''),
+                'stopCity' => '',
+                'airlineCode' => $firstLeg['img'] ?? $firstLeg['airline'] ?? '',
+                'airlineName' => $firstLeg['airline'] ?? '',
             ];
         }
 

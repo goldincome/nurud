@@ -430,9 +430,9 @@
                                                                                                                                 <i class="fas fa-plane text-slate-300 text-[10px] transform rotate-90"></i>
                                                                                                                                 <div class="w-1.5 h-1.5 rounded-full bg-slate-300 absolute right-0"></div>
                                                                                                                             </div>
-                                                                                                                            <div class="text-[10px] font-medium text-brand-orange mt-1">
-                                                                                                                                ${leg.stops} ${leg.stopCity ? `(${leg.stopCity})` : ''}
-                                                                                                                            </div>
+                                                                                                                             <div class="text-[10px] font-medium text-brand-orange mt-1">
+                                                                                                                                 ${leg.stops}
+                                                                                                                             </div>
                                                                                                                         </div>
 
                                                                                                                         <div class="text-right min-w-[80px]">
