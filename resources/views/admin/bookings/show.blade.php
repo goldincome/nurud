@@ -87,7 +87,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase mb-1">Total Price</p>
-                    <p class="text-slate-800 font-bold text-lg">{{ $booking->currency }} {{ number_format($booking->total_price + $booking->markup_fee) }}</p>
+                    <p class="text-slate-800 font-bold text-lg">{{ $booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : 'GBP' }}{{ number_format((float) ($booking->priceInPounds->total_price ?? 0), 2) }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase mb-1">Payment Method</p>
@@ -95,7 +95,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-bold text-slate-500 uppercase mb-1">Route</p>
-                    <p class="text-slate-800">{{ $booking->origin_location }} <i class="fas fa-arrow-right text-xs mx-1 text-slate-400"></i> {{ $booking->origin_destination }}</p>
+                    <p class="text-slate-800">{{ $booking->origin_location_display }} <i class="fas fa-arrow-right text-xs mx-1 text-slate-400"></i> {{ $booking->origin_destination_display }}</p>
                 </div>
             </div>
         </div>
@@ -146,10 +146,20 @@
                     <h3 class="font-bold text-slate-800">Price Breakdown</h3>
                 </div>
                 <div class="p-6">
+                    @php
+                        $pp = $booking->priceInPounds;
+                        $ppCurrency = $pp->currency ? config('currency.supported_currencies.gbp.symbol') : 'GBP';
+                        $ppBase = (float) ($pp->price ?? 0);
+                        $ppTax = (float) ($pp->tax ?? 0);
+                        $ppMarkup = (float) ($pp->markup ?? 0);
+                        $ppTotal = (float) ($pp->total_price ?? 0);
+                    @endphp
                     <div class="space-y-3">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Flight Base Fare</p>
                         @php
                             $groupedDetails = $booking->travelerPricings->groupBy('traveler_type');
+                            $totalLocal = $booking->total_price + $booking->markup_fee;
+                            $priceRatio = $totalLocal > 0 ? $ppTotal / $totalLocal : 1;
                         @endphp
                         @foreach($groupedDetails as $type => $group)
                             @php
@@ -157,28 +167,29 @@
                                 $totalGroupPrice = $group->sum(function ($pricing) {
                                     return $pricing->price['base'] ?? 0;
                                 });
+                                $groupGBP = $totalGroupPrice * $priceRatio;
                                 $label = \App\Enums\TravelerType::from($type)->label();
                             @endphp
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-slate-600">{{ $label }} x ({{ $count }})</span>
-                                <span class="font-medium text-slate-800">{{ $booking->currency }} {{ number_format($totalGroupPrice, 2) }}</span>
+                                <span class="font-medium text-slate-800">{{ $ppCurrency }} {{ number_format($groupGBP, 2) }}</span>
                             </div>
                         @endforeach
 
                         <div class="pt-3 border-t border-slate-100 space-y-3">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-slate-600">Taxes and Fees</span>
-                                <span class="font-medium text-slate-800">{{ $booking->currency }} {{ number_format($booking->taxes_and_fees + $booking->markup_fee) }}</span>
+                                <span class="font-medium text-slate-800">{{ $ppCurrency }} {{ number_format($ppTax, 2) }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm text-slate-400">
                                 <span>Discount</span>
-                                <span>{{ $booking->currency }} 0</span>
+                                <span>{{ $ppCurrency }} 0.00</span>
                             </div>
                         </div>
 
                         <div class="pt-4 border-t border-slate-100 flex justify-between items-center">
                             <span class="font-bold text-slate-800">Total Price</span>
-                            <span class="text-xl font-bold text-brand-blue">{{ $booking->currency }} {{ number_format($booking->total_price + $booking->markup_fee) }}</span>
+                            <span class="text-xl font-bold text-brand-blue">{{ $ppCurrency }} {{ number_format($ppTotal, 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -294,7 +305,7 @@
             <div class="p-6">
                <div class="flex items-center justify-between mb-4">
                     <div>
-                        <p class="text-2xl font-bold text-brand-blue">{{ $booking->origin_location }}</p>
+                        <p class="text-2xl font-bold text-brand-blue">{{ $booking->origin_location_display }}</p>
                         <p class="text-xs text-slate-500">Departure</p>
                     </div>
                     <div class="flex-1 px-8 text-center">
@@ -303,7 +314,7 @@
                         <p class="text-xs text-slate-500 mt-2">{{ $booking->carrier_code }} • {{ $booking->class ?? 'Economy' }}</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-2xl font-bold text-brand-blue">{{ $booking->origin_destination }}</p>
+                        <p class="text-2xl font-bold text-brand-blue">{{ $booking->origin_destination_display }}</p>
                         <p class="text-xs text-slate-500">Arrival</p>
                     </div>
                </div>

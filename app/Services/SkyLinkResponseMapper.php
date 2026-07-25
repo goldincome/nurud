@@ -133,7 +133,7 @@ class SkyLinkResponseMapper
     public function buildFlightDataForViews(array $flight, array $pricingData, array $searchData, int $markupFee = 0, ?SimlessPayService $simlessPayService = null): array
     {
         $seg = $this->getFirstSegment($flight);
-        $segments = $this->getSegments($flight);
+        $allItineraries = $flight['segments'] ?? [];
 
         $depCode = $seg['departure_code'] ?? '';
         $arrCode = $seg['arrival_code'] ?? '';
@@ -146,43 +146,88 @@ class SkyLinkResponseMapper
         $carrierCode = $seg['img'] ?? $seg['airline'] ?? '';
         $carrierName = $seg['airline'] ?? '';
 
-        $viewSegments = [];
-        foreach ($segments as $s) {
-            $departureAt = $this->formatDateTime(
-                $s['departure_date'] ?? $departureDate,
-                $s['departure_time'] ?? '00:00'
-            );
-            $arrivalAt = $this->formatDateTime(
-                $s['arrival_date'] ?? $departureDate,
-                $s['arrival_time'] ?? '00:00'
-            );
+        $routeModel = $searchData['routeModel'] ?? 0;
+        $viewItineraries = [];
 
-            $viewSegments[] = [
-                'carrier' => [
-                    'iataCode' => $s['img'] ?? $s['airline'] ?? '',
-                    'name' => $s['airline'] ?? '',
-                ],
-                'number' => $s['flight_no'] ?? '',
-                'aircraft' => ['code' => ''],
-                'duration' => $s['seg_duration'] ?? $s['duration_time'] ?? '0h 0m',
-                'cabin' => strtoupper($cabin),
-                'class' => $s['class_letter'] ?? 'Y',
-                'segmentDeparture' => [
-                    'at' => $departureAt,
-                    'airport' => [
-                        'iataCode' => $s['departure_code'] ?? '',
-                        'city' => $s['departure_city'] ?? $cityNames['departure_city'] ?? '',
-                        'name' => $s['departure_airport'] ?? '',
+        foreach ($allItineraries as $itinIndex => $itinSegments) {
+            if (empty($itinSegments)) continue;
+
+            $viewSegments = [];
+            foreach ($itinSegments as $s) {
+                $departureAt = $this->formatDateTime(
+                    $s['departure_date'] ?? $departureDate,
+                    $s['departure_time'] ?? '00:00'
+                );
+                $arrivalAt = $this->formatDateTime(
+                    $s['arrival_date'] ?? $departureDate,
+                    $s['arrival_time'] ?? '00:00'
+                );
+
+                $viewSegments[] = [
+                    'carrier' => [
+                        'iataCode' => $s['img'] ?? $s['airline'] ?? '',
+                        'name' => $s['airline'] ?? '',
                     ],
-                ],
-                'segmentArrival' => [
-                    'at' => $arrivalAt,
-                    'airport' => [
-                        'iataCode' => $s['arrival_code'] ?? '',
-                        'city' => $s['arrival_city'] ?? $cityNames['arrival_city'] ?? '',
-                        'name' => $s['arrival_airport'] ?? '',
+                    'number' => $s['flight_no'] ?? '',
+                    'aircraft' => ['code' => ''],
+                    'duration' => $s['seg_duration'] ?? $s['duration_time'] ?? '0h 0m',
+                    'cabin' => strtoupper($cabin),
+                    'class' => $s['class_letter'] ?? 'Y',
+                    'segmentDeparture' => [
+                        'at' => $departureAt,
+                        'airport' => [
+                            'iataCode' => $s['departure_code'] ?? '',
+                            'city' => $s['departure_city'] ?? $cityNames['departure_city'] ?? '',
+                            'name' => $s['departure_airport'] ?? '',
+                        ],
                     ],
-                ],
+                    'segmentArrival' => [
+                        'at' => $arrivalAt,
+                        'airport' => [
+                            'iataCode' => $s['arrival_code'] ?? '',
+                            'city' => $s['arrival_city'] ?? $cityNames['arrival_city'] ?? '',
+                            'name' => $s['arrival_airport'] ?? '',
+                        ],
+                    ],
+                ];
+            }
+
+            $firstLeg = $itinSegments[0];
+            $totalDuration = $firstLeg['total_duration'] ?? '';
+            if (!$totalDuration) {
+                $totalMins = 0;
+                foreach ($itinSegments as $s) {
+                    $dur = $s['seg_duration'] ?? $s['duration_time'] ?? '';
+                    if (preg_match('/(\d+)h\s*(\d+)m/', $dur, $m)) {
+                        $totalMins += ((int) $m[1] * 60) + (int) $m[2];
+                    } elseif (preg_match('/(\d+)h/', $dur, $m)) {
+                        $totalMins += (int) $m[1] * 60;
+                    } elseif (preg_match('/(\d+)m/', $dur, $m)) {
+                        $totalMins += (int) $m[1];
+                    }
+                }
+                $totalDuration = $totalMins > 0 ? sprintf('%dh %dm', floor($totalMins / 60), $totalMins % 60) : '0h 0m';
+            }
+
+            $itinIndexNum = $itinIndex + 1;
+            $itinTitle = match (true) {
+                $routeModel === 1 && $itinIndex === 0 => 'Outbound',
+                $routeModel === 1 && $itinIndex === 1 => 'Return',
+                default => 'Flight ' . $itinIndexNum,
+            };
+
+            $viewItineraries[] = [
+                'segments' => $viewSegments,
+                'duration' => $totalDuration,
+                'itineraryTitle' => $itinTitle,
+            ];
+        }
+
+        if (empty($viewItineraries)) {
+            $viewItineraries[] = [
+                'segments' => [],
+                'duration' => $seg['total_duration'] ?? '0h 0m',
+                'itineraryTitle' => 'Outbound',
             ];
         }
 
@@ -234,16 +279,8 @@ class SkyLinkResponseMapper
             ];
         }
 
-        $totalDuration = $seg['total_duration'] ?? $seg['duration_time'] ?? '0h 0m';
-
         return [
-            'itineraries' => [
-                [
-                    'segments' => $viewSegments,
-                    'duration' => $totalDuration,
-                    'itineraryTitle' => 'Outbound' ,
-                ],
-            ],
+            'itineraries' => $viewItineraries,
             'travelerPricings' => $travelerPricings,
             'verifiedPrice' => ['total' => $verifiedPrice],
             'verifiedPriceBreakdown' => [

@@ -273,13 +273,13 @@ class BookingController extends Controller
                 try {
                     if ($method === PaymentMethod::PAY_LATER) {
                         Mail::to($booking->customer_email)
-                            ->send(new \App\Mail\BuyNowPayLaterEmail($booking, Bank::all()));
+                            ->send(new \App\Mail\BuyNowPayLaterEmail($booking));
                     } elseif ($method === PaymentMethod::BANK_TRANSFER) {
                         Mail::to($booking->customer_email)
-                            ->send(new \App\Mail\BankTransferBookingEmail($booking, Bank::all()));
+                            ->send(new \App\Mail\BankTransferBookingEmail($booking));
                     } elseif ($method === PaymentMethod::BOOK_ON_HOLD) {
                         Mail::to($booking->customer_email)
-                            ->send(new \App\Mail\BookOnHoldEmail($booking, Bank::all()));
+                            ->send(new \App\Mail\BookOnHoldEmail($booking));
                     }
                 } catch (\Exception $e) {
                     Log::error('Failed to send deferred payment email', [

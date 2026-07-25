@@ -63,7 +63,7 @@
                                 {{ $booking->departure_date ? $booking->departure_date->format('M d, Y H:i') : 'N/A' }}
                             </td>
                             <td class="px-6 py-4 font-medium text-slate-800">
-                                {{ $booking->currency }} {{ number_format($booking->total_price + $booking->markup_fee) }}
+                                {{ $booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : 'GBP' }}{{ number_format((float) ($booking->priceInPounds->total_price ?? 0), 2) }}
                             </td>
                             <td class="px-6 py-4">
                                 <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide

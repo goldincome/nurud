@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Booking;
+use App\Models\Airport;
 use App\Models\Traveler;
 use App\Models\Payment;
 use App\Mail\BookingConfirmed;
@@ -170,9 +171,18 @@ class BookingService
             $perInfantBase = $perPassenger['infant'] ?? round($perAdultBase * 0.1);
             $totalBase = ($perAdultBase * $adultCount) + ($perChildBase * $childCount) + ($perInfantBase * $infantCount);
 
-            $seg = $flight['segments'][0][0] ?? $flight;
-            $originLocation = $seg['departure_code'] ?? ($flight['departure_code'] ?? $searchParams['originLocationCode'] ?? null);
-            $originDestination = $seg['arrival_code'] ?? ($flight['arrival_code'] ?? $searchParams['originDestinationCode'] ?? null);
+            $allSegs = $flight['segments'][0] ?? ($flight['segments'] ?? []);
+            if (!empty($allSegs) && is_array($allSegs)) {
+                $firstSeg = $allSegs[0];
+                $lastSeg = end($allSegs);
+                $originLocation = $firstSeg['departure_code'] ?? ($flight['departure_code'] ?? $searchParams['originLocationCode'] ?? null);
+                $originDestination = $lastSeg['arrival_code'] ?? ($flight['arrival_code'] ?? $searchParams['originDestinationCode'] ?? null);
+                $seg = $firstSeg;
+            } else {
+                $seg = $flight;
+                $originLocation = $seg['departure_code'] ?? ($flight['departure_code'] ?? $searchParams['originLocationCode'] ?? null);
+                $originDestination = $seg['arrival_code'] ?? ($flight['arrival_code'] ?? $searchParams['originDestinationCode'] ?? null);
+            }
             $carrierCode = $seg['img'] ?? $seg['airline'] ?? ($flight['airline'] ?? null);
 
             $booking = Booking::create([
@@ -252,60 +262,95 @@ class BookingService
                 ]);
             }
 
-            $segList = $flight['segments'][0] ?? [];
-            if (empty($segList)) { $segList = [$flight]; }
-            $builtSegments = [];
-            foreach ($segList as $s) {
-                $depDate = $s['departure_date'] ?? $searchParams['departureDate'] ?? '';
-                $depTime = $s['departure_time'] ?? '00:00';
-                $arrDate = $s['arrival_date'] ?? $searchParams['departureDate'] ?? '';
-                $arrTime = $s['arrival_time'] ?? '00:00';
+            $allItineraries = $flight['segments'] ?? [];
+            if (empty($allItineraries)) { $allItineraries = [[$flight]]; }
 
-                try {
-                    $depAt = \Carbon\Carbon::parse($depDate)->format('Y-m-d') . 'T' . \Carbon\Carbon::parse($depTime)->format('H:i:s');
-                } catch (\Exception $e) {
-                    $depAt = $depDate . 'T' . $depTime;
-                }
-                try {
-                    $arrAt = \Carbon\Carbon::parse($arrDate)->format('Y-m-d') . 'T' . \Carbon\Carbon::parse($arrTime)->format('H:i:s');
-                } catch (\Exception $e) {
-                    $arrAt = $arrDate . 'T' . $arrTime;
+            $routeModel = $searchParams['routeModel'] ?? 0;
+
+            foreach ($allItineraries as $itinIndex => $itinSegments) {
+                if (empty($itinSegments)) continue;
+
+                $itinFirst = $itinSegments[0];
+                $itinLast = end($itinSegments);
+
+                $itinOrigin = $itinFirst['departure_code'] ?? $originLocation ?? '';
+                $itinDestination = $itinLast['arrival_code'] ?? $originDestination ?? '';
+
+                $builtSegments = [];
+                $totalDurationMins = 0;
+
+                foreach ($itinSegments as $s) {
+                    $depDate = $s['departure_date'] ?? $searchParams['departureDate'] ?? '';
+                    $depTime = $s['departure_time'] ?? '00:00';
+                    $arrDate = $s['arrival_date'] ?? $searchParams['departureDate'] ?? '';
+                    $arrTime = $s['arrival_time'] ?? '00:00';
+
+                    try {
+                        $depAt = \Carbon\Carbon::parse($depDate)->format('Y-m-d') . 'T' . \Carbon\Carbon::parse($depTime)->format('H:i:s');
+                    } catch (\Exception $e) {
+                        $depAt = $depDate . 'T' . $depTime;
+                    }
+                    try {
+                        $arrAt = \Carbon\Carbon::parse($arrDate)->format('Y-m-d') . 'T' . \Carbon\Carbon::parse($arrTime)->format('H:i:s');
+                    } catch (\Exception $e) {
+                        $arrAt = $arrDate . 'T' . $arrTime;
+                    }
+
+                    $segDur = $s['seg_duration'] ?? $s['duration_time'] ?? '';
+                    if (preg_match('/(\d+)h\s*(\d+)m/', $segDur, $m)) {
+                        $totalDurationMins += ((int) $m[1] * 60) + (int) $m[2];
+                    } elseif (preg_match('/(\d+)h/', $segDur, $m)) {
+                        $totalDurationMins += (int) $m[1] * 60;
+                    } elseif (preg_match('/(\d+)m/', $segDur, $m)) {
+                        $totalDurationMins += (int) $m[1];
+                    }
+
+                    $builtSegments[] = [
+                        'carrier' => [
+                            'iataCode' => $s['img'] ?? $s['airline'] ?? $carrierCode,
+                            'name' => $s['airline'] ?? $carrierCode,
+                        ],
+                        'number' => $s['flight_no'] ?? '',
+                        'duration' => $segDur,
+                        'segmentDeparture' => [
+                            'at' => $depAt,
+                            'airport' => [
+                                'iataCode' => $s['departure_code'] ?? $itinOrigin ?: '',
+                                'city' => $s['departure_city'] ?? ($s['departure_code'] ?? $itinOrigin ?: ''),
+                            ],
+                        ],
+                        'segmentArrival' => [
+                            'at' => $arrAt,
+                            'airport' => [
+                                'iataCode' => $s['arrival_code'] ?? $itinDestination ?: '',
+                                'city' => $s['arrival_city'] ?? ($s['arrival_code'] ?? $itinDestination ?: ''),
+                            ],
+                        ],
+                    ];
                 }
 
-                $builtSegments[] = [
-                    'carrier' => [
-                        'iataCode' => $s['img'] ?? $s['airline'] ?? $carrierCode,
-                        'name' => $s['airline'] ?? $carrierCode,
-                    ],
-                    'number' => $s['flight_no'] ?? '',
-                    'duration' => $s['seg_duration'] ?? $s['duration_time'] ?? '',
-                    'segmentDeparture' => [
-                        'at' => $depAt,
-                        'airport' => [
-                            'iataCode' => $s['departure_code'] ?? $originLocation ?: '',
-                            'city' => $s['departure_city'] ?? ($s['departure_code'] ?? $originLocation ?: ''),
-                        ],
-                    ],
-                    'segmentArrival' => [
-                        'at' => $arrAt,
-                        'airport' => [
-                            'iataCode' => $s['arrival_code'] ?? $originDestination ?: '',
-                            'city' => $s['arrival_city'] ?? ($s['arrival_code'] ?? $originDestination ?: ''),
-                        ],
-                    ],
-                ];
+                $itinDuration = $totalDurationMins > 0
+                    ? sprintf('%dh %dm', floor($totalDurationMins / 60), $totalDurationMins % 60)
+                    : ($itinFirst['total_duration'] ?? null);
+
+                $itinIndexNum = $itinIndex + 1;
+                $itinTitle = match (true) {
+                    $routeModel === 1 && $itinIndex === 0 => 'Outbound',
+                    $routeModel === 1 && $itinIndex === 1 => 'Return',
+                    default => 'Flight ' . $itinIndexNum,
+                };
+
+                $originDisplay = \App\Models\Booking::resolveAirportDisplay($itinOrigin);
+                $destinationDisplay = \App\Models\Booking::resolveAirportDisplay($itinDestination);
+
+                $booking->itineraries()->create([
+                    'itinerary_title' => $itinTitle,
+                    'itinerary_summary' => $originDisplay . ' to ' . $destinationDisplay,
+                    'itinerary_index' => $itinIndexNum,
+                    'duration' => $itinDuration,
+                    'segments' => $builtSegments,
+                ]);
             }
-
-            $booking->itineraries()->create([
-                'itinerary_title' => match ($searchParams['routeModel'] ?? 0) {
-                    1 => 'Outbound',
-                    default => 'Flight 1',
-                },
-                'itinerary_summary' => ($originLocation ?: 'N/A') . ' to ' . ($originDestination ?: 'N/A'),
-                'itinerary_index' => 1,
-                'duration' => $seg['total_duration'] ?? $seg['duration_time'] ?? null,
-                'segments' => $builtSegments,
-            ]);
 
             AdminNotificationService::notifyNewReservation($booking);
 

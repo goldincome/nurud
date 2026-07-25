@@ -251,19 +251,16 @@
                     <div class="space-y-4 mb-8">
                         <div class="flex justify-between text-sm">
                             <span class="text-white/60">Base Fare</span>
-                            <span class="font-semibold">{{ number_format($booking->base_price, 2) }}
-                                {{ $booking->currency }}</span>
+                            <span class="font-semibold">{{ $booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : '£' }}{{ number_format((float) ($booking->priceInPounds->price ?? 0), 2) }}</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-white/60">Taxes & Fees</span>
                             <span
-                                class="font-semibold">{{ number_format($booking->taxes_and_fees + $booking->markup_fee, 2) }}
-                                {{ $booking->currency }}</span>
+                                class="font-semibold">{{ $booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : '£' }}{{ number_format((float) ($booking->priceInPounds->tax ?? 0), 2) }}</span>
                         </div>
                         <div class="pt-6 border-t border-white/10 flex justify-between items-baseline">
                             <span class="font-bold text-brand-orange text-xs uppercase tracking-widest">Total Paid</span>
-                            <span class="text-3xl font-black text-white">{{ number_format($booking->total_price, 2) }} <span
-                                    class="text-xs font-normal">{{ $booking->currency }}</span></span>
+                            <span class="text-3xl font-black text-white">{{ $booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : '£' }}{{ number_format((float) ($booking->priceInPounds->total_price ?? 0), 2) }}</span>
                         </div>
                     </div>
 

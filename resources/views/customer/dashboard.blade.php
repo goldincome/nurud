@@ -104,8 +104,7 @@
                                     {{ $booking->created_at->format('M d, Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="font-bold text-slate-900">{{ number_format($booking->total_price, 2) }}
-                                        {{ $booking->currency }}</span>
+                                    <span class="font-bold text-slate-900">{{ $booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : '£' }}{{ number_format((float) ($booking->priceInPounds->total_price ?? 0), 2) }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php

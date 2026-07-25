@@ -8,18 +8,18 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Bank;
 
-class BookOnHoldEmail extends Mailable
+class BookOnHoldEmail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     public $booking;
     public $banks;
 
-    public function __construct(\App\Models\Booking $booking, $banks)
+    public function __construct(\App\Models\Booking $booking)
     {
         $this->booking = $booking;
-        $this->banks = $banks;
     }
 
     public function envelope(): Envelope
@@ -36,6 +36,8 @@ class BookOnHoldEmail extends Mailable
 
     public function content(): Content
     {
+        // Fetch Bank data right here. The background queue worker will execute this.
+        $this->banks = Bank::all();
         return new Content(
             view: 'emails.book_on_hold_email',
         );

@@ -44,8 +44,7 @@
                                     <span class="block text-[10px]">{{ $payment->created_at->format('h:i A') }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="font-bold text-slate-900">{{ number_format($payment->amount, 2) }}
-                                        {{ $payment->currency }}</span>
+                                    <span class="font-bold text-slate-900">{{ $payment->booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : '£' }}{{ number_format((float) ($payment->booking->priceInPounds->total_price ?? 0), 2) }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span

@@ -57,7 +57,7 @@
                     <p class="text-xs font-medium text-slate-500 uppercase tracking-wide mt-1">Total Bookings</p>
                 </div>
                 <div class="p-5 text-center">
-                    <p class="text-2xl font-bold text-green-600">₦{{ number_format($stats['total_spend']) }}</p>
+                    <p class="text-2xl font-bold text-green-600">{{ config('currency.supported_currencies.ngn.symbol') }}{{ number_format($stats['total_spend']) }}</p>
                     <p class="text-xs font-medium text-slate-500 uppercase tracking-wide mt-1">Total Spend</p>
                 </div>
                 <div class="p-5 text-center">
@@ -145,7 +145,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 font-bold text-slate-800">
-                                    {{ $booking->currency ?? '₦' }} {{ number_format($booking->total_price) }}
+                                    {{ config('currency.supported_currencies.ngn.symbol') }}{{ number_format($booking->total_price) }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="text-xs capitalize text-slate-600">

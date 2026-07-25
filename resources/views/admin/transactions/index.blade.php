@@ -138,7 +138,7 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex flex-col">
-                                <span class="text-sm font-black text-slate-800">{{ $tx->currency }} {{ number_format($tx->amount, 2) }}</span>
+                                <span class="text-sm font-black text-slate-800">{{ $tx->booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : '£' }}{{ number_format((float) ($tx->booking->priceInPounds->total_price ?? 0), 2) }}</span>
                                 <span class="text-[10px] text-slate-400 font-medium italic">Net Received</span>
                             </div>
                         </td>
@@ -250,7 +250,7 @@
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Volume</p>
                     <h4 class="text-xl font-black text-slate-800">
-                        £{{ number_format(\App\Models\Payment::where('status', \App\Enums\PaymentStatus::COMPLETED)->sum('amount'), 2) }}
+                        {{ config('currency.supported_currencies.gbp.symbol') }}{{ number_format((float) \App\Models\PriceInPounds::whereHas('booking', fn($q) => $q->whereHas('payments', fn($p) => $p->where('status', \App\Enums\PaymentStatus::COMPLETED)))->sum('total_price'), 2) }}
                     </h4>
                 </div>
             </div>

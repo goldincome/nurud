@@ -16,7 +16,7 @@ class AdminPaymentController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Payment::with(['booking', 'booking.user']);
+        $query = Payment::with(['booking', 'booking.user', 'booking.priceInPounds']);
 
         // Search functionality
         if ($request->filled('search')) {

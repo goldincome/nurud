@@ -33,7 +33,7 @@
                 </div>
             </div>
             <h3 class="text-slate-500 text-sm font-medium">Total Revenue from Customers</h3>
-            <p class="text-2xl font-bold text-slate-800">₦{{ number_format($totalRevenue) }}</p>
+            <p class="text-2xl font-bold text-slate-800">{{ config('currency.supported_currencies.ngn.symbol') }}{{ number_format($totalRevenue) }}</p>
         </div>
     </div>
 
@@ -142,9 +142,9 @@
                             </td>
                             <td class="px-6 py-4 font-medium text-slate-800">
                                 @if($customer->bookings_sum_total_price > 0)
-                                    ₦{{ number_format($customer->bookings_sum_total_price) }}
+                                    {{ config('currency.supported_currencies.ngn.symbol') }}{{ number_format($customer->bookings_sum_total_price) }}
                                 @else
-                                    <span class="text-slate-400">₦0</span>
+                                    <span class="text-slate-400">{{ config('currency.supported_currencies.ngn.symbol') }}0</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-slate-600">

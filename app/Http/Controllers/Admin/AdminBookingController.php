@@ -16,7 +16,7 @@ class AdminBookingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with('user');
+        $query = Booking::with('user', 'priceInPounds');
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -38,7 +38,7 @@ class AdminBookingController extends Controller
 
     public function show(Booking $booking)
     {
-        $booking->load(['travelers', 'payments', 'itineraries', 'travelerPricings']);
+        $booking->load(['travelers', 'payments', 'itineraries', 'travelerPricings', 'priceInPounds']);
         $bookingStatus = BookingStatus::class;
         $paymentMethod = $booking->payments()->first()->payment_method->value ?? null;
         return view('admin.bookings.show', compact('booking', 'bookingStatus', 'paymentMethod'));

@@ -119,4 +119,28 @@ class Booking extends Model
     {
         return $value ?: ($this->pnr ?: $this->reference_number);
     }
+
+    protected static ?array $airportNameCache = null;
+
+    protected static function resolveAirportDisplay(string $code): string
+    {
+        if (empty($code)) return 'N/A';
+
+        if (static::$airportNameCache === null) {
+            static::$airportNameCache = Airport::pluck('city', 'code')->toArray();
+        }
+
+        $city = static::$airportNameCache[$code] ?? null;
+        return $city ? "{$city}({$code})" : $code;
+    }
+
+    public function getOriginLocationDisplayAttribute(): string
+    {
+        return static::resolveAirportDisplay($this->origin_location);
+    }
+
+    public function getOriginDestinationDisplayAttribute(): string
+    {
+        return static::resolveAirportDisplay($this->origin_destination);
+    }
 }

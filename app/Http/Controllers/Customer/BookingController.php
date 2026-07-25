@@ -21,7 +21,7 @@ class BookingController extends Controller
     public function index()
     {
         $bookings = Booking::where('user_id', Auth::id())
-            ->with(['itineraries'])
+            ->with(['itineraries', 'priceInPounds'])
             ->latest()
             ->paginate(10);
 
@@ -31,7 +31,7 @@ class BookingController extends Controller
     public function show($id)
     {
         $booking = Booking::where('user_id', Auth::id())
-            ->with(['travelers', 'itineraries', 'payments', 'travelerPricings'])
+            ->with(['travelers', 'itineraries', 'payments', 'travelerPricings', 'priceInPounds'])
             ->findOrFail($id);
 
         return view('customer.bookings.show', compact('booking'));

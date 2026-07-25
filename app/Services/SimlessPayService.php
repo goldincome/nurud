@@ -345,7 +345,7 @@ class SimlessPayService
 
         return Cache::remember($cacheKey, $ttl, function () use ($channelId) {
             $channels = $this->getPayoutChannels();
-            dd($channels, $channelId);
+            //dd($channels, $channelId);
             // Find the specific channel by ID to be safe
             $channel = collect($channels['data']['pay_out_channels'] ?? [])
                 ->firstWhere('id', $channelId);

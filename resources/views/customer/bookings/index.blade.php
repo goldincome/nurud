@@ -59,8 +59,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex flex-col">
-                                        <span class="font-bold text-slate-900">{{ number_format($booking->total_price, 2) }}
-                                            {{ $booking->currency }}</span>
+                                        <span class="font-bold text-slate-900">{{ $booking->priceInPounds->currency ? config('currency.supported_currencies.gbp.symbol') : '£' }}{{ number_format((float) ($booking->priceInPounds->total_price ?? 0), 2) }}</span>
                                         <span
                                             class="text-[10px] text-slate-400 capitalize">{{ str_replace('_', ' ', $booking->payment_method->value ?? $booking->payment_method) }}</span>
                                     </div>

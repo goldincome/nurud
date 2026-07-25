@@ -21,7 +21,7 @@ class DashboardController extends Controller
         ];
 
         $recentBookings = Booking::where('user_id', $user->id)
-            ->with(['itineraries'])
+            ->with(['itineraries', 'priceInPounds'])
             ->latest()
             ->limit(5)
             ->get();

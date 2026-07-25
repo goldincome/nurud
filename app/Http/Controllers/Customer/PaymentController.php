@@ -14,7 +14,7 @@ class PaymentController extends Controller
         $payments = Payment::whereHas('booking', function ($query) {
             $query->where('user_id', Auth::id());
         })
-            ->with('booking')
+            ->with(['booking.priceInPounds'])
             ->latest()
             ->paginate(10);
 
