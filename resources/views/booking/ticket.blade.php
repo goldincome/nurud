@@ -545,7 +545,7 @@
                             <td>{{ ucfirst(\App\Enums\TravelerType::from($booking->travelerPricings[$index]->traveler_type)->label() ?? 'Adult') }}
                             </td>
                             <td>{{ ucfirst($traveler->gender->label() ?? 'N/A') }}</td>
-                            <td>{{ $traveler->date_of_birth ? \Carbon\Carbon::parse($traveler->date_of_birth)->format('M d, Y') : 'N/A' }}
+                            <td><!-- {{ $traveler->date_of_birth ? \Carbon\Carbon::parse($traveler->date_of_birth)->format('M d, Y') : 'N/A' }} -->
                             </td>
                         </tr>
                     @endforeach
