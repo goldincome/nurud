@@ -1,5 +1,0 @@
-/*!40101 SET NAMES utf8mb4 */;
-SET FOREIGN_KEY_CHECKS=0;
-INSERT INTO `subscribers` VALUES (1,'homan@gmail.com',1,'2026-04-07 07:54:53','2026-04-07 07:54:53');
-INSERT INTO `subscribers` VALUES (2,'bodypal4me@gmail.com',1,'2026-04-07 07:55:13','2026-04-07 07:55:13');
-SET FOREIGN_KEY_CHECKS=1;

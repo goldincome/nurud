@@ -1,5 +1,0 @@
-/*!40101 SET NAMES utf8mb4 */;
-SET FOREIGN_KEY_CHECKS=0;
-INSERT INTO `markup_rules` VALUES (1,'>=',1096.00,'percentage',5.00,'gbp',1,'2026-02-13 17:46:07','2026-06-12 12:03:09');
-INSERT INTO `markup_rules` VALUES (2,'<',1096.00,'flat',50.00,'gbp',1,'2026-02-13 17:52:34','2026-06-12 12:03:38');
-SET FOREIGN_KEY_CHECKS=1;
