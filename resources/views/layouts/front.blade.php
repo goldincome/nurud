@@ -3,27 +3,29 @@
 
 <head>
 
-    <title>@yield('title') - Nurud Travels</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <x-seo-meta
+        :title="trim(view()->getSection('seo-title', 'Book Cheap Flights to Nigeria & Worldwide | Nurud Travels'))"
+        :description="trim(view()->getSection('seo-description', 'Book affordable flights to Nigeria and worldwide destinations. Compare fares, book now pay later, and get dedicated travel support from Nurud Travels, a trusted London travel agency.'))"
+        :canonical="view()->getSection('seo-canonical', request()->url())"
+        :robots="view()->getSection('seo-robots', 'index, follow')"
+        :og-image="view()->getSection('seo-og-image', asset('images/nurud-logo.png'))"
+    />
 
     <meta name="msapplication-TileImage" content="{{ asset('favicon.png') }}">
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="theme-color" content="#ffffff">
 
     <meta name="author" content="Nurud Travels">
-    <meta name="description" content="@yield('description')">
     <meta name="keywords" content="@yield('keywords')">
     <meta name="publisher" content="Nurud Travels">
     <meta name="copyright" content="Nurud Travels">
-    <meta property="og:image" content="@yield('image', asset('favicon.png'))" />
-    <meta property="og:title" content="@yield('title')" />
-    <meta property="og:description" content="@yield('description')" />
-    <meta name="robots" content="index, follow">
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="{{ request()->url() }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @yield('head')
     @yield('og')
 
     <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicon.png') }}">
@@ -39,7 +41,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
     <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('favicon.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon.png') }}">
-    <link rel="canonical" href="{{ request()->url() }}" />
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"

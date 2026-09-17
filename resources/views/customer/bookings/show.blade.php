@@ -28,7 +28,7 @@
                         class="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 hover:bg-slate-200 transition-all flex items-center">
                         <i class="fas fa-file-pdf mr-2 text-red-500"></i> Download Invoice
                     </a>
-                    <a href="#"
+                    <a href="{{ route('customer.payments.index') }}"
                         class="bg-brand-blue text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-brand-blue/20 hover:bg-sky-700 transition-all flex items-center">
                         <i class="fas fa-credit-card mr-2"></i> Complete Payment
                     </a>

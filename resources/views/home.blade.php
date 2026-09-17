@@ -1,5 +1,8 @@
 @extends('layouts.front')
 
+@section('seo-title', 'Book Cheap Flights to Nigeria & Worldwide | Nurud Travels')
+@section('seo-description', 'Book affordable flights from London and the UK to Lagos, Abuja, Accra and worldwide. Compare deals, use book-now-pay-later, and get help with NIN, BVN and Nigerian passports.')
+
 @section('content')
     <main>
         {{-- ============================================================ --}}
@@ -11,15 +14,15 @@
             {{-- Decorative floating city images --}}
             <div class="hero-city-images hidden lg:block">
                 <div class="hero-city-img hero-city-1">
-                    <img src="{{ asset("images/abuja-city.jpg") }}?q=80&w=600&auto=format&fit=crop" alt="City"
+                    <img src="{{ asset('images/abuja-city.webp') }}" alt="City"
                         class="w-full h-full object-cover rounded-2xl">
                 </div>
                 <div class="hero-city-img hero-city-2">
-                    <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=600&auto=format&fit=crop"
+                    <img src="{{ asset('images/unsplash/photo-1500530855697-b586d89ba3ee.webp') }}"
                         alt="City" class="w-full h-full object-cover rounded-2xl">
                 </div>
                 <div class="hero-city-img hero-city-3">
-                    <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=600&auto=format&fit=crop"
+                    <img src="{{ asset('images/unsplash/photo-1506748686214-e9df14d4d9d0.webp') }}"
                         alt="City" class="w-full h-full object-cover rounded-2xl">
                 </div>
             </div>
@@ -83,16 +86,17 @@
                 <div class="deals-scroll flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory" id="deals-scroll">
                     @php
                         $deals = [
-                            ['city' => 'Lagos', 'country' => 'Nigeria', 'price' => 463, 'img' => asset("images/lagos-city.jpg") . '?q=80&w=600&auto=format&fit=crop'],
-                            ['city' => 'Abuja', 'country' => 'Nigeria', 'price' => 535, 'img' => asset("images/abuja-city.jpg") . '?q=80&w=600&auto=format&fit=crop'],
-                            ['city' => 'Berlin', 'country' => 'Germany', 'price' => 326, 'img' => 'https://images.unsplash.com/photo-1560969184-10fe8719e047?q=80&w=600&auto=format&fit=crop'],
-                            ['city' => 'Gatún', 'country' => 'Panama', 'price' => 486, 'img' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop'],
-                            ['city' => 'London', 'country' => 'UK', 'price' => 450, 'img' => 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=600&auto=format&fit=crop'],
-                            ['city' => 'Dubai', 'country' => 'UAE', 'price' => 720, 'img' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=600&auto=format&fit=crop'],
+                            ['city' => 'Lagos', 'country' => 'Nigeria', 'price' => 463, 'img' => asset('images/lagos-city.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-lagos-los'])],
+                            ['city' => 'Abuja', 'country' => 'Nigeria', 'price' => 535, 'img' => asset('images/abuja-city.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-abuja-abv'])],
+                            ['city' => 'Berlin', 'country' => 'Germany', 'price' => 326, 'img' => asset('images/unsplash/photo-1560969184-10fe8719e047.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-berlin-sxf'])],
+                            ['city' => 'Nice', 'country' => 'France', 'price' => 148, 'img' => asset('images/unsplash/photo-1531722569936-825d3dd91b15.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-nice-nce'])],
+                            ['city' => 'London', 'country' => 'UK', 'price' => 450, 'img' => asset('images/unsplash/photo-1513635269975-59663e0ac1ad.webp'), 'url' => null],
+                            ['city' => 'Dubai', 'country' => 'UAE', 'price' => 720, 'img' => asset('images/unsplash/photo-1512453979798-5ea266f8880c.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-dubai-dxb'])],
                         ];
                     @endphp
                     @foreach($deals as $deal)
-                        <div class="deal-card flex-shrink-0 w-60 sm:w-64 snap-start cursor-pointer group">
+                        <a href="{{ $deal['url'] ?? '#' }}" @if(empty($deal['url'])) onclick="return false" aria-disabled="true" @endif
+                            class="deal-card flex-shrink-0 w-60 sm:w-64 snap-start cursor-pointer group block">
                             <div class="relative rounded-xl overflow-hidden h-40 mb-3">
                                 <img src="{{ $deal['img'] }}" alt="{{ $deal['city'] }}"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
@@ -101,7 +105,7 @@
                             <h3 class="font-bold text-brand-grayDark dark:text-white text-sm">{{ $deal['city'] }}</h3>
                             <p class="text-xs text-brand-grayLight dark:text-slate-400">{{ $deal['country'] }}</p>
                             <p class="text-sm font-bold text-brand-blue mt-1">from £{{ $deal['price'] }}</p>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
                 {{-- Scroll Buttons --}}
@@ -169,7 +173,7 @@
         {{-- ============================================================ --}}
         {{-- TRENDING CITIES - Grid of destination photos --}}
         {{-- ============================================================ --}}
-        <section class="trending-section py-14">
+        <section id="trending-cities" class="trending-section py-14">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-10">
                     <h2 class="text-2xl sm:text-3xl font-bold text-brand-grayDark dark:text-white mb-2">Trending cities</h2>
@@ -179,22 +183,22 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     @php
                         $cities = [
-                            ['name' => 'Paris', 'country' => 'France', 'img' => asset("images/paris-city.jpg") . '?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Bangkok', 'country' => 'Thailand', 'img' => 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'New York', 'country' => 'USA', 'img' => 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'London', 'country' => 'UK', 'img' => 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Sydney', 'country' => 'Australia', 'img' => 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Dubai', 'country' => 'UAE', 'img' => 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Tokyo', 'country' => 'Japan', 'img' => 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Rome', 'country' => 'Italy', 'img' => 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Barcelona', 'country' => 'Spain', 'img' => 'https://images.unsplash.com/photo-1583422409516-2895a77efded?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Istanbul', 'country' => 'Turkey', 'img' => 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Bali', 'country' => 'Indonesia', 'img' => 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Lagos', 'country' => 'Nigeria', 'img' => 'https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?q=80&w=600&auto=format&fit=crop'],
+                            ['name' => 'Paris', 'country' => 'France', 'img' => asset('images/paris-city.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-paris-cdg'])],
+                            ['name' => 'Bangkok', 'country' => 'Thailand', 'img' => asset('images/unsplash/photo-1508009603885-50cf7c579365.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-bangkok-bkk'])],
+                            ['name' => 'New York', 'country' => 'USA', 'img' => asset('images/unsplash/photo-1496442226666-8d4d0e62e6e9.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-new-york-jfk'])],
+                            ['name' => 'London', 'country' => 'UK', 'img' => asset('images/unsplash/photo-1513635269975-59663e0ac1ad.webp'), 'url' => url('/')],
+                            ['name' => 'Sydney', 'country' => 'Australia', 'img' => asset('images/unsplash/photo-1506973035872-a4ec16b8e8d9.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-sydney-syd'])],
+                            ['name' => 'Dubai', 'country' => 'UAE', 'img' => asset('images/unsplash/photo-1512453979798-5ea266f8880c.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-dubai-dxb'])],
+                            ['name' => 'Tokyo', 'country' => 'Japan', 'img' => asset('images/unsplash/photo-1540959733332-eab4deabeeaf.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-tokyo-hnd'])],
+                            ['name' => 'Rome', 'country' => 'Italy', 'img' => asset('images/unsplash/photo-1500530855697-b586d89ba3ee.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-rome-fco'])],
+                            ['name' => 'Barcelona', 'country' => 'Spain', 'img' => asset('images/unsplash/photo-1583422409516-2895a77efded.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-barcelona-bcn'])],
+                            ['name' => 'Istanbul', 'country' => 'Turkey', 'img' => asset('images/unsplash/photo-1524231757912-21f4fe3a7200.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-istanbul-ist'])],
+                            ['name' => 'Bali', 'country' => 'Indonesia', 'img' => asset('images/unsplash/photo-1537996194471-e657df975ab4.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-bali-dps'])],
+                            ['name' => 'Lagos', 'country' => 'Nigeria', 'img' => asset('images/unsplash/photo-1618828665011-0abd973f7bb8.webp'), 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-lagos-los'])],
                         ];
                     @endphp
                     @foreach($cities as $city)
-                        <a href="#" class="trending-city-card group">
+                        <a href="{{ $city['url'] }}" class="trending-city-card group">
                             <div class="relative rounded-xl overflow-hidden aspect-[4/3]">
                                 <img src="{{ $city['img'] }}" alt="{{ $city['name'] }}"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -224,18 +228,18 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     @php
                         $countries = [
-                            ['name' => 'Italy', 'flights' => '2.5k+ flights', 'img' => 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Spain', 'flights' => '1.8k+ flights', 'img' => asset("images/spain-city.jpg") . '?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Thailand', 'flights' => '1.2k+ flights', 'img' => asset("images/thailand-city.jpg") . '?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Japan', 'flights' => '1.4k+ flights', 'img' => 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'India', 'flights' => '3.1k+ flights', 'img' => 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Greece', 'flights' => '900+ flights', 'img' => 'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Australia', 'flights' => '1.1k+ flights', 'img' => 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?q=80&w=600&auto=format&fit=crop'],
-                            ['name' => 'Nigeria', 'flights' => '800+ flights', 'img' => 'https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?q=80&w=600&auto=format&fit=crop'],
+                            ['name' => 'Italy', 'flights' => '2.5k+ flights', 'img' => asset('images/unsplash/photo-1506748686214-e9df14d4d9d0.webp'), 'url' => route('destinations.show', 'italy')],
+                            ['name' => 'Spain', 'flights' => '1.8k+ flights', 'img' => asset('images/spain-city.webp'), 'url' => route('destinations.show', 'spain')],
+                            ['name' => 'Thailand', 'flights' => '1.2k+ flights', 'img' => asset('images/thailand-city.webp'), 'url' => route('destinations.show', 'thailand')],
+                            ['name' => 'Japan', 'flights' => '1.4k+ flights', 'img' => asset('images/unsplash/photo-1542051841857-5f90071e7989.webp'), 'url' => route('destinations.show', 'japan')],
+                            ['name' => 'India', 'flights' => '3.1k+ flights', 'img' => asset('images/unsplash/photo-1524492412937-b28074a5d7da.webp'), 'url' => route('destinations.show', 'india')],
+                            ['name' => 'Greece', 'flights' => '900+ flights', 'img' => asset('images/unsplash/photo-1533104816931-20fa691ff6ca.webp'), 'url' => route('destinations.show', 'greece')],
+                            ['name' => 'Australia', 'flights' => '1.1k+ flights', 'img' => asset('images/unsplash/photo-1523482580672-f109ba8cb9be.webp'), 'url' => route('destinations.show', 'australia')],
+                            ['name' => 'Nigeria', 'flights' => '800+ flights', 'img' => asset('images/unsplash/photo-1618828665011-0abd973f7bb8.webp'), 'url' => route('destinations.show', 'nigeria')],
                         ];
                     @endphp
                     @foreach($countries as $country)
-                        <a href="#" class="trending-country-card group">
+                        <a href="{{ $country['url'] }}" class="trending-country-card group">
                             <div class="relative rounded-xl overflow-hidden aspect-[4/3]">
                                 <img src="{{ $country['img'] }}" alt="{{ $country['name'] }}"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -257,7 +261,7 @@
         {{-- ============================================================ --}}
         {{-- FLIGHT DEALS BY DESTINATION --}}
         {{-- ============================================================ --}}
-        <section class="py-14">
+        <section id="flight-deals" class="py-14">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-10">
                     <h2 class="text-2xl sm:text-3xl font-bold text-brand-grayDark dark:text-white mb-2">Flight deals by
@@ -269,10 +273,38 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
                     @php
                         $flightDeals = [
-                            ['region' => 'Africa', 'routes' => ['Lagos', 'Accra', 'Nairobi', 'Johannesburg', 'Cairo', 'Addis Ababa']],
-                            ['region' => 'North America', 'routes' => ['New York', 'Los Angeles', 'Chicago', 'Miami', 'San Francisco', 'Toronto']],
-                            ['region' => 'Europe', 'routes' => ['London', 'Paris', 'Rome', 'Barcelona', 'Amsterdam', 'Berlin']],
-                            ['region' => 'Asia', 'routes' => ['Bangkok', 'Tokyo', 'Singapore', 'Dubai', 'Bali', 'Mumbai']],
+                            ['region' => 'Africa', 'routes' => [
+                                ['name' => 'Lagos', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-lagos-los'])],
+                                ['name' => 'Accra', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-accra-acc'])],
+                                ['name' => 'Johannesburg', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-johannesburg-jnb'])],
+                                ['name' => 'Nairobi', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-nairobi-nbo'])],
+                                ['name' => 'Cairo', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-cairo-cai'])],
+                                ['name' => 'Addis Ababa', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-addis-ababa-add'])],
+                            ]],
+                            ['region' => 'North America', 'routes' => [
+                                ['name' => 'New York', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-new-york-jfk'])],
+                                ['name' => 'Los Angeles', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-los-angeles-lax'])],
+                                ['name' => 'Chicago', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-chicago-ord'])],
+                                ['name' => 'Miami', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-miami-mia'])],
+                                ['name' => 'San Francisco', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-san-francisco-sfo'])],
+                                ['name' => 'Toronto', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-toronto-yyz'])],
+                            ]],
+                            ['region' => 'Europe', 'routes' => [
+                                ['name' => 'London', 'url' => url('/')],
+                                ['name' => 'Paris', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-paris-cdg'])],
+                                ['name' => 'Amsterdam', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-amsterdam-ams'])],
+                                ['name' => 'Barcelona', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-barcelona-bcn'])],
+                                ['name' => 'Berlin', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-berlin-sxf'])],
+                                ['name' => 'Rome', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-rome-fco'])],
+                            ]],
+                            ['region' => 'Asia', 'routes' => [
+                                ['name' => 'Bangkok', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-bangkok-bkk'])],
+                                ['name' => 'Tokyo', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-tokyo-hnd'])],
+                                ['name' => 'Singapore', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-singapore-sin'])],
+                                ['name' => 'Dubai', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-dubai-dxb'])],
+                                ['name' => 'Bali', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-bali-dps'])],
+                                ['name' => 'Mumbai', 'url' => route('flights.route.show', ['route_slug' => 'london-lhr-to-mumbai-bom'])],
+                            ]],
                         ];
                     @endphp
                     @foreach($flightDeals as $region)
@@ -282,10 +314,10 @@
                             <ul class="space-y-2">
                                 @foreach($region['routes'] as $route)
                                     <li>
-                                        <a href="#"
+                                        <a href="{{ $route['url'] }}"
                                             class="text-sm text-brand-blue hover:text-brand-red dark:text-brand-blueLight dark:hover:text-brand-redLight transition-colors flex items-center gap-2">
                                             <i class="fas fa-plane text-[10px] text-brand-grayLight"></i>
-                                            Flights to {{ $route }}
+                                            Flights to {{ $route['name'] }}
                                         </a>
                                     </li>
                                 @endforeach
@@ -337,7 +369,7 @@
         {{-- ============================================================ --}}
         {{-- CTA BANNER --}}
         {{-- ============================================================ --}}
-        <section class="py-16 bg-white dark:bg-slate-900">
+        <section id="price-alerts" class="py-16 bg-white dark:bg-slate-900">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-2xl sm:text-3xl font-bold text-brand-grayDark dark:text-white mb-4">Ready for your next
                     adventure?</h2>

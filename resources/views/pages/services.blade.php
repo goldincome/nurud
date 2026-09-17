@@ -1,9 +1,12 @@
 @extends('layouts.front')
 
+@section('seo-title', 'Our Services | Flights, NIN/BVN, Passport, TIN | Nurud Travels')
+@section('seo-description', 'Explore Nurud Travels services: cheap flights to Nigeria and worldwide, book-now-pay-later plans, NIN/BVN enrolment, Nigerian passport renewal, TIN registration and travel insurance.')
+
 @section('content')
     <!-- Hero Section -->
     <div class="bg-brand-blueDeep py-20 md:py-28 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('{{ asset('images/unsplash/photo-1469854523086-cc02fe5d8800.webp') }}')] bg-cover bg-center"></div>
         <div class="container mx-auto px-4 relative z-10 text-center">
             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">OUR <span class="text-brand-orange">SERVICES.</span></h1>
             <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto font-light">From seamless flights to holiday homes and flexible payment plans, we handle the details so you can fiercely focus on the journey.</p>

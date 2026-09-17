@@ -1,5 +1,7 @@
 @extends('layouts.front')
 
+@section('seo-robots', 'noindex, nofollow')
+
 @section('content')
     <div class="container mx-auto px-4 py-4 pb-6">
         <div id="modify-bar" class="flex flex-col md:flex-row justify-between items-center gap-4">

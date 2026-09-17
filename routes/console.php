@@ -9,3 +9,11 @@ Artisan::command('inspire', function () {
 Schedule::command('app:process-all-queues')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command('sitemap:generate')
+    ->dailyAt('02:00')
+    ->withoutOverlapping();
+
+Schedule::command('flight-routes:update-prices')
+    ->cron('0 */8 * * *')
+    ->withoutOverlapping();

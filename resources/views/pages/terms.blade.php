@@ -1,5 +1,8 @@
 @extends('layouts.front')
 
+@section('seo-title', 'Terms and Conditions | Nurud Travels')
+@section('seo-description', 'The terms and conditions that apply when you book flights and use services through Nurud Travels, your London-based travel agency.')
+
 @section('content')
     <!-- Hero Section -->
     <div class="bg-brand-blueDeep py-16 md:py-24">

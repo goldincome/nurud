@@ -1,9 +1,12 @@
 @extends('layouts.front')
 
+@section('seo-title', 'Flight Booking FAQs | Nurud Travels')
+@section('seo-description', 'Answers to common questions about booking flights with Nurud Travels: payments, baggage, changes, cancellations, luggage and travelling to Nigeria.')
+
 @section('content')
     <!-- Hero Section -->
     <div class="bg-brand-blueDeep py-20 md:py-28 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('{{ asset('images/unsplash/photo-1542204165-65bf26472b9b.webp') }}')] bg-cover bg-center"></div>
         <div class="container mx-auto px-4 relative z-10 text-center">
             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">WE'VE GOT <span class="text-brand-orange">ANSWERS.</span></h1>
             <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto font-light">Find quick answers to the most common questions about booking your flights, payment methods, and managing your journey.</p>

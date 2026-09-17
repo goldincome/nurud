@@ -1,10 +1,13 @@
 @extends('layouts.front')
 
+@section('seo-title', 'Contact Nurud Travels | Flights to Nigeria & Worldwide')
+@section('seo-description', 'Contact Nurud Travels, your travel agency in Woolwich, London. Talk to us about flights to Nigeria, NIN/BVN enrolment, passport help and flexible payment plans.')
+
 @section('content')
     <!-- Hero Section -->
     <div class="bg-brand-blueDeep py-20 md:py-28 relative overflow-hidden">
         <div
-            class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1596524430615-b46475ddff6e?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center">
+            class="absolute inset-0 opacity-10 bg-[url('{{ asset('images/unsplash/photo-1596524430615-b46475ddff6e.webp') }}')] bg-cover bg-center">
         </div>
         <div class="container mx-auto px-4 relative z-10 text-center">
             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">GET IN <span
@@ -77,18 +80,18 @@
                 <div class="pt-8 mt-8 border-t border-slate-100">
                     <h4 class="font-bold text-slate-400 mb-4 text-xs uppercase tracking-widest">Connect Internally</h4>
                     <div class="flex space-x-3">
-                        <a href="#"
+                        <span
                             class="w-10 h-10 bg-white shadow-sm border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all"><i
-                                class="fab fa-facebook-f"></i></a>
-                        <a href="#"
+                                class="fab fa-facebook-f"></i></span>
+                        <span
                             class="w-10 h-10 bg-white shadow-sm border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all"><i
-                                class="fab fa-twitter"></i></a>
-                        <a href="#"
+                                class="fab fa-twitter"></i></span>
+                        <span
                             class="w-10 h-10 bg-white shadow-sm border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all"><i
-                                class="fab fa-instagram"></i></a>
-                        <a href="#"
+                                class="fab fa-instagram"></i></span>
+                        <span
                             class="w-10 h-10 bg-white shadow-sm border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:bg-brand-blue hover:text-white hover:border-brand-blue transition-all"><i
-                                class="fab fa-linkedin-in"></i></a>
+                                class="fab fa-linkedin-in"></i></span>
                     </div>
                 </div>
             </div>

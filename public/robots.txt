@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Allow: /
+Allow: /login
+Allow: /register
+Disallow: /admin/
+Disallow: /dashboard/
+
+Sitemap: https://nurud.com/sitemap.xml

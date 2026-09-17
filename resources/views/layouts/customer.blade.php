@@ -1,6 +1,7 @@
 @extends('layouts.front')
 
-@section('title', 'Customer Panel')
+@section('seo-title', 'Customer Panel | Nurud Travels')
+@section('seo-robots', 'noindex, nofollow')
 
 @section('content')
     <div class="min-h-screen bg-slate-50/50 py-12">

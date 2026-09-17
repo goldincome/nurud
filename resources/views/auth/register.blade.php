@@ -1,6 +1,7 @@
 @extends('layouts.front')
 
-@section('title', 'Register')
+@section('seo-title', 'Create Account | Nurud Travels')
+@section('seo-description', 'Create your free Nurud Travels account to book flights, save traveller details and get notified about great deals.')
 
 @section('content')
     <main class="min-h-screen py-12 px-4">

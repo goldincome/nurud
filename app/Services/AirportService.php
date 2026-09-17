@@ -61,10 +61,29 @@ class AirportService
     }
 
     /**
+     * Get the raw airports dataset keyed by IATA code.
+     *
+     * Returns the full JSON rows (id, name, code, country_code, state_code,
+     * state_name, local) indexed by uppercase IATA code. Used by the SEO
+     * flight-route pages so airport city/name/country data always comes from
+     * airports.json — never the `airports` DB table. Cached for 24 hours.
+     */
+    public function lookup(): Collection
+    {
+        return Cache::remember('airports_lookup_code_map', self::CACHE_TTL, function () {
+            $path = database_path('data/airports.json');
+            $raw = json_decode(file_get_contents($path), true);
+
+            return collect($raw)->keyBy(fn (array $airport) => strtoupper((string) ($airport['code'] ?? '')));
+        });
+    }
+
+    /**
      * Bust the cache (e.g. after updating the JSON file).
      */
     public function clearCache(): void
     {
         Cache::forget(self::CACHE_KEY);
+        Cache::forget('airports_lookup_code_map');
     }
 }

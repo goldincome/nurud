@@ -5,6 +5,8 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AirportController;
+use App\Http\Controllers\FlightRouteController;
+use App\Http\Controllers\CountryDestinationController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Enums\CustomerType;
 use App\Http\Controllers\Admin\AdminBankController;
@@ -53,6 +55,38 @@ Route::get('/privacy', function () {
 Route::get('/services', function () {
     return view('pages.services');
 })->name('services');
+
+// Static Diaspora Service Pages (programmatic SEO silo)
+Route::view('/services/nin-bvn-enrollment-uk', 'services.nin-bvn')->name('services.nin-bvn');
+Route::view('/services/nigerian-passport-renewal-london', 'services.passport')->name('services.passport');
+Route::view('/services/tin-registration-uk', 'services.tin')->name('services.tin');
+Route::view('/services/book-now-pay-later-flights', 'services.bnpl')->name('services.bnpl');
+Route::view('/services/travel-insurance-nigeria', 'services.insurance')->name('services.insurance');
+
+// Programmatic Flight Routes
+Route::prefix('flights')->group(function () {
+    Route::get('/{route_slug}', [FlightRouteController::class, 'show'])
+        ->where('route_slug', '^[a-z0-9-]+-[a-z0-9]{3}-to-[a-z0-9-]+-[a-z0-9]{3}$')
+        ->name('flights.route.show');
+});
+
+// Country Destination Silo (static travel country pages)
+Route::get('/destinations', [CountryDestinationController::class, 'index'])
+    ->name('destinations.index');
+Route::get('/destinations/{slug}', [CountryDestinationController::class, 'show'])
+    ->where('slug', '^[a-z-]+$')
+    ->name('destinations.show');
+
+// Topical Travel Guide Silo
+Route::view('/travel-guides', 'guides.index')->name('guides.index');
+Route::view('/travel-guides/nigeria-entry-visa-requirements-uk', 'guides.visa-requirements')->name('guides.visa-requirements');
+Route::view('/travel-guides/lagos-murtala-muhammed-airport-guide', 'guides.lagos-airport')->name('guides.lagos-airport');
+Route::view('/travel-guides/how-to-renew-nigerian-passport-from-uk', 'guides.passport-renewal')->name('guides.passport-renewal');
+Route::view('/travel-guides/nin-bvn-enrolment-centres-uk', 'guides.nin-bvn-centres')->name('guides.nin-bvn-centres');
+Route::view('/travel-guides/best-time-to-fly-london-to-lagos', 'guides.best-time-to-fly')->name('guides.best-time-to-fly');
+
+// Local Woolwich Physical Presence Page
+Route::view('/travel-agent-woolwich-london', 'local.woolwich')->name('local.woolwich');
 
 Route::get('/booking', function () {
     return view('booking.booking');

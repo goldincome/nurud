@@ -1,9 +1,12 @@
 @extends('layouts.front')
 
+@section('seo-title', 'About Nurud Travels | Your London Travel Agency')
+@section('seo-description', 'Nurud Travels is a trusted London-based travel agency helping the Nigerian diaspora book affordable flights, manage NIN/BVN and passport enrolment, and travel with confidence.')
+
 @section('content')
     <!-- Hero Section -->
     <div class="bg-brand-blueDeep py-20 md:py-28 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div class="absolute inset-0 opacity-10 bg-[url('{{ asset('images/unsplash/photo-1513635269975-59663e0ac1ad.webp') }}')] bg-cover bg-center"></div>
         <div class="container mx-auto px-4 relative z-10 text-center">
             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">YOUR JOURNEY, <span class="text-brand-orange">ELEVATED.</span></h1>
             <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto font-light">We are Nurud Travels. Redefining how you experience the world by making travel seamless, accessible, and completely extraordinary.</p>
@@ -25,7 +28,7 @@
                 </p>
             </div>
             <div class="rounded-3xl overflow-hidden shadow-2xl relative h-[350px] md:h-[450px]">
-                <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2074&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105" alt="A beautiful sky representing travel">
+                <img src="{{ asset('images/unsplash/photo-1436491865332-7a61a109cc05.webp') }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105" alt="A beautiful sky representing travel">
             </div>
         </div>
 

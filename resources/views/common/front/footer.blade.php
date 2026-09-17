@@ -15,14 +15,14 @@
                 <p class="text-white/50 text-xs leading-relaxed mb-4">Your journey begins here. Search, compare, and
                     book flights to destinations worldwide.</p>
                 <div class="flex space-x-4 text-lg">
-                    <a href="#" class="text-white/40 hover:text-brand-red transition-colors"><i
-                            class="fab fa-facebook"></i></a>
-                    <a href="#" class="text-white/40 hover:text-brand-red transition-colors"><i
-                            class="fab fa-instagram"></i></a>
-                    <a href="#" class="text-white/40 hover:text-brand-red transition-colors"><i
-                            class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-white/40 hover:text-brand-red transition-colors"><i
-                            class="fab fa-linkedin"></i></a>
+                    <span class="text-white/40 transition-colors"><i
+                            class="fab fa-facebook"></i></span>
+                    <span class="text-white/40 transition-colors"><i
+                            class="fab fa-instagram"></i></span>
+                    <span class="text-white/40 transition-colors"><i
+                            class="fab fa-twitter"></i></span>
+                    <span class="text-white/40 transition-colors"><i
+                            class="fab fa-linkedin"></i></span>
                 </div>
             </div>
             {{-- Company --}}
@@ -49,10 +49,10 @@
             <div>
                 <h5 class="text-white font-bold mb-4 text-xs uppercase tracking-wider">Explore</h5>
                 <ul class="space-y-2">
-                    <li><a href="#" class="hover:text-white transition-colors">Trending Cities</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Trending Countries</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Flight Deals</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Price Alerts</a></li>
+                    <li><a href="{{ url('/') }}#trending-cities" class="hover:text-white transition-colors">Trending Cities</a></li>
+                    <li><a href="{{ url('/') }}#trending-cities" class="hover:text-white transition-colors">Trending Countries</a></li>
+                    <li><a href="{{ url('/') }}#flight-deals" class="hover:text-white transition-colors">Flight Deals</a></li>
+                    <li><a href="{{ url('/') }}#price-alerts" class="hover:text-white transition-colors">Price Alerts</a></li>
                 </ul>
             </div>
             {{-- Contact --}}

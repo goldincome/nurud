@@ -1,6 +1,7 @@
 @extends('layouts.front')
 
-@section('title', 'Verify Email')
+@section('seo-title', 'Verify Email | Nurud Travels')
+@section('seo-robots', 'noindex, nofollow')
 
 @section('content')
     <main class="min-h-screen py-12 px-4">

@@ -1,5 +1,7 @@
 @extends('layouts.front')
 
+@section('seo-robots', 'noindex, nofollow')
+
 @section('content')
     <!-- Progress Bar Section -->
     <div class="bg-brand-blue py-8">
@@ -314,7 +316,7 @@
 
                 <div class="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
                     <p class="text-xs text-slate-500">
-                        By booking and payment, you are agreeing to the <a href="#" class="text-brand-blue underline">terms
+                        By booking and payment, you are agreeing to the <a href="{{ route('terms') }}" class="text-brand-blue underline">terms
                             & conditions</a>
                     </p>
 
@@ -328,7 +330,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden sticky top-24">
                     <!-- Image Header -->
                     <div class="h-32 bg-slate-200 relative">
-                        <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=2070&auto=format&fit=crop"
+                        <img src="{{ asset('images/unsplash/photo-1513635269975-59663e0ac1ad.webp') }}"
                             class="w-full h-full object-cover" alt="Destination">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     </div>

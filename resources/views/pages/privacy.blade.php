@@ -1,9 +1,12 @@
 @extends('layouts.front')
 
+@section('seo-title', 'Privacy Policy | Nurud Travels')
+@section('seo-description', 'Read the Nurud Travels privacy policy to understand how we collect, use and protect your personal data when you book flights and use our services.')
+
 @section('content')
     <!-- Hero Section -->
     <div class="bg-brand-blueDeep py-16 md:py-24 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-5 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
+        <div class="absolute inset-0 opacity-5 bg-[url('{{ asset('images/unsplash/photo-1451187580459-43490279c0fa.webp') }}')] bg-cover bg-center mix-blend-overlay"></div>
         <div class="container mx-auto px-4 text-center relative z-10">
             <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Privacy Policy</h1>
             <p class="text-white/80 text-sm md:text-base">Last updated: {{ date('F d, Y') }}</p>
